@@ -11,8 +11,8 @@ if @mode == 1: # run
         pm.PyNode(f"{side}_leg_footroll_control").angle.set(@footAngle, k=False, l=True)
 
         for typ in ["arm", "leg"]:
-            pm.PyNode(f"{side}_{type}_ik_control").stretch.set(1)
-            pm.PyNode(f"{side}_{type}_ik_polevector_control").stretch.set(1)
+            pm.PyNode(f"{side}_{typ}_ik_control").stretch.set(1)
+            pm.PyNode(f"{side}_{typ}_ik_polevector_control").stretch.set(1)
 ]]></run>
 <doc><![CDATA[## Summary
 The **bipedFinishing** module finalizes a biped rig by applying user‑defined foot roll angles, enabling IK/FK blending on arm controls, activating stretch on all arm and leg IK chains, organizing visibility sets for controls and bend rigs, and hiding default helper groups. It prepares the rig for animation and export by locking and grouping relevant nodes.
