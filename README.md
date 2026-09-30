@@ -8,17 +8,39 @@ After completing the installation steps below:
 
 1. Open `rigsystem/library/biped_body_template.ma` in Maya.
 2. Open Rig Builder and select the RigSystem workspace.
-3. Insert the `Characters/Biped` module by pressing Tab.
+3. Insert the `Assemblies/Biped/Biped` module by pressing Tab.
 4. Press **Run**.
+5. Save the resulting rig as a separate build/anim scene.
 
-The full featured bipedal rig is ready for animation,
+The biped rig is ready for animation.
 
-## 🧪 Compatibility
+## 📂 Source and build scenes
 
-> [!IMPORTANT]
-> **Pilot support:** Maya 2026 on Windows (`win64`). The bundled `.mll` plug-ins are built for this configuration. Other Maya versions may be added as needed, after their builds have been tested.
+Each rig should have two Maya scene files:
 
-The scripts use **Python 3.11** inside Maya. Autodesk lists Python 3.11.4 for [Maya 2026](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-DEVHELP/files/Maya_DEVHELP_Open_Source_Components_html.html).
+| Scene | Purpose |
+| --- | --- |
+| `source` | The rigger's working scene. It can keep guides, helpers, intermediate geometry, and anything else needed to develop the rig. |
+| `build` (`anim`) | The generated scene for animators. The build scripts turn the source into a clean, optimized rig ready for animation. |
+
+Make all scene changes in the `source` file. If the build logic needs to change, update its Rig Builder `.rb` module. Never edit the `build` scene directly: run the module again to reproduce it from the `source` scene and the `.rb` module.
+
+### 🦴 Fit the skeleton
+
+In the `source` scene, fit the template skeleton to the character by moving and rotating its bones along the available axes. Preserve each joint's local axes and orientation while adjusting its position and pose; the build modules use those axes to construct the rig.
+
+### 📍 Place the helpers
+
+Helpers are rigging guides in the `source` scene, not animation controls.
+
+For `Biped`, the supplied template already contains helpers under the `helpers` group:
+
+1. Use the template's existing helpers, or set the `Biped` module's `mode` to **Helpers** and run it to create guides for a new source scene.
+2. Fit most helpers by editing their curve points (CVs).
+3. Select the adjusted curves on one side and run `Pipeline/Symmetry/MirrorCurves` to mirror their shapes to the opposite side.
+4. Switch `mode` to **Run** and execute the module again. The build uses the helpers to create an animation rig.
+
+To change a control's placement later, adjust its helper in the `source` scene and rebuild the `build` scene.
 
 ## 📦 What's included
 
@@ -41,6 +63,13 @@ The following plug-ins are included as compiled `.mll` files. Their source code 
 
 The Python scripts and many Rig Builder modules use `PyMEL`. Install it in the Maya 2026 Python environment if it is not already available. [Rig Builder](https://github.com/azagoruyko/rigBuilder) is a separate application required to use the modules in `rigsystem/rb_modules`.
 
+## 🧪 Compatibility
+
+> [!IMPORTANT]
+> **Pilot support:** Maya 2026 on Windows (`win64`). The bundled `.mll` plug-ins are built for this configuration. Other Maya versions may be added as needed, after their builds have been tested.
+
+The scripts use **Python 3.11** inside Maya. Autodesk lists Python 3.11.4 for [Maya 2026](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-DEVHELP/files/Maya_DEVHELP_Open_Source_Components_html.html).
+
 ## 🚀 Installation
 
 Set `MAYA_MODULE_PATH` to the **repository root**, the folder containing `rigsystem.mod`.
@@ -60,17 +89,16 @@ To enable RigSystem's animation tools in Maya's viewport right-click menu, follo
 
 This starts Rig Builder's host connection inside Maya so modules can execute there.
 
-### 🛠️ Rig Builder workspace
+To start the connection automatically with Maya, append the generated **Startup Script** to your `userSetup.py` that Maya runs at startup.
 
-The recommended setup is to point a dedicated Rig Builder workspace directly to this repository's `rigsystem/rb_modules` directory:
+### 🛠️ Rig Builder workspace (recommended workflow)
+
+Create a dedicated Rig Builder workspace and copy the RigSystem modules into it:
 
 1. In Rig Builder, open **Manage Workspaces** using the gear button next to the workspace selector.
-2. Create or select a workspace for RigSystem.
-3. Set **Modules Path** to the full path of `rigsystem/rb_modules` in your local copy of this repository.
-4. Switch to that workspace to browse and use the modules.
-
-> [!TIP]
-> Pointing **Modules Path** at this repository uses it as a live library: pulling updates refreshes the available modules, and saving a module writes to your local repository copy. To customize modules in a separate workspace, copy the ones you need into that workspace's `modules` directory. Copied modules must be updated separately.
+2. Create a workspace named **RigSystem**.
+3. Find its **Modules Path** in the workspace settings. Copy the *contents* of this repository's `rigsystem/rb_modules` directory into that folder.
+4. Select the RigSystem workspace to browse and use the copied modules.
 
 ## 🤖 AI and MCP
 
