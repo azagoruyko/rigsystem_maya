@@ -1,0 +1,21 @@
+RigSystem viewport menu
+=======================
+
+1. Copy `dagMenuProc.mel` from your Maya installation into this directory.
+   Leave the original unchanged.
+2. In the copied file's `dagMenuProc` procedure, find the main menu block
+   (after the ViewCube handling, not inside `hasTraversalMM()`):
+
+       if (`popupMenu -e -exists $parent`) {
+           setParent -m $parent;
+
+   Insert this code immediately after `setParent -m $parent;`:
+
+       //////////////////
+       int $v = python("from anim_utils.dagMenuProc import customDagMenuProc;customDagMenuProc('" + $parent + "', '" + $object + "')");
+       if ($v==1) return;
+       //////////////////
+
+3. Restart Maya. Right-click a rig control in the viewport to open the menu.
+
+The local `dagMenuProc.mel` is ignored by Git.
