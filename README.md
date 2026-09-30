@@ -14,7 +14,7 @@ After completing the installation steps below:
 4. Press **Run**.
 5. Save the resulting rig as a separate build/anim scene.
 
-The biped rig is ready for animation.
+The full featured bipedal rig is ready for animation.
 
 ## 📂 Source and build scenes
 
