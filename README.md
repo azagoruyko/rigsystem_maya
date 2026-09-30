@@ -95,12 +95,13 @@ To start the connection automatically with Maya, append the generated **Startup 
 
 ### 🛠️ Rig Builder workspace (recommended workflow)
 
-Create a dedicated Rig Builder workspace and copy the RigSystem modules into it:
+Create a dedicated Rig Builder workspace and add RigSystem as a module dependency. This keeps the modules in this repository as the source of truth, so updates do not require copying them into the workspace again:
 
 1. In Rig Builder, open **Manage Workspaces** using the gear button next to the workspace selector.
 2. Create a workspace named **RigSystem**.
-3. Find its **Modules Path** in the workspace settings. Copy the *contents* of this repository's `rigsystem/rb_modules` directory into that folder.
-4. Select the RigSystem workspace to browse and use the copied modules.
+3. In the workspace settings, add this repository's `rigsystem/rb_modules` directory as a dependency module path.
+4. Keep the workspace's **Modules Path** for modules specific to your project; do not copy the RigSystem modules there.
+5. Select the RigSystem workspace to browse and use the dependency modules.
 
 ## 🤖 AI and MCP
 
