@@ -2,7 +2,9 @@
 
 RigSystem is a **rigging environment for Maya**. It brings together Maya tools, plug-ins, and modules for [Rig Builder](https://github.com/azagoruyko/rigBuilder) in one workflow.
 
-<img width="742" height="246" alt="image" src="https://github.com/user-attachments/assets/aab61922-3b0b-4d20-b443-0cb86bef4f25" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/012cb13b-830c-4563-90f3-6304ac3aea4e" width="800" />
+</p>
 
 ## ⚡ Quick start
 
