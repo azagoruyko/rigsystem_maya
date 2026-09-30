@@ -2,6 +2,7 @@
 incrementalSave/
 autosave/
 swatches/
+.mayaSwatches/
 *.ma~
 *.mb~
 
