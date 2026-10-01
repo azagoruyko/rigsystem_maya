@@ -76,6 +76,8 @@ The scripts use **Python 3.11** inside Maya. Autodesk lists Python 3.11.4 for [M
 
 ## 🚀 Installation
 
+Follow the guide: https://www.youtube.com/watch?v=g7IWIPeaabQ
+
 Set `MAYA_MODULE_PATH` to the **repository root**, the folder containing `rigsystem.mod`.
 
 The module definition points to `./rigsystem` and its Maya 2026 Windows plug-ins.
