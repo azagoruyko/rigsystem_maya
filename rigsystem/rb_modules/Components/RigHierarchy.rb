@@ -57,20 +57,19 @@ moduleInfo.setAttr("main_control", main_control.message)
 
     ]]></run>
 <doc><![CDATA[## Summary
-Creates a standardized rigt hierarchy for a character asset, including groups for controls, internal logic, helpers, geometry, and deformation. It also generates a main control node with a circular helper, a root joint, and a module information container for downstream rigt modules.
+Creates a basic rig hierarchy with a main control, root joint, and supporting transform nodes, sets up constraints and dynamic parenting, and publishes a `moduleInfo` node for downstream modules.
 
 ## Inputs
-- **None** – This module does not expose any configurable attributes; it simply builds the rigt structure when executed.
+- **None** – The module does not require any external inputs; all nodes are created internally.
 
 ## Outputs
-- **`main_control`** – A transform node with a circular helper curve, a `scaleFactor` attribute, and constraints to the rig’s transform group.
-- **`rootJoint`** – A joint under the `skeleton` group, constrained to the main control.
-- **`moduleInfo`** – A `ModuleInfo` node of type `rigt` that publishes the `main_control` message for other modules to reference.
-- **Hierarchy Nodes** – The following transform groups are created under the root `rigt` node: `transform`, `internal`, `controls`, `skeleton`, `geometry`, `others`, `helpers`.
+- **`main_control`** – The primary control transform that drives the rig and is exposed via the `moduleInfo` node.
+- **`rootJoint`** – The root joint of the skeleton, parented to the `skeleton` transform and constrained to `main_control`.
+- **`moduleInfo`** – A `ModuleInfo` node named `"rig"` that stores the rig type and a message reference to `main_control`.
+- **Rig hierarchy nodes** – `rigt`, `transform`, `internal`, `controls`, `skeleton`, `geometry`, `others`, `helpers`, and the dynamic parent node created by `anim_utils.dynamicParent.makeDynamicParent`.
 
 ## Usage
-1. **Execute the module** in the Rig Builder workspace. It will create the rigt hierarchy and the main control node automatically.
-2. **Adjust the main control** in the viewport (position, orientation, scale) to match the character’s root.
-3. **Connect the `moduleInfo`** or the `main_control` node to downstream rigt modules (e.g., limb, face, or animation modules) that require a reference to the rig’s root.
-4. **Export or reference** the created hierarchy for scene integration, ensuring that the `rigt` node remains the top‑level parent for all rigt elements.]]></doc>
+1. Execute the module; it will automatically create the rig hierarchy and publish the `moduleInfo` node.
+2. The `main_control` can be positioned and scaled in the scene; its scale factor attribute controls the size of the control.
+3. Downstream modules can connect to the `moduleInfo` node or directly to `rootJoint`/`main_control` to attach additional rig components.]]></doc>
 </module>

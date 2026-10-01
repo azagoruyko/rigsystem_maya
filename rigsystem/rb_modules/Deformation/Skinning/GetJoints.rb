@@ -27,8 +27,8 @@ Collects all unique joint names that influence the selected skin clusters. The m
 3. **Run the Module** – Press **Run** (or execute the module) to collect all unique joint names from the listed skin clusters.  
 4. **Consume the Output** – The resulting joint names appear in the `outJoints` list box. Connect this output to other modules that need a joint list, such as constraint or rigging tools.]]></doc>
 <attributes>
-<attr name="skinClusters" template="lineEditAndButton" category="General" connect=""><![CDATA[{"default": "value", "buttonCommand": "import pymel.core as pm\n\nls = pm.ls(sl=True, fl=True)\n    \nvalue = []\nfor obj in ls:\n\tskin = pm.mel.eval(\"findRelatedSkinCluster \"+obj)\n\tif skin and skin not in value:\n\t\tvalue.append(skin)\n", "buttonLabel": "Get skinClusters by mesh", "value": ["skinCluster164"]}]]></attr>
+<attr name="skinClusters" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": ["skinCluster13"], "placeholder": "", "buttonCommand": "import pymel.core as pm\n\nls = pm.ls(sl=True, fl=True)\n    \nvalue = []\nfor obj in ls:\n\tskin = pm.mel.eval(\"findRelatedSkinCluster \"+obj)\n\tif skin and skin not in value:\n\t\tvalue.append(skin)\n", "buttonLabel": "Get skinClusters by mesh", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="" template="label" category="General" connect=""><![CDATA[{"default": "text", "text": "Press <b>Run</b> to get skinClusters' joints."}]]></attr>
-<attr name="outJoints" template="listBox" category="General" connect=""><![CDATA[{"default": "items", "items": ["root", "Root_M", "Spine1_M", "Spine1Part1_M", "Spine2_M", "Chest_M", "Neck_M", "NeckPart1_M", "Head_M", "M_jaw_joint", "Scapula_R", "Shoulder_R", "ShoulderPart1_R", "Elbow_R", "R_elbow_lowPsd_joint", "Scapula_L", "Shoulder_L", "ShoulderPart1_L", "Elbow_L", "L_elbow_upPsd_joint", "Hip_R", "Hip_L"]}]]></attr>
+<attr name="outJoints" template="listBox" category="General" connect=""><![CDATA[{"items": [], "default": "items"}]]></attr>
 </attributes>
 </module>
