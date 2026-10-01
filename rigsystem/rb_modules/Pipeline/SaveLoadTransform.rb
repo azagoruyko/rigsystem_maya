@@ -1,4 +1,4 @@
-<module name="saveLoadTransform" type="Tools/SaveLoadTransform" muted="0" uid="8fb4d6c44f1f4743a962a6385fadb21c">
+<module name="SaveLoadTransform" muted="0" uid="8fb4d6c44f1f4743a962a6385fadb21c">
 <run><![CDATA[import pymel.core as pm
 import json
 
@@ -60,10 +60,8 @@ The **saveLoadTransform** tool captures the translation, rotation, and scale of 
 This tool is ideal for capturing neutral poses, creating pose presets, or re‑applying control transforms after a rig rebuild.]]></doc>
 <attributes>
 <attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"current": 0, "items": ["Save", "Load"], "default": "current"}]]></attr>
-<attr name="objects" template="listBox" category="General" connect=""><![CDATA[{"default": "items", "items": ["M_spine_fk_1_control", "M_spine_fk_2_control", "M_spine_fk_3_control"]}]]></attr>
-<attr name="file" template="fileSelector" category="General" connect=""><![CDATA[{"value": "", "mode": "saveFile", "filter": "JSON Files (*.json)", "title": "Select JSON file", "default": "value"}]]></attr>
+<attr name="objects" template="listBox" category="General" connect=""><![CDATA[{"default": "items", "items": []}]]></attr>
+<attr name="file" template="fileSelector" category="General" connect=""><![CDATA[{"value": "C:\\Users\\kashaed\\AppData\\Local\\Temp\\saveLoadTranforms", "unresolvedValue": "$TEMP\\saveLoadTranforms", "mode": "saveFile", "filter": "JSON Files (*.json)", "title": "Select JSON file", "default": "value"}]]></attr>
 <attr name="loadAllObjects" template="checkBox" category="General" connect=""><![CDATA[{"default": "checked", "checked": true}]]></attr>
 </attributes>
-<children>
-</children>
 </module>
