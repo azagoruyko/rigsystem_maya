@@ -1,70 +1,44 @@
-<module name="setMaxInfluences" type="Tools/SetMaxInfluences" muted="0" uid="ba683572a8564671832cbe81d0fc0b8c">
+<module name="SetMaxInfluences" muted="0" uid="ba683572a8564671832cbe81d0fc0b8c">
 <run><![CDATA[import pymel.core as pm
+from rig_utils import skinCluster
 
-def setMaxInfluences(geo, maxinf=4):
-    geo = pm.PyNode(geo)
-    skin = pm.mel.eval("findRelatedSkinCluster "+geo)
-    if not skin:
-        pm.warning("setMaxInfluences: cannot find skinCluster on '%s'"%geo)
-        return
-    
-    invalidIndices = []
-    
-    beginProgress("Set max influences", geo.numVertices(), 0.25)
-    for i in range(geo.numVertices()):
-        stepProgress(i)
-        
-        vtx = geo + ".vtx[%d]"%i
-        weights = pm.skinPercent(skin, vtx, ignoreBelow=0.0001,query=True, value=True)
-        
-        if len(weights) > maxinf:
-            invalidIndices.append(i)
-            
-            maxWeights = [0] * len(weights)
-            for w in weights:                               
-                # Move the target influence down until the bottom is reached (-1) or the next influence is greater
-                j = len(weights)-1
-                while j >= 0 and w > maxWeights[j]: 
-                    j -= 1
-                j += 1
-                
-                k = len(weights)-1
-                while k > j:
-                    maxWeights[k] = maxWeights[k-1]
-                    k -= 1
-                    
-                maxWeights[k] = w
-                 
-            pruneValue = maxWeights[maxinf] + 0.0001
-            pm.skinPercent(skin, vtx, pruneWeights=pruneValue)                             
-    endProgress()
-    print(invalidIndices)
-    
-if pm.objExists(@geo):
-    setMaxInfluences(@geo, @maxInf)        
-else:
-    warning("Cannot find '%s' geometry"%@geo)    ]]></run>
+geo = @mesh
+maxInf = int(@maxInf)
+
+if not pm.objExists(geo):
+    error("Cannot find geometry '{0}'.".format(geo))
+if maxInf < 1:
+    error("Maximum influences must be at least 1.")
+
+skinNode = pm.mel.eval("findRelatedSkinCluster " + geo)
+if not skinNode:
+    error("Cannot find a skinCluster on '{0}'.".format(geo))
+
+skinHelper = skinCluster.SkinClusterHelper(geo)
+skinWeights = skinHelper.getSkinWeights()
+skinWeights.setMaxInfluence(maxInf)
+skinHelper.setSkinWeights(skinWeights)
+
+print("Processed {0} vertices on '{1}' with a limit of {2} influences.".format(
+    skinWeights.numVertices(), geo, maxInf))
+]]></run>
 <doc><![CDATA[## Summary
-Clamps the number of joint influences per vertex on a selected geometry’s skinCluster, pruning any weights that exceed a user‑defined maximum. The tool also reports the vertex indices that were affected.
+Limits the number of bone influences per vertex on a selected mesh’s skin cluster to a user‑defined maximum, updating the skin weights in place.
 
 ## Inputs
-- **`geo`** (`lineEditAndButton`): The name of the geometry node whose skinCluster will be processed.  
-- **`maxInf`** (`lineEdit`): Integer specifying the maximum allowed influences per vertex (default = 4, minimum = 2, maximum = 10).
+- **`mesh`**: The name of the mesh object whose skin cluster will be processed.  
+- **`maxInf`**: Integer specifying the maximum number of influences allowed per vertex (must be ≥ 1).
 
 ## Outputs
-- **In‑place modification**: The skinCluster on the specified geometry is updated; vertices with more than `maxInf` influences have the lowest weights pruned.  
-- **Console report**: A list of vertex indices that exceeded the influence limit is printed to the script editor.
+- The module does not create new nodes or attributes; it directly modifies the existing skin cluster on the specified mesh, reducing each vertex’s influence list to the specified maximum.
 
 ## Usage
-1. **Select the target geometry** in the Maya viewport or type its name into the `geo` field.  
-2. **Set the desired maximum influences** in the `maxInf` field (e.g., 4).  
-3. **Execute the module** (click the run button or press the assigned hotkey).  
-4. **Review the console output** for any vertex indices that were pruned.  
-5. **Verify the skinning** by inspecting the skinCluster weights or using the `skinCluster` editor.]]></doc>
+1. Connect the target mesh to the **`mesh`** attribute.  
+2. Set **`maxInf`** to the desired influence limit (e.g., 4).  
+3. Execute the module.  
+4. The console will report the number of vertices processed and the applied limit. The skin cluster on the mesh is updated accordingly.]]></doc>
 <attributes>
-<attr name="geo" template="lineEditAndButton" category="General" connect=""><![CDATA[{"default": "value", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "value": "Cat_geo"}]]></attr>
-<attr name="maxInf" template="lineEdit" category="General" connect=""><![CDATA[{"default": "value", "max": "10", "validator": 1, "value": 4, "min": "2"}]]></attr>
+<attr name="mesh" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "body_proxy_geo", "placeholder": "Skinned mesh", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="maxInf" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": 4, "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 4, "max": 16, "validator": 1, "default": "value"}]]></attr>
 </attributes>
-<children>
-</children>
 </module>
