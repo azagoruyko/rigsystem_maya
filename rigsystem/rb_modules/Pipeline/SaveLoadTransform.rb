@@ -61,7 +61,7 @@ This tool is ideal for capturing neutral poses, creating pose presets, or re‑a
 <attributes>
 <attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"current": 0, "items": ["Save", "Load"], "default": "current"}]]></attr>
 <attr name="objects" template="listBox" category="General" connect=""><![CDATA[{"default": "items", "items": []}]]></attr>
-<attr name="file" template="fileSelector" category="General" connect=""><![CDATA[{"value": "C:\\Users\\kashaed\\AppData\\Local\\Temp\\saveLoadTranforms", "unresolvedValue": "$TEMP\\saveLoadTranforms", "mode": "saveFile", "filter": "JSON Files (*.json)", "title": "Select JSON file", "default": "value"}]]></attr>
+<attr name="file" template="fileSelector" category="General" connect=""><![CDATA[{"value": "$TEMP\\Temp\\saveLoadTranforms", "mode": "saveFile", "filter": "JSON Files (*.json)", "title": "Select JSON file", "default": "value"}]]></attr>
 <attr name="loadAllObjects" template="checkBox" category="General" connect=""><![CDATA[{"default": "checked", "checked": true}]]></attr>
 </attributes>
 </module>
