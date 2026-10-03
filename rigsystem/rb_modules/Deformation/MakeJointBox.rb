@@ -470,7 +470,8 @@ def makeJointBox(mesh, joints, offset=0.1, density=3, targetFaceCount=None, skin
 
     # Set the final name according to the format: [mesh]_[joints]_jointBox
     jntNames = [jnt.nodeName() for jnt in joints]
-    finalName = "{}_cdt".format("_".join(jntNames))
+    jntLabel = "_".join(jntNames) + "_" if @joints else ""
+    finalName = f"{@mesh}_{jntLabel}jointBox"
     bbox.rename(finalName)
 
     pm.delete(bbox, ch=True) # Delete history
@@ -528,8 +529,8 @@ Creates a conformed joint box from the skin weights of the specified joints. It 
 2. Adjust the shape and retopology settings.
 3. Run the module. It creates and constrains the joint box in the Maya scene. Inspect the result and save the scene when ready.]]></doc>
 <attributes>
-<attr name="mesh" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "", "placeholder": "Skinned mesh", "buttonCommand": "import pymel.core as pm\nselection = pm.selected()\nif selection:\n    value = selection[0].name()", "buttonLabel": "Set selected", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
-<attr name="joints" template="listBox" category="General" connect=""><![CDATA[{"items": ["joint1"], "default": "items"}]]></attr>
+<attr name="mesh" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "hair", "placeholder": "Skinned mesh", "buttonCommand": "import pymel.core as pm\nselection = pm.selected()\nif selection:\n    value = selection[0].name()", "buttonLabel": "Set selected", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="joints" template="listBox" category="General" connect=""><![CDATA[{"items": [], "default": "items"}]]></attr>
 <attr name="offset" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": 0.4, "placeholder": "", "buttonCommand": "", "buttonLabel": "", "buttonEnabled": false, "min": 0, "max": 10, "validator": 2, "default": "value"}]]></attr>
 <attr name="density" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": 25, "placeholder": "", "buttonCommand": "", "buttonLabel": "", "buttonEnabled": false, "min": 1, "max": 100, "validator": 1, "default": "value"}]]></attr>
 <attr name="skinWeightThreshold" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": 0.2, "placeholder": "", "buttonCommand": "", "buttonLabel": "", "buttonEnabled": false, "min": 0, "max": 1, "validator": 2, "default": "value"}]]></attr>
