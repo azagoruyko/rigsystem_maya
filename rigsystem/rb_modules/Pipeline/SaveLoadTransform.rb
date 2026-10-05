@@ -1,67 +1,68 @@
 <module name="SaveLoadTransform" muted="0" uid="8fb4d6c44f1f4743a962a6385fadb21c">
 <run><![CDATA[import pymel.core as pm
 import json
+import os
 
 if @mode==0: # save transformation
-    data = {}
-    for n in @objects:
-        n = pm.PyNode(n)
-        k = n.name()
-        data[k] = {}
-        data[k]["t"] = list(n.t.get())
-        data[k]["r"] = list(n.r.get())
-        data[k]["s"] = list(n.s.get())
+    data = {n: pm.xform(n, q=True, ws=True, m=True)
+            for n in @objects}
     
-    with open(@file, "w") as f:
+    with open(os.path.expandvars(@file), "w") as f:
         json.dump(data, f)    
     
 else: # load transformation
-    with open(@file, "r") as f:
+    with open(os.path.expandvars(@file), "r") as f:
         data = json.load(f)
         
-    for k in data:
+    existingNodes = [pm.PyNode(k) for k in data.keys() if pm.objExists(k)]
+    existingNodes = sorted(existingNodes, key=lambda x: len(x.getAllParents()))
+        
+    for n in existingNodes:
+        k = n.name()
+        
         if not @loadAllObjects and k not in @objects:
             continue
             
-        if pm.objExists(k):
-            j = pm.PyNode(k)
-            if j.t.isSettable():j.t.set(data[k]["t"])
-            if j.r.isSettable():j.r.set(data[k]["r"])
-            if j.s.isSettable():j.s.set(data[k]["s"])
-            print(j)
-        else:
-            pm.warning("Cannot find "+k)
+        s = n.s.get()
+        pm.xform(n, ws=True, m=data[k])
+            
+        if @keepScale and n.s.isSettable():
+            n.s.set(s)
+                
+        print(n)
 ]]></run>
-<doc><![CDATA[## Summary  
-The **saveLoadTransform** tool captures the translation, rotation, and scale of selected rig controls and writes them to a JSON file, or restores those attributes from a JSON file back onto the controls. It is useful for saving neutral poses, transferring presets between assets, or re‑applying control transforms after a rebuild.
+<doc><![CDATA[## Summary
+This module records or restores the world‑space transformation matrices of a set of scene objects. In **Save** mode it writes the matrices to a JSON file; in **Load** mode it reads the file and applies the stored transforms back to the objects, optionally preserving their original scale.
 
-## Inputs  
-- **`mode`** (`radioButton`):  
-  - `0` – **Save**: write the current transforms of the selected objects to the file.  
-  - `1` – **Load**: read transforms from the file and apply them to the objects.  
-- **`objects`** (`listBox`): list of control names (or any transform nodes) whose transforms will be saved or loaded.  
-- **`file`** (`fileSelector`): path to the JSON file used for saving or loading. The button opens a save dialog by default; right-click it to switch to `openFile` when loading.  
-- **`loadAllObjects`** (`checkBox`): when unchecked, only the objects listed in **`objects`** are updated during a load; when checked, all objects present in the JSON file are applied regardless of the list.
+## Inputs
+- **`mode`** (`int`):  
+  - `0` – Save current transforms to the file.  
+  - `1` – Load transforms from the file and apply them.
+- **`objects`** (`list[str]`): Names of the objects whose transforms will be saved or restored.
+- **`file`** (`str`): File path (may contain environment variables) where the JSON data is written or read.
+- **`loadAllObjects`** (`bool`): When loading, if `False` only objects listed in `objects` are updated; if `True` all objects present in the file are processed.
+- **`keepScale`** (`bool`): When loading, if `True` the original scale of each object is preserved after applying the new matrix.
 
-## Outputs  
-- **JSON file** at the path specified by **`file`** containing a dictionary of node names mapped to their `t`, `r`, and `s` values.  
-- On load, the tool sets the `t`, `r`, and `s` attributes of each node (if settable) and prints the node name to the console.  
-- No additional rig nodes or attributes are created; the tool purely reads/writes transform data.
+## Outputs
+None. The module writes to or reads from a file and prints the names of the processed nodes to the console.
 
-## Usage  
-1. **Select the controls** you want to preserve in the **`objects`** list.  
-2. **Choose a file** path via the button or type it manually.  
-3. Set **`mode`** to **Save** and click **Run** to write the current transforms to the JSON file.  
-4. To restore a pose, set **`mode`** to **Load**.  
-   - If you only want to update the controls listed in **`objects`**, leave **`loadAllObjects`** unchecked.  
-   - If you want to apply all transforms stored in the file, check **`loadAllObjects`**.  
-5. Click **Run**; the tool will apply the stored transforms and print each updated node to the console.  
-
-This tool is ideal for capturing neutral poses, creating pose presets, or re‑applying control transforms after a rig rebuild.]]></doc>
+## Usage
+1. **Set the mode**:  
+   - `mode = 0` to capture the current transforms.  
+   - `mode = 1` to restore transforms from a file.
+2. **Define the target objects** in the `objects` list (e.g., `["root", "spine1", "spine2"]`).
+3. **Specify the file path** in `file` (use `$HOME` or other env vars if needed).
+4. **Optional flags**:  
+   - `loadAllObjects = True` to update every object stored in the file.  
+   - `keepScale = True` to keep each object's original scale after loading.
+5. **Execute the module**.  
+   - In **Save** mode it will create/overwrite the JSON file with the current world‑space matrices.  
+   - In **Load** mode it will read the file, apply the matrices, and print each processed node name.]]></doc>
 <attributes>
-<attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"current": 0, "items": ["Save", "Load"], "default": "current"}]]></attr>
-<attr name="objects" template="listBox" category="General" connect=""><![CDATA[{"default": "items", "items": []}]]></attr>
-<attr name="file" template="fileSelector" category="General" connect=""><![CDATA[{"value": "$TEMP\\Temp\\saveLoadTranforms", "mode": "saveFile", "filter": "JSON Files (*.json)", "title": "Select JSON file", "default": "value"}]]></attr>
-<attr name="loadAllObjects" template="checkBox" category="General" connect=""><![CDATA[{"default": "checked", "checked": true}]]></attr>
+<attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"items": ["Save", "Load"], "current": 1, "columns": 2, "default": "current"}]]></attr>
+<attr name="objects" template="listBox" category="General" connect=""><![CDATA[{"items": [], "default": "items"}]]></attr>
+<attr name="file" template="fileSelector" category="General" connect=""><![CDATA[{"value": "$TEMP\\saveLoadTranforms", "mode": "saveFile", "filter": "JSON Files (*.json)", "title": "Select JSON file", "default": "value"}]]></attr>
+<attr name="loadAllObjects" template="checkBox" category="General" connect=""><![CDATA[{"checked": true, "default": "checked"}]]></attr>
+<attr name="keepScale" template="checkBox" category="General" connect=""><![CDATA[{"checked": true, "default": "checked"}]]></attr>
 </attributes>
 </module>
