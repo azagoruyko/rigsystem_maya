@@ -1,5 +1,7 @@
 def findSymmetricName(name, left=True, right=True):
     """Return a mirrored side name variant when possible."""
+    name = str(name)
+
     lStarts = {"L_": "R_", "l_": "r_", "Left": "Right", "left_": "right_"}
     lEnds = {"_L": "_R", "_l": "_r", "Left": "Right", "_left": "_right"}
 
