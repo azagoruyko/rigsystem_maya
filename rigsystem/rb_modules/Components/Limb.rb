@@ -150,13 +150,9 @@ if @mode == 1:  # run
     # bones start position control
     positionCtrl = None
     if h_position:
-        options_ctrl.addAttr("positionControl", at="bool", dv=False)
-        rig_utils.lockAttr(options_ctrl.positionControl, 0.5)    
-        
         positionTransform = pm.createNode("transform", n=@name + "_1_position_control_transform", p=controls_grp)
         pm.matchTransform(positionTransform, jointsParent)
         pm.matchTransform(positionTransform, joint1, position=True, rotation=False)
-        options_ctrl.positionControl >> positionTransform.v
         
         if jointsParent:
             pm.parentConstraint(jointsParent, positionTransform, mo=True)
