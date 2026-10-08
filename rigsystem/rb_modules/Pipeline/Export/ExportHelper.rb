@@ -20,7 +20,7 @@ Saves the data of a specified NURBS curve to a file for use in game engine or Al
 4. Click **Run** to execute the module; the curve data will be saved to the configured export location.  
 5. Verify the output file in your project’s export directory.]]></doc>
 <attributes>
-<attr name="nurbsCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"default": "value", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "value": "curve1"}]]></attr>
-<attr name="curveType" template="lineEditAndButton" category="General" connect=""><![CDATA[{"default": "value", "max": "", "validator": 0, "value": "test", "min": "", "buttonEnabled": false}]]></attr>
+<attr name="nurbsCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "triangle", "placeholder": "", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="curveType" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "triangle", "placeholder": "Curve file name", "buttonCommand": "", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 </attributes>
 </module>
