@@ -31,6 +31,7 @@ for j in @joints:
 if @setParent == 1: # parent by hierarchy
     for i in range(1, len(controlPerJoint)):
         controlPerJoint[i-1] | controlPerJoint[i]
+        rig_utils.setToOffsetParentMatrix(controlPerJoint[i])
     ]]></run>
 <doc><![CDATA[## Summary
 Creates forward‑kinematics (FK) control curves for a list of joints, allowing optional orientation matching, scale linking, and hierarchical or constraint‑based parenting of the generated controls.
