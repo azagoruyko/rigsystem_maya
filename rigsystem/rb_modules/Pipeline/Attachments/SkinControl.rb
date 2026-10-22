@@ -1,4 +1,4 @@
-<module name="skinControl" muted="0" uid="0f7c32b1393e4939aba1963e961af702">
+<module name="SkinControl" muted="0" uid="0f7c32b1393e4939aba1963e961af702">
 <run><![CDATA[import pymel.core as pm
 
 mesh = pm.PyNode(@mesh)
@@ -51,7 +51,7 @@ for index, uv_pin in enumerate(new_uv_pins):
     pm.rename(uv_pin, control_name + "_uvPin" + suffix)
 
 control_parent = control.getParent()
-attachment = pm.createNode("transform", n=control_name + "_tranform")
+attachment = pm.createNode("transform", n=control_name + "_skinned_transform")
 pm.matchTransform(attachment, control)
 attachment | control
 
