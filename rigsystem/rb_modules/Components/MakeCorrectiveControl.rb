@@ -30,7 +30,8 @@ if @type == "softMod":
 ctrl.t >> handle.t
 ctrl.r >> handle.r
 ctrl.s >> handle.s
-]]></run>
+
+@set_out_control(ctrl.name())]]></run>
 <doc><![CDATA[## Summary
 This module builds a compensation cluster deformer on the currently selected geometry and creates a helper control that follows the cluster handle. The helper’s transform and radius are wired to the cluster deformer, allowing the control to drive the cluster’s fall‑off and maintain mesh volume during extreme joint rotations.
 
@@ -44,6 +45,7 @@ This module builds a compensation cluster deformer on the currently selected geo
 - **Compensation Transform Hierarchy** (`<name>_compensation_transform` & `<name>_transform`): Transforms that drive the cluster’s weighted, pre, and post matrices via a scriptJob.  
 - **Helper Control** (`<name>`): A curve/locator node positioned at the cluster handle, parented to the compensation transform, with its `t`, `r`, `s` attributes driving the cluster handle and a `radius` attribute controlling the deformer’s fall‑off.  
 - **ScriptJob**: Keeps the cluster matrices updated during idle time.
+- **Attribute**: Sets `out_control` to be the generated control.
 
 ## Usage
 1. **Set the `name` attribute** to a unique identifier for the cluster and helper (e.g., `R_shoulder_cluster`).  
@@ -52,10 +54,11 @@ This module builds a compensation cluster deformer on the currently selected geo
 4. **Run the module**. It will create the compensation cluster, the helper control, and wire the control’s transform and radius to the cluster deformer.  
 5. **Adjust the helper control** in the viewport to fine‑tune the cluster’s influence, or connect the generated nodes to downstream deformation or rigging modules.]]></doc>
 <attributes>
-<attr name="name" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "L_shirt_sleeve1", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="name" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "R_shirt_sleeve_front", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="curveType" template="comboBox" category="General" connect=""><![CDATA[{"items": ["arc", "arrow", "axis", "axisSphere", "cube", "circle", "diamond", "key", "pyramid", "rect", "sphere", "triangle", "plus"], "current": "sphere", "default": "current"}]]></attr>
-<attr name="deformRadius" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": 10, "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 2, "default": "value"}]]></attr>
+<attr name="deformRadius" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": 15, "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 2, "default": "value"}]]></attr>
 <attr name="type" template="comboBox" category="General" connect=""><![CDATA[{"items": ["cluster", "softMod"], "current": "softMod", "default": "current"}]]></attr>
+<attr name="out_control" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "", "placeholder": "Maya node", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 </attributes>
 <children>
 <module name="makeHelper" muted="1" uid="1f5e3d986051407397d0b580e70ef628">
@@ -77,8 +80,9 @@ Creates a helper curve node with a user‑defined name and shape, positioned at 
 3. Execute the module.  
 4. The created helper curve will appear in the scene; you can parent, constrain, or connect it to other rig components as needed.]]></doc>
 <attributes>
-<attr name="curveType" template="comboBox" category="General" connect="/curveType"><![CDATA[{"items": ["arc", "arrow", "axis", "axisSphere", "cube", "circle", "diamond", "key", "pyramid", "rect", "sphere", "triangle", "plus"], "current": "sphere", "default": "current"}]]></attr>
-<attr name="name" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "L_shirt_sleeve1_control", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value", "_expression": "value = ch(\"../name\") + \"_control\""}]]></attr>
+<attr name="curveType" template="comboBox" category="General" connect="/curveType"><![CDATA[{"items": ["arc", "arrow", "arrowCircle", "axis", "axisSphere", "circle", "cube", "diamond", "flag", "gear", "guide", "key", "main", "plus", "pyramid", "rect", "sphere", "triangle"], "current": "sphere", "default": "current"}]]></attr>
+<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import os\nimport rig_utils\n\ncurves = sorted(\n    os.path.splitext(filename)[0]\n    for filename in os.listdir(rig_utils.curve.CurvesPath)\n    if filename.endswith(\".json\")\n)\ncurrent = ch(\"/curveType\")\nif current not in curves:\n    chset(\"/curveType\", curves[0] if curves else \"\", \"current\")\n\nchset(\"/curveType\", curves, \"items\")", "label": "Get All Curves", "color": "", "default": "command"}]]></attr>
+<attr name="name" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "R_shirt_sleeve_front_control", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value", "_expression": "value = ch(\"../name\") + \"_control\""}]]></attr>
 </attributes>
 </module>
 <module name="compensationCluster" muted="1" uid="e3bfce6c327f4c16ad859bea29ba1dcb">
@@ -136,11 +140,11 @@ Creates a compensation cluster deformer that mitigates mesh volume collapse duri
 4. **Adjust the cluster envelope** or the compensation transform as needed to fine‑tune the deformation.  
 5. **Optional**: Connect the created nodes to other rig elements or use them as part of a larger deformation strategy.]]></doc>
 <attributes>
-<attr name="name" template="lineEditAndButton" category="General" connect="/name"><![CDATA[{"value": "L_shirt_sleeve1", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
-<attr name="type" template="comboBox" category="General" connect="/type"><![CDATA[{"items": ["cluster", "softMod"], "current": "cluster", "default": "current"}]]></attr>
-<attr name="out_parent" template="lineEditAndButton" category="Output" connect=""><![CDATA[{"value": "L_shirt_sleeve1_compensation_transform", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
-<attr name="out_handle" template="lineEditAndButton" category="Output" connect=""><![CDATA[{"value": "L_shirt_sleeve1_transform", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
-<attr name="out_deformer" template="lineEditAndButton" category="Output" connect=""><![CDATA[{"value": "L_shirt_sleeve1_softMod", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="name" template="lineEditAndButton" category="General" connect="/name"><![CDATA[{"value": "R_shirt_sleeve_front", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="type" template="comboBox" category="General" connect="/type"><![CDATA[{"items": ["cluster", "softMod"], "current": "softMod", "default": "current"}]]></attr>
+<attr name="out_parent" template="lineEditAndButton" category="Output" connect=""><![CDATA[{"value": "", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="out_handle" template="lineEditAndButton" category="Output" connect=""><![CDATA[{"value": "", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="out_deformer" template="lineEditAndButton" category="Output" connect=""><![CDATA[{"value": "", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 </attributes>
 </module>
 </children>
