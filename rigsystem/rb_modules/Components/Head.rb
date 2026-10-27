@@ -1,7 +1,7 @@
 <module name="Head" muted="0" uid="b79cb052aef143f7ad8ea6d3260f8e98">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 ROTATE_ORDER = 3  # XZY
 

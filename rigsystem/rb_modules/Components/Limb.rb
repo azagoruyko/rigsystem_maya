@@ -1,7 +1,7 @@
 <module name="Limb" muted="0" uid="d2e886c7fa894a018b74d0f9b00c62e5">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)

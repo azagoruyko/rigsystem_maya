@@ -3,7 +3,7 @@
 import maya.mel as mel
 import pymel.core as pm
 import maya.api.OpenMaya as om
-from rig_utils import skinCluster as skin
+from rigsystem.rig_utils import skinCluster as skin
 import math
 
 IS_RETOPO_AVAILABLE = cmds.about(api=True) >= 20230000

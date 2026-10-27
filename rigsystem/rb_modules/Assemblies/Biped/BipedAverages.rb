@@ -45,7 +45,7 @@ This setup provides a reusable, symmetric averaging framework for all major bipe
 <children>
 <module name="L_shoulder" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -238,7 +238,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="R_shoulder" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -431,7 +431,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="L_elbow" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -624,7 +624,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="R_elbow" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -817,7 +817,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="L_hand" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1010,7 +1010,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="R_hand" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1203,7 +1203,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="L_knee" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1396,7 +1396,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="R_knee" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1589,7 +1589,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="L_hip" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1782,7 +1782,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="R_hip" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)

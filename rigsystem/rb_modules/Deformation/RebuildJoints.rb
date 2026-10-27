@@ -2,7 +2,7 @@
 <run><![CDATA[import pymel.core as pm
 import pymel.api as api
 import re
-import rig_utils
+from rigsystem import rig_utils
 
 def getIncrementedName(name):
     lastNumRegex = "(\\d+)([a-zA-Z_]*$)"

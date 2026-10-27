@@ -1,6 +1,6 @@
 <module name="symmetrize" muted="0" uid="62f2ec7d17484555ac960a629f02463f">
 <run><![CDATA[import pymel.core as pm
-from rig_utils.general import symmetrizeJoint
+from rigsystem.rig_utils.general import symmetrizeJoint
 
 for j in pm.selected(type=["transform", "joint"]):
     symmetrizeJoint(j)]]></run>

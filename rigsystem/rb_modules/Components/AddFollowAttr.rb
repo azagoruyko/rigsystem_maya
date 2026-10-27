@@ -1,6 +1,6 @@
 <module name="addFollowAttr" muted="0" uid="ae9878fd05af41f49e42a3fe90540743">
 <run><![CDATA[import pymel.core as pm
-from anim_utils import switcher
+from rigsystem.anim_utils import switcher
 
 control = pm.PyNode(@control)
 

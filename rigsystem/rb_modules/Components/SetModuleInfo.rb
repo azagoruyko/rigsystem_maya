@@ -1,6 +1,6 @@
 <module name="setModuleInfo" type="" muted="0" uid="6a834ba65ca34113a1d3c2c75d85f000">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 moduleInfo = rig_utils.ModuleInfo(@moduleInfo)
 moduleInfo.setAttr("type", @moduleType)

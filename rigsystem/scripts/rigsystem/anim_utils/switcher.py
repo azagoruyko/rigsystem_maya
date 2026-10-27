@@ -2,9 +2,9 @@ import maya.cmds as cmds
 import maya.mel as mel
 import pymel.core as pm
 
-from rig_utils.general import resetControl, copyAttrsSpec, lockTRS, isAnimated
-from rig_utils.matrix import taxis
-from rig_utils.moduleInfo import ModuleInfo, getModuleInfo
+from rigsystem.rig_utils.general import resetControl, copyAttrsSpec, lockTRS, isAnimated
+from rigsystem.rig_utils.matrix import taxis
+from rigsystem.rig_utils.moduleInfo import ModuleInfo, getModuleInfo
 
 
 def kinematicSwitchMulti(object, startFrame=None, endFrame=None):

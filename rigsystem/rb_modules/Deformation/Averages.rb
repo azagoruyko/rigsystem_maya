@@ -36,7 +36,7 @@ The **Averages** module orchestrates the creation, maintenance, and mirroring of
 </module>
 <module name="mirrorAverageValues" muted="0" uid="e7f568dc08e241e09d741aa978e51e5f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 averages = pm.ls("*_average_*_locator")
 for avg in averages:
@@ -86,7 +86,7 @@ Compound module for biped rigs that sets up joint angle averaging across shoulde
 <children>
 <module name="L_shoulder" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -251,7 +251,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="R_shoulder" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -416,7 +416,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="L_elbow" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -581,7 +581,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="R_elbow" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -746,7 +746,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="L_hand" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -911,7 +911,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="R_hand" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1076,7 +1076,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="L_knee" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1241,7 +1241,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="R_knee" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1406,7 +1406,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="L_hip" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1571,7 +1571,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="R_hip" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1738,7 +1738,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="bipedFingersAverages" muted="0" uid="8bde81c4d3ca49d9ba1fa6bb8511fedf">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 sides = ["L", "R"]
 fingers = ["thumb", "index", "middle", "ring", "pinky"]
@@ -1789,7 +1789,7 @@ Specialized compound module for generating joint angle average nodes across fing
 <children>
 <module name="AverageJoints" muted="1" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1954,7 +1954,7 @@ Calculates average position and orientation values between joints or node groups
 </module>
 <module name="mirrorAverageJoints" muted="0" uid="e7f568dc08e241e09d741aa978e51e5f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 averages = pm.ls("*_average_*_locator")
 for avg in averages:
@@ -2009,7 +2009,7 @@ The script scans all Maya locator objects whose names match the pattern *_averag
 </module>
 <module name="AverageJoints" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)

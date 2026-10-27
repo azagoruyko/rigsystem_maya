@@ -1,6 +1,6 @@
 <module name="updateControlsColor" muted="0" uid="30f854df893a476b83423f05a830ae7d">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 for ctrl in pm.selected(type="transform"):
     c = rig_utils.getColorByName(ctrl.name())

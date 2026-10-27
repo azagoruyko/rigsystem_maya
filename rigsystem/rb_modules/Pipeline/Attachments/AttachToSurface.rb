@@ -1,6 +1,6 @@
 <module name="attachToSurface" muted="0" uid="b21c578b1b144f4e9fe06ec449961b0f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 surface = pm.PyNode(@surface)
 transforms = [pm.PyNode(t) for t in @transforms]

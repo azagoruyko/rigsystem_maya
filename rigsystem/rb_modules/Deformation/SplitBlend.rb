@@ -1,6 +1,6 @@
 <module name="splitBlend" muted="0" uid="909adcb7aa7c4d9eaedc54c95ddf9165">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 skinGeo = pm.PyNode(@skinGeo)
 blendGeo = pm.PyNode(@blendGeo)

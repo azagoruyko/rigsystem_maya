@@ -2,8 +2,8 @@
 <run><![CDATA[import json
 import pymel.core as pm
 import pymel.api as api
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 RotateOrder = 3  # XZY
 

@@ -1,7 +1,7 @@
 <module name="MoveSkinToParentBones" muted="0" uid="1c376ace7e984f1dbaf52699eb92e551">
 <run><![CDATA[from collections import defaultdict
 import pymel.core as pm
-import rig_utils.skinCluster as skin
+from rigsystem.rig_utils import skinCluster as skin
 
 selection = pm.ls(@joints, type="joint")
 if not selection:

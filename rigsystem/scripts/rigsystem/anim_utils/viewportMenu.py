@@ -1,8 +1,10 @@
-"""Viewport menu helpers; see `dagMenuProc.txt` for Maya integration steps."""
+"""RigSystem's viewport menu for selected controls."""
+from functools import partial
 import os
 import re
 
 import maya.cmds as cmds
+import maya.mel as mel
 import pymel.core as pm
 
 from .menu import Menu
@@ -24,18 +26,21 @@ from .dynamicParent import (
 from .bake import spine_bakeIKtoFK, spine_bakeFKtoIK
 from . import editFKwithIK
 
-from rig_utils.general import (
+from rigsystem.rig_utils.general import (
     copyAttrs,
     resetControl,
     resetControls,
     selectControls,
     toggleVisible,
 )
-from rig_utils.moduleInfo import ModuleInfo, getModuleInfo
-from rig_utils.naming import isLeftSide, isRightSide
+from rigsystem.rig_utils.moduleInfo import ModuleInfo, getModuleInfo
+from rigsystem.rig_utils.naming import findSymmetricName, isLeftSide, isRightSide
 
-def customDagMenuProc(parent, object):
-    """Build and show the custom DAG menu for the given object."""
+_originalPostCommands = {}
+
+
+def buildViewportMenu(parent, object):
+    """Build RigSystem's menu for the selected object when it has actions."""
     object = pm.PyNode(object)
 
     menu = Menu()
@@ -51,14 +56,50 @@ def customDagMenuProc(parent, object):
         ls = pm.ls(sl=True, type="transform") + [object]
         postfix = "... [multi selection]" if len(set(ls)) > 1 else ""
 
-        pm.menuItem(l=object + postfix, bld=True, en=True)
-        pm.menuItem(divider=True)
+        pm.menuItem(parent=parent, l=object + postfix, bld=True, en=True)
+        pm.menuItem(parent=parent, divider=True)
 
         menu.buildIn(parent)
 
         return True
 
     return False
+
+
+def _postMenuCommand(parent, originalCommand, *mayaArgs):
+    """Show RigSystem actions or let Maya build its standard menu."""
+    selected = cmds.ls(selection=True, long=True, type="transform") or []
+    if selected:
+        cmds.menu(parent, edit=True, deleteAllItems=True)
+        if buildViewportMenu(parent, selected[-1]):
+            return
+
+    mel.eval(originalCommand)
+
+
+def installViewportMenu():
+    """Attach RigSystem to existing Maya viewport menu callbacks."""
+    for menuName in cmds.lsUI(menus=True):
+        if menuName in _originalPostCommands:
+            continue
+
+        originalCommand = cmds.menu(menuName, query=True, postMenuCommand=True)
+        if isinstance(originalCommand, str) and "buildObjectMenuItemsNow" in originalCommand:
+            _originalPostCommands[menuName] = originalCommand
+            cmds.menu(
+                menuName,
+                edit=True,
+                postMenuCommand=partial(_postMenuCommand, menuName, originalCommand),
+            )
+
+
+def uninstallViewportMenu():
+    """Restore Maya's viewport menu callbacks."""
+    for menuName, originalCommand in _originalPostCommands.items():
+        if cmds.menu(menuName, exists=True):
+            cmds.menu(menuName, edit=True, postMenuCommand=originalCommand)
+
+    _originalPostCommands.clear()
 
 
 def simpleMirror(object):

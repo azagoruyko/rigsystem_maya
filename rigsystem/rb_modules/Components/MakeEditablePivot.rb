@@ -1,6 +1,6 @@
 <module name="makeEditablePivot" muted="0" uid="14932544be434020a1338edbc2110db2">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 makeHelperMod = module.child("MakeHelper")
 
@@ -75,7 +75,7 @@ Creates pivot helpers and optional control curves for a list of selected transfo
 </attributes>
 <children>
 <module name="MakeHelper" muted="1" uid="1f5e3d986051407397d0b580e70ef628">
-<run><![CDATA[import rig_utils
+<run><![CDATA[from rigsystem import rig_utils
 rig_utils.curve.makeCurve(@name, @curveType)]]></run>
 <doc><![CDATA[## Summary
 Creates a helper curve node with a user‑defined name and shape, positioned at the current selection or a specified transform. The curve can be used as a visual reference or as a target for constraints and connections.

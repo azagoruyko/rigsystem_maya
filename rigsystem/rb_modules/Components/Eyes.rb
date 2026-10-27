@@ -1,7 +1,7 @@
 <module name="Eyes" muted="0" uid="5224e40320b643a787c6a601ecabdd31">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 L_eye_joint = pm.PyNode(@L_eye_joint)
 R_eye_joint = pm.PyNode(@R_eye_joint)

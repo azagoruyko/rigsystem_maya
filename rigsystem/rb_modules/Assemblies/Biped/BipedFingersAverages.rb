@@ -1,6 +1,6 @@
 <module name="BipedFingersAverages" muted="0" uid="8bde81c4d3ca49d9ba1fa6bb8511fedf">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 sides = ["L", "R"]
 fingers = ["thumb", "index", "middle", "ring", "pinky"]
@@ -69,7 +69,7 @@ The **bipedFingersAverages** module automates the creation of joint‑angle aver
 <children>
 <module name="AverageJoints" muted="1" uid="aa34933cc99d4d389840950f60ed08be">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -262,7 +262,7 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </module>
 <module name="mirrorAverageJoints" muted="0" uid="e7f568dc08e241e09d741aa978e51e5f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 averages = pm.ls("*_average_*_locator")
 for avg in averages:

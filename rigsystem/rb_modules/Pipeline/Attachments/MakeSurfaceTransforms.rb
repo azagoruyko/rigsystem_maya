@@ -1,7 +1,7 @@
 <module name="makeSurfaceTransforms" muted="0" uid="4f767e9fccee4ad495c3ae0f8cf33d25">
 <run><![CDATA[import pymel.core as pm
 import maya.cmds as cmds
-import rig_utils
+from rigsystem import rig_utils
 
 surface = pm.PyNode(@surface)
 surface_shape = surface.getShape()

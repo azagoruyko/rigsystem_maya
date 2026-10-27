@@ -82,8 +82,8 @@ The `updateAverageBaseAngle` module scans the Maya scene for all locator objects
 <run><![CDATA[import json
 import pymel.core as pm
 import pymel.api as api
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 RotateOrder = 3  # XZY
 
@@ -623,8 +623,8 @@ The **spine** module automates the creation of a Maya spine rig that supports FK
 </module>
 <module name="head" muted="0" uid="b79cb052aef143f7ad8ea6d3260f8e98">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 ROTATE_ORDER = 3  # XZY
 
@@ -892,8 +892,8 @@ Follow these steps to integrate the head rig into a larger character rig, ensuri
 </module>
 <module name="eyes" muted="1" uid="5224e40320b643a787c6a601ecabdd31">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 L_eye_joint = pm.PyNode(@L_eye_joint)
 R_eye_joint = pm.PyNode(@R_eye_joint)
@@ -1124,8 +1124,8 @@ This module provides a robust, parameter‑driven eye rig that can be integrated
 </module>
 <module name="L_shoulder" muted="0" uid="d25b5dd9832e485d89561e7a13924fb8">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent
 
 controlsParent = pm.PyNode("controls")
 helpersParent = pm.PyNode("helpers")
@@ -1221,8 +1221,8 @@ Creates a shoulder animation control curve with optional helper placement. In **
 </module>
 <module name="R_shoulder" muted="0" uid="d25b5dd9832e485d89561e7a13924fb8">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent
 
 controlsParent = pm.PyNode("controls")
 helpersParent = pm.PyNode("helpers")
@@ -1318,8 +1318,8 @@ Creates a shoulder animation control curve with optional helper placement. In **
 </module>
 <module name="L_arm" muted="0" uid="d2e886c7fa894a018b74d0f9b00c62e5">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -1847,8 +1847,8 @@ The module automatically handles mirroring, dynamic parenting, and provides a cl
 </module>
 <module name="R_arm" muted="0" uid="d2e886c7fa894a018b74d0f9b00c62e5">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -2376,8 +2376,8 @@ The module automatically handles mirroring, dynamic parenting, and provides a cl
 </module>
 <module name="L_fingers" muted="0" uid="35660581920746079cd76409b837b743">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent
 
 controlsParent = pm.PyNode("controls")
 helpersParent = pm.PyNode("helpers")
@@ -2552,8 +2552,8 @@ Creates a finger rig for a hand or paw, generating FK controls for each digit wi
 </module>
 <module name="R_fingers" muted="0" uid="35660581920746079cd76409b837b743">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent
 
 controlsParent = pm.PyNode("controls")
 helpersParent = pm.PyNode("helpers")
@@ -2808,8 +2808,8 @@ Follow these steps to quickly generate a robust, animatable leg rig that integra
 <children>
 <module name="limb" muted="0" uid="d2e886c7fa894a018b74d0f9b00c62e5">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -3337,8 +3337,8 @@ The module automatically handles mirroring, dynamic parenting, and provides a cl
 </module>
 <module name="foot" muted="0" uid="">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 mode = ch("../mode")
 name = ch("../name")
@@ -3799,8 +3799,8 @@ Follow these steps to quickly generate a robust, animatable leg rig that integra
 <children>
 <module name="limb" muted="0" uid="d2e886c7fa894a018b74d0f9b00c62e5">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 joint1 = pm.PyNode(@joint1)
 joint2 = pm.PyNode(@joint2)
@@ -4328,8 +4328,8 @@ The module automatically handles mirroring, dynamic parenting, and provides a cl
 </module>
 <module name="foot" muted="0" uid="">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent, switcher
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent, switcher
 
 mode = ch("../mode")
 name = ch("../name")
@@ -4787,7 +4787,7 @@ removeNamespaces()]]></run>
 </module>
 <module name="lockNodes" muted="0" uid="">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 pm.delete(pm.ls(type="dagPose"))
 
@@ -4939,7 +4939,7 @@ This module scans the current Maya scene for duplicate node names and logs a war
 </module>
 <module name="bipedFinishing" muted="0" uid="e536a7df411640bda73a205a15293848">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 if @mode == 1: # run
     pm.hide(pm.ls("*_average_group"))

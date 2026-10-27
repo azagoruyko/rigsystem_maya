@@ -1,6 +1,6 @@
 <module name="BipedFinishing" muted="0" uid="e536a7df411640bda73a205a15293848">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 if @mode == 1: # run
     pm.hide(pm.ls("*_average_group"))

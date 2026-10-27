@@ -1,6 +1,6 @@
 <module name="curveSkinLayers" muted="0" uid="28b7e6993fe94ae384cd4bcff1328692">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 mainCurve = pm.PyNode(@mainCurve)
 

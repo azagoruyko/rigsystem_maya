@@ -1,7 +1,7 @@
 <module name="MirrorComponentTags" muted="0" uid="782551aa058e4467979b60c2e3d5a5d0">
 <run><![CDATA[import pymel.core as pm
 import maya.api.OpenMaya as om
-from rig_utils import naming
+from rigsystem.rig_utils import naming
 
 def getShape(geo):
     return next((shape for shape in (pm.listRelatives(geo, shapes=True) or []) if not shape.intermediateObject.get()), None)

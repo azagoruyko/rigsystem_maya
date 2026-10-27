@@ -1,6 +1,6 @@
 <module name="SetMaxInfluences" muted="0" uid="ba683572a8564671832cbe81d0fc0b8c">
 <run><![CDATA[import pymel.core as pm
-from rig_utils import skinCluster
+from rigsystem.rig_utils import skinCluster
 
 geo = @mesh
 maxInf = int(@maxInf)

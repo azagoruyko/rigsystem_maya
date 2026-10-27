@@ -1,6 +1,6 @@
 <module name="freezeJoints" type="Tools/FreezeJoints" muted="0" uid="e13ecd930d9943d69299094249a7e31e">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 rig_utils.freezeJoints([pm.PyNode(j) for j in @joints])]]></run>
 <doc><![CDATA[## Summary

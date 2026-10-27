@@ -1,5 +1,5 @@
 class Menu(object):
-    """Hierarchical menu used in dagMenuProc to build a Maya viewport menu."""
+    """Hierarchical menu for RigSystem's Maya viewport actions."""
 
     def __init__(self, name="", command=None, altCommand=None, icon=""):
         self.name = name
@@ -46,7 +46,7 @@ class Menu(object):
                     return found
 
     def buildIn(self, parent):
-        """Build this menu into the given Maya UI parent (e.g. from dagMenuProc)."""
+        """Build this menu into the given Maya UI parent."""
         import pymel.core as pm
 
         def buildIn_local(menu):

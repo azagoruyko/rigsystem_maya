@@ -2,8 +2,8 @@ import maya.cmds as cmds
 import pymel.api as api
 import pymel.core as pm
 
-from rig_utils.moduleInfo import ModuleInfo, getModuleInfo
-from rig_utils.general import matchJoint
+from rigsystem.rig_utils.moduleInfo import ModuleInfo, getModuleInfo
+from rigsystem.rig_utils.general import matchJoint
 
 NAME = "editFKwithIK"
 

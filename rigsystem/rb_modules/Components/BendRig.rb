@@ -1,6 +1,6 @@
 <module name="BendRig" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)

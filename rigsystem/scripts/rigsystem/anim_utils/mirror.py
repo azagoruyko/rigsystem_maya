@@ -1,9 +1,9 @@
 import maya.api.OpenMaya as om
 import pymel.core as pm
 
-from rig_utils.general import copyAttrs
-from rig_utils.moduleInfo import ModuleInfo
-from rig_utils.naming import findSymmetricName
+from rigsystem.rig_utils.general import copyAttrs
+from rigsystem.rig_utils.moduleInfo import ModuleInfo
+from rigsystem.rig_utils.naming import findSymmetricName
 
 def flipMatrix(src, center, axis=(-1, 1, 1)):
     """Flip matrix over center; axis is scale applied after (e.g. (-1,1,1) for X mirror)."""

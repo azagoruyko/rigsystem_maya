@@ -1,7 +1,7 @@
 <module name="Fingers" muted="0" uid="35660581920746079cd76409b837b743">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent
 
 controlsParent = pm.PyNode("controls")
 helpersParent = pm.PyNode("helpers")

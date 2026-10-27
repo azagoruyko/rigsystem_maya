@@ -1,5 +1,5 @@
 <module name="MakeDynamicParent" muted="0" uid="049b644ccf1c4022b8f02ef231b0ebe4">
-<run><![CDATA[import anim_utils
+<run><![CDATA[from rigsystem import anim_utils
 anim_utils.dynamicParent.makeDynamicParent(@parent, @control)]]></run>
 <doc><![CDATA[## Summary
 Builds dynamic parent space switching setups (world, root, chest, head, ik) by adding custom enum attributes to a control node and wiring a parent‑constraint weight network that drives the control’s parent space during animation.

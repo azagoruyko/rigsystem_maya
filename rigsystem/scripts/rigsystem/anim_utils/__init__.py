@@ -1,6 +1,6 @@
 from . import (
     bake,
-    dagMenuProc,
+    viewportMenu,
     dynamicParent,
     editFKwithIK,
     menu,

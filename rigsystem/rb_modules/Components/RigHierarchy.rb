@@ -1,7 +1,7 @@
 <module name="RigHierarchy" muted="0" uid="54888fff338a4a049762cbeb3377f929">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-import anim_utils
+from rigsystem import rig_utils
+from rigsystem import anim_utils
 
 rigt = pm.createNode("transform", n="rig")
 rig_utils.lockTRS(rigt, v=0.5)

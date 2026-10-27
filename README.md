@@ -1,5 +1,7 @@
 # RigSystem for Maya
 
+![GitHub Tag](https://img.shields.io/github/v/tag/azagoruyko/rigsystem_maya?label=Version)
+
 RigSystem is a **rigging environment for Maya**. It brings together Maya tools, plug-ins, and modules for [Rig Builder](https://github.com/azagoruyko/rigBuilder) in one workflow.
 
 <p align="center">
@@ -84,7 +86,7 @@ The module definition points to `./rigsystem` and its Maya 2026 Windows plug-ins
 
 ### 🎬 Viewport animation menu
 
-To enable RigSystem's animation tools in Maya's viewport right-click menu, follow [`dagMenuProc.txt`](rigsystem/platforms/2026/win64/scripts/dagMenuProc.txt). The instructions show how to make a local copy of Maya's `dagMenuProc.mel` and insert the RigSystem call. This menu setup is optional for the rest of RigSystem.
+RigSystem installs its viewport animation menu when Maya starts. Select a rig control, then right-click in the viewport to open its actions. Maya's standard menu appears when the selected object has no RigSystem actions. No Maya MEL file needs to be copied or modified.
 
 ### 🔌 Connect Maya to Rig Builder
 

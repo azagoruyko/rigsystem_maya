@@ -1,6 +1,6 @@
 <module name="transferBlendsWithWrap" muted="0" uid="5772ef3bbe374b19bbfa620fa562cab5">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 srcGeo = pm.PyNode(@srcGeoWithBlends)
 destGeo = pm.PyNode(@destGeo)

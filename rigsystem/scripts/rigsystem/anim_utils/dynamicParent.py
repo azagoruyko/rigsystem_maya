@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 import pymel.core as pm
 
-from rig_utils.general import lockTRS, isAnimated
+from rigsystem.rig_utils.general import lockTRS, isAnimated
 from .bake import getFrameRange
 
 dynParentKeyColor = [1, 1, 0]

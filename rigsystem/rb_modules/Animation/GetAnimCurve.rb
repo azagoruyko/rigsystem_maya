@@ -1,6 +1,6 @@
 <module name="getAnimCurve" type="Tools/GetAnimCurve" muted="0" uid="dc8b7eedb70245a68d294d58cf5b3967">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
     
 if @mode == 0: # get
     @set_data(rig_utils.getAnimCurveData(pm.PyNode(@animCurve)))

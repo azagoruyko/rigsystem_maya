@@ -1,6 +1,6 @@
 <module name="mirrorCurves" muted="0" uid="c1f83e2098ab4b32a1290f845a7698bd">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 if @useSelected:
     selection = pm.ls(sl=True, type="transform")

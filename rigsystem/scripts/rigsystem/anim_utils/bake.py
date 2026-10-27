@@ -3,8 +3,8 @@ import json
 import maya.mel as mel
 import pymel.core as pm
 
-from rig_utils.general import makeSurfaceTransform
-from rig_utils.moduleInfo import getModuleInfo
+from rigsystem.rig_utils.general import makeSurfaceTransform
+from rigsystem.rig_utils.moduleInfo import getModuleInfo
 
 
 def getFrameRange():

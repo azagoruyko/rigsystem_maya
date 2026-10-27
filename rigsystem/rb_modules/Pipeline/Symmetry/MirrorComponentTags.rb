@@ -1,7 +1,7 @@
 <module name="mirrorComponentTags" muted="0" uid="52d9a9a2cf4043e6a43708dd4e4fb98b">
 <run><![CDATA[import maya.cmds as cmds
 import maya.api.OpenMaya as om
-import rig_utils
+from rigsystem import rig_utils
 
 def getShape(geo):
     if not geo or not cmds.objExists(geo):

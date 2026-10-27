@@ -1,7 +1,7 @@
 <module name="MakeControl" muted="0" uid="d25b5dd9832e485d89561e7a13924fb8">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
-from anim_utils import dynamicParent
+from rigsystem import rig_utils
+from rigsystem.anim_utils import dynamicParent
 
 controlsParent = pm.PyNode("controls")
 helpersParent = pm.PyNode("helpers")

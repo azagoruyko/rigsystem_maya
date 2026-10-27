@@ -1,6 +1,6 @@
 <module name="isoparmJoints" muted="0" uid="a7c82e914f6b4d32a9018e472bc194d3">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 isoparm = pm.PyNode(@isoparm.strip())
 

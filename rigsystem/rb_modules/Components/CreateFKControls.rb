@@ -1,6 +1,6 @@
 <module name="CreateFKControls" muted="0" uid="2583b3b8a41a4ee6b2235c66a1acfd28">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 controlPerJoint = []
 

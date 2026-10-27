@@ -1,7 +1,7 @@
 <module name="SkinWeightsToCluster" muted="0" uid="3a23aeeaaeab4e46b893c1e5725b0f72">
 <run><![CDATA[import maya.cmds as cmds
 import pymel.core as pm
-import rig_utils.skinCluster as skin_utils
+from rigsystem.rig_utils import skinCluster as skin_utils
 
 mesh = @mesh
 bone = pm.PyNode(@bone)

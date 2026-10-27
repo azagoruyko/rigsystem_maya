@@ -1,6 +1,6 @@
 <module name="mirrorAverageValues" muted="0" uid="e7f568dc08e241e09d741aa978e51e5f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 averages = pm.ls("*_average_*_locator")
 for avg in averages:

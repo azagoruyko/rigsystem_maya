@@ -1,6 +1,6 @@
 <module name="MakeCorrectiveControl" muted="0" uid="e8b9c7463d6f4ef99a6aee1aeddf43fb">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 makeHelperMod = module.child("makeHelper")
 compClusterMod = module.child("compensationCluster")
@@ -62,7 +62,7 @@ This module builds a compensation cluster deformer on the currently selected geo
 </attributes>
 <children>
 <module name="makeHelper" muted="1" uid="1f5e3d986051407397d0b580e70ef628">
-<run><![CDATA[import rig_utils
+<run><![CDATA[from rigsystem import rig_utils
 rig_utils.curve.makeCurve(@name, @curveType)]]></run>
 <doc><![CDATA[## Summary
 Creates a helper curve node with a user‑defined name and shape, positioned at the current selection or a specified transform. The curve can be used as a visual reference or as a target for constraints and connections.
@@ -81,7 +81,7 @@ Creates a helper curve node with a user‑defined name and shape, positioned at 
 4. The created helper curve will appear in the scene; you can parent, constrain, or connect it to other rig components as needed.]]></doc>
 <attributes>
 <attr name="curveType" template="comboBox" category="General" connect="/curveType"><![CDATA[{"items": ["arc", "arrow", "arrowCircle", "axis", "axisSphere", "circle", "cube", "diamond", "flag", "gear", "guide", "key", "main", "plus", "pyramid", "rect", "sphere", "triangle"], "current": "sphere", "default": "current"}]]></attr>
-<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import os\nimport rig_utils\n\ncurves = sorted(\n    os.path.splitext(filename)[0]\n    for filename in os.listdir(rig_utils.curve.CurvesPath)\n    if filename.endswith(\".json\")\n)\ncurrent = ch(\"/curveType\")\nif current not in curves:\n    chset(\"/curveType\", curves[0] if curves else \"\", \"current\")\n\nchset(\"/curveType\", curves, \"items\")", "label": "Get All Curves", "color": "", "default": "command"}]]></attr>
+<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import os\nfrom rigsystem import rig_utils\n\ncurves = sorted(\n    os.path.splitext(filename)[0]\n    for filename in os.listdir(rig_utils.curve.CurvesPath)\n    if filename.endswith(\".json\")\n)\ncurrent = ch(\"/curveType\")\nif current not in curves:\n    chset(\"/curveType\", curves[0] if curves else \"\", \"current\")\n\nchset(\"/curveType\", curves, \"items\")", "label": "Get All Curves", "color": "", "default": "command"}]]></attr>
 <attr name="name" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "R_shirt_sleeve_front_control", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value", "_expression": "value = ch(\"../name\") + \"_control\""}]]></attr>
 </attributes>
 </module>

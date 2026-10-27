@@ -37,7 +37,7 @@ The **bipedBends** module coordinates the creation of a complete character rig b
 <children>
 <module name="neck" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)
@@ -233,7 +233,7 @@ Creates a flexible bend rig between two target points using a NURBS plane, latti
 </module>
 <module name="L_arm_1" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)
@@ -429,7 +429,7 @@ Creates a flexible bend rig between two target points using a NURBS plane, latti
 </module>
 <module name="L_arm_2" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)
@@ -625,7 +625,7 @@ Creates a flexible bend rig between two target points using a NURBS plane, latti
 </module>
 <module name="R_arm_1" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)
@@ -821,7 +821,7 @@ Creates a flexible bend rig between two target points using a NURBS plane, latti
 </module>
 <module name="R_arm_2" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)
@@ -1017,7 +1017,7 @@ Creates a flexible bend rig between two target points using a NURBS plane, latti
 </module>
 <module name="L_leg_1" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)
@@ -1213,7 +1213,7 @@ Creates a flexible bend rig between two target points using a NURBS plane, latti
 </module>
 <module name="L_leg_2" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)
@@ -1409,7 +1409,7 @@ Creates a flexible bend rig between two target points using a NURBS plane, latti
 </module>
 <module name="R_leg_1" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)
@@ -1605,7 +1605,7 @@ Creates a flexible bend rig between two target points using a NURBS plane, latti
 </module>
 <module name="R_leg_2" muted="0" uid="c936e465689042df9808edc3ab5e712f">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 point1 = pm.PyNode(@point1)
 point2 = pm.PyNode(@point2)

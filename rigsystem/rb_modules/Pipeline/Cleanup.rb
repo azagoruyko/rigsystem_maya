@@ -77,7 +77,7 @@ removeNamespaces()]]></run>
 </module>
 <module name="lockNodes" muted="0" uid="">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 pm.delete(pm.ls(type="dagPose"))
 

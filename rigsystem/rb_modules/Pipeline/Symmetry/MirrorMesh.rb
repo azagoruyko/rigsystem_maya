@@ -2,7 +2,7 @@
 <run><![CDATA[import maya.cmds as cmds
 import maya.api.OpenMaya as om
 import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 baseMesh = @baseMesh
 mesh = @mesh

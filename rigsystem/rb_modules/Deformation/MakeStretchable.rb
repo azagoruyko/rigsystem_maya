@@ -1,6 +1,6 @@
 <module name="makeStretchable" muted="0" uid="e2d5e2c2f71b41078b86f36600ef2af7">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 control = pm.PyNode(@control)
 jnt = pm.PyNode(@joint)

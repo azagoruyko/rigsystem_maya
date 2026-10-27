@@ -1,6 +1,6 @@
 <module name="matrixToOffsetParentMatrix" muted="0" uid="18853f5b0d0c472791a6371f8c6b5838">
 <run><![CDATA[import pymel.core as pm
-import rig_utils
+from rigsystem import rig_utils
 
 if @mode == 0: # to
     for t in pm.selected(type=["transform", "joint"]):
