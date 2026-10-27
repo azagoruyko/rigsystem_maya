@@ -1,7 +1,7 @@
 from maya.OpenMaya import *
 from maya.OpenMayaMPx import *
 
-nodeId = MTypeId(0x00137241) # see mytona_mtypeids.h
+nodeId = MTypeId(0x00137241)
 
 class ParamFromLength(MPxNode):
     inputCurve = MObject()
