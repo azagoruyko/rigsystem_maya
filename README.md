@@ -4,6 +4,8 @@
 
 RigSystem is a **rigging environment for Maya**. It brings together Maya tools, plug-ins, and modules for [Rig Builder](https://github.com/azagoruyko/rigBuilder) in one workflow.
 
+In 2.0.0, the Maya tools live in the `rigsystem` Python package, and the viewport animation menu works without replacing Maya's `dagMenuProc.mel`.
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/012cb13b-830c-4563-90f3-6304ac3aea4e" width="800" />
 </p>
@@ -52,9 +54,10 @@ To change a control's placement later, adjust its helper in the `source` scene a
 
 | Path | Contents |
 | --- | --- |
-| `rigsystem/scripts` | Maya rigging and animation scripts |
+| `rigsystem/scripts/rigsystem` | Maya rigging and animation Python package (`rig_utils` and `anim_utils`) |
+| `rigsystem/scripts/userSetup.py` | Loads bundled plug-ins and installs the viewport menu in interactive Maya |
 | `rigsystem/rb_modules` | Modules to run in Rig Builder |
-| `rigsystem/platforms/2026/win64` | Maya 2026 plug-ins and platform-specific scripts |
+| `rigsystem/platforms/2026/win64/plug-ins` | Bundled Maya 2026 plug-ins |
 | `rigsystem/library` | Maya scene assets and templates |
 
 ## 🧩 Dependencies
@@ -82,11 +85,15 @@ Follow the guide: https://www.youtube.com/watch?v=g7IWIPeaabQ
 
 Set `MAYA_MODULE_PATH` to the **repository root**, the folder containing `rigsystem.mod`.
 
-The module definition points to `./rigsystem` and its Maya 2026 Windows plug-ins.
+The module definition points to `./rigsystem` and its Maya 2026 Windows plug-ins. Its `userSetup.py` loads the bundled plug-ins and installs the viewport menu in interactive Maya. The RigSystem release version is defined in `rigsystem/scripts/rigsystem/__init__.py`.
+
+If upgrading from a setup that used a custom `dagMenuProc.mel`, remove that script override and restart Maya. RigSystem 2.0.0 does not need an extra `MAYA_SCRIPT_PATH` or `PYTHONPATH` entry for it.
 
 ### 🎬 Viewport animation menu
 
-RigSystem installs its viewport animation menu when Maya starts. Select a rig control, then right-click in the viewport to open its actions. Maya's standard menu appears when the selected object has no RigSystem actions. No Maya MEL file needs to be copied or modified.
+RigSystem installs its viewport animation menu when Maya starts. Select a rig control, then right-click in the viewport to open its actions. With multiple transforms selected, the menu uses the **last selected** one; it does not inspect the object under the cursor. Maya's standard menu appears when the selected object has no RigSystem actions. No Maya MEL file needs to be copied or modified.
+
+Custom scripts and Rig Builder modules should use the package imports, for example `from rigsystem import rig_utils` or `from rigsystem.anim_utils import switcher`.
 
 ### 🔌 Connect Maya to Rig Builder
 
@@ -120,7 +127,7 @@ RigSystem is very AI-friendly: its `.rb` modules contain readable code, structur
 Contributions to the Maya package belong in this repository:
 
 - Add or improve Rig Builder modules in `rigsystem/rb_modules`.
-- Add or improve Maya rigging and animation scripts in `rigsystem/scripts`.
+- Add or improve Maya rigging and animation scripts in `rigsystem/scripts/rigsystem`.
 - Report issues with the packaged Maya module, its installation, or bundled builds here.
 
 For changes to Rig Builder itself, use the [Rig Builder repository](https://github.com/azagoruyko/rigBuilder). For plug-in source changes, contribute to [`animClip`](https://github.com/azagoruyko/animClip), [`colliders`](https://github.com/azagoruyko/colliders), or [`skeleposer`](https://github.com/azagoruyko/skeleposer) in their respective repositories.
