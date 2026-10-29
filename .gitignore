@@ -6,9 +6,6 @@ swatches/
 *.ma~
 *.mb~
 
-# Local copy of Maya's viewport menu script
-/rigsystem/platforms/*/*/scripts/dagMenuProc.mel
-
 # Python bytecode
 __pycache__/
 *.py[cod]
