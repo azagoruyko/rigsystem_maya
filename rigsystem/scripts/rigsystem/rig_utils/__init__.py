@@ -10,3 +10,4 @@ from . import (
     plane,
     skinCluster
 )
+from .anim import isAnimated

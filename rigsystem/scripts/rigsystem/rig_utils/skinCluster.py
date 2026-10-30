@@ -2,26 +2,17 @@ import json
 
 import maya.api.OpenMaya as om
 import maya.api.OpenMayaAnim as oma
-import maya.cmds as cmds
-import pymel.core as pm
 
-def getMObject(nodeName):
-    """Return an MObject for the given dependency node name."""
-    sel = om.MSelectionList()
-    sel.add(nodeName)
-    return sel.getDependNode(0)
+from .. import proxy
 
-def getMDagPath(nodeName):
-    """Return an MDagPath for the given DAG node name."""
-    sel = om.MSelectionList()
-    sel.add(nodeName)
-    return sel.getDagPath(0)
+cmds = proxy.cmds
 
 def duplicateSkinMesh(srcSkinMesh):
     """Duplicate a skinned mesh and copy its skin weights."""
-    destSkinMesh = pm.duplicate(srcSkinMesh, n=srcSkinMesh + "_copy", rc=True)[0]
+    srcSkinMesh = str(srcSkinMesh)
+    destSkinMesh = cmds.duplicate(srcSkinMesh, n=f"{srcSkinMesh}_copy", rc=True)[0]
     srcSkin = SkinClusterHelper(srcSkinMesh)
-    pm.skinCluster(destSkinMesh, srcSkin.getInfluences(), tsb=True)
+    cmds.skinCluster(srcSkin.getInfluences(), destSkinMesh, tsb=True)
     destSkin = SkinClusterHelper(destSkinMesh)
     destSkin.setSkinWeights(srcSkin.getSkinWeights())
     destSkin.setDqWeights(srcSkin.getDqWeights())
@@ -31,22 +22,24 @@ def duplicateSkinMesh(srcSkinMesh):
 
 def moveSkinToParentBones():
     """Move selected joints' skin weights to their parent joints."""
-    joints = pm.ls(sl=True, type="joint")
+    joints = cmds.ls(sl=True, type="joint") or []
     if not joints:
-        pm.warning("Select joints to move skin weights from.")
+        cmds.warning("Select joints to move skin weights from.")
         return
 
-    joints.sort(key=lambda joint: len(joint.getAllParents()), reverse=True)
+    jointNodes = dict(zip(joints, proxy.nodes(joints)))
+    joints.sort(key=lambda joint: len(jointNodes[joint].getAllParents()), reverse=True)
     skinClusters = {}
 
     for joint in joints:
-        parent = joint.getParent()
-        if not isinstance(parent, pm.nodetypes.Joint):
-            pm.warning("Joint '{}' has no joint parent. Skipping.".format(joint.name()))
+        parent = jointNodes[joint].getParent(type="joint")
+        if not parent:
+            cmds.warning(f"Joint '{joint}' has no joint parent. Skipping.")
             continue
 
-        for skinCluster in set(joint.listConnections(type="skinCluster")):
-            skinClusters.setdefault(skinCluster.name(), []).append(joint)
+        skinClusters = proxy.node(joint).listConnections(type="skinCluster")
+        for skinCluster in {str(node) for node in skinClusters}:
+            skinClusters.setdefault(skinCluster, []).append(joint)
 
     for skinClusterName, skinJoints in skinClusters.items():
         helper = SkinClusterHelper(skinClusterName)
@@ -55,20 +48,24 @@ def moveSkinToParentBones():
         if not skinJoints:
             continue
 
-        missingParents = list({joint.getParent() for joint in skinJoints
-                               if helper.getInfluencePhysicalIndex(joint.getParent()) is None})
+        parents = {
+            joint: node.getParent(type="joint")
+            for joint, node in zip(skinJoints, proxy.nodes(skinJoints))
+        }
+        missingParents = list({str(parent) for parent in parents.values()
+                               if helper.getInfluencePhysicalIndex(parent) is None})
         if missingParents:
-            pm.skinCluster(skinClusterName, e=True, ai=missingParents, wt=0)
+            cmds.skinCluster(skinClusterName, e=True, ai=missingParents, wt=0)
             helper = SkinClusterHelper(skinClusterName)
 
         weights = helper.getSkinWeights()
         for joint in skinJoints:
             childIndex = helper.getInfluencePhysicalIndex(joint)
-            parentIndex = helper.getInfluencePhysicalIndex(joint.getParent())
+            parentIndex = helper.getInfluencePhysicalIndex(parents[joint])
             weights.mergeInfluences(childIndex, parentIndex)
 
         helper.setSkinWeights(weights)
-        pm.skinCluster(skinClusterName, e=True, ri=skinJoints)
+        cmds.skinCluster(skinClusterName, e=True, ri=skinJoints)
 
 
 def getAllComponents(dagPath):
@@ -132,29 +129,36 @@ class SkinWeights:
         self._numInf = numInf
         self._numVertices = int(len(weights) / self._numInf)
 
+
     def numInfluences(self):
         """Return number of influences per vertex."""
         return self._numInf
+
 
     def numVertices(self):
         """Return number of vertices represented in this data."""
         return self._numVertices
 
+
     def copy(self):
         """Return a shallow copy of this SkinWeights object."""
         return SkinWeights(self.weights[:], self._numInf)
+
 
     def getVertexWeight(self, vertexId, infId):
         """Return weight value for one vertex-influence pair."""
         return self.weights[vertexId * self._numInf + infId]
 
+
     def setVertexWeight(self, vertexId, infId, weight):
         """Set weight value for one vertex-influence pair."""
         self.weights[vertexId * self._numInf + infId] = weight
 
+
     def getVertexWeights(self, vertexId):
         """Return all influence weights for a vertex."""
         return self.weights[vertexId * self._numInf:(vertexId + 1) * self._numInf]
+
 
     def setVertexWeights(self, vertexId, weights):
         """Set all influence weights for a vertex."""
@@ -162,9 +166,11 @@ class SkinWeights:
         for i, w in enumerate(weights):
             self.weights[vertexId * self._numInf + i] = w
 
+
     def getInfluenceWeights(self, infId):
         """Return all vertex weights for one influence."""
         return list(self.weights)[infId::self._numInf]
+
 
     def setInfluenceWeights(self, infId, weights):
         """Set all vertex weights for one influence."""
@@ -172,20 +178,24 @@ class SkinWeights:
         for i, w in enumerate(weights):
             self.weights[i * self._numInf + infId] = w
 
+
     def clearInfluenceWeights(self, infId):
         """Zero all weights for one influence."""
         for i in range(self._numVertices):
             self.weights[i * self._numInf + infId] = 0
 
+
     def clearWeights(self):
         """Zero all stored skin weights."""
         self.weights = [0] * len(self.weights)
+
 
     def mergeInfluences(self, srcInfId, destInfId):
         """Accumulate source influence weights into destination influence."""
         for i in range(self._numVertices):
             self.weights[i * self._numInf + destInfId] += self.weights[i * self._numInf + srcInfId]
             self.weights[i * self._numInf + srcInfId] = 0
+
 
     def merge(self, otherSkinWeights, alpha=1.0):
         """Add weighted values from another SkinWeights instance."""
@@ -202,9 +212,11 @@ class SkinWeights:
         for i in range(len(self.weights)):
             self.weights[i] += alphaWeights[i] * otherSkinWeights.weights[i]
 
+
     def getUnusedInfluences(self, threshold=1e-4):
         """Return influence indices whose total weight is below threshold."""
         return [i for i in range(self._numInf) if sum(self.getInfluenceWeights(i)) < threshold]
+
 
     def normalize(self):
         """Normalize vertex weights so each vertex sums to one."""
@@ -214,9 +226,11 @@ class SkinWeights:
                 for j in range(self._numInf):
                     self.weights[i * self._numInf + j] /= total
 
+
     def getAffectedIndices(self, infId):
         """Return vertex indices affected by the given influence."""
         return [i for i in range(self._numVertices) if self.getVertexWeight(i, infId) > 1e-4]
+
 
     def pruneSmallWeights(self, threshold=1e-3):
         """Zero weights below the provided threshold."""
@@ -224,6 +238,7 @@ class SkinWeights:
             for j in range(self._numInf):
                 if self.weights[i * self._numInf + j] < threshold:
                     self.weights[i * self._numInf + j] = 0
+
 
     def setMaxInfluence(self, maxInf):
         """Clamp each vertex to at most maxInf active influences."""        
@@ -257,9 +272,11 @@ class SkinWeightsUndoStack:
             cls._cache[skinName] = []
         cls._cache[skinName].append((skinWeights, dqWeights))
 
+
     @classmethod
     def canUndo(cls, skinName):
         return skinName in cls._cache and len(cls._cache[skinName]) > 0
+
 
     @classmethod
     def undo(cls, skinName):
@@ -275,47 +292,57 @@ class SkinWeightsUndoStack:
 class SkinClusterHelper:
     def __init__(self, obj):
         """Wrap MFnSkinCluster access for a mesh or skinCluster node."""
-        if pm.objectType(obj) == "skinCluster":
-            self._skinFn = oma.MFnSkinCluster(getMObject(obj))
-            outGeom = pm.PyNode(obj).getOutputGeometry()[0]
-            self._objDagPath = getMDagPath(outGeom.getParent().name())
+        obj = str(obj)
+        if cmds.nodeType(obj) == "skinCluster":
+            self._skinFn = oma.MFnSkinCluster(proxy.node(obj).mobject)
+            outGeom = cmds.skinCluster(obj, q=True, geometry=True)[0]
+            self._objDagPath = proxy.node(outGeom).dagPath
         else:
-            self._objDagPath = getMDagPath(str(obj))
-            self._skinFn = oma.MFnSkinCluster(getMObject(pm.mel.eval("findRelatedSkinCluster " + obj)))
+            self._objDagPath = proxy.node(obj).dagPath
+            skinClusters = cmds.ls(cmds.listHistory(obj) or [], type="skinCluster") or []
+            self._skinFn = oma.MFnSkinCluster(proxy.node(skinClusters[0]).mobject)
+
 
     def mesh(self):
         """Return the mesh path name associated with the skin cluster."""
         return self._objDagPath.partialPathName()
 
+
     def node(self):
         """Return the skinCluster node name."""
         return self._skinFn.name()
 
+
     def getInfluenceLogicalIndex(self, inf):
         """Return logical influence index for the given influence."""
-        infDagPath = getMDagPath(str(inf))
+        infDagPath = proxy.node(inf).dagPath
         if infDagPath in self._skinFn.influenceObjects():
             return self._skinFn.indexForInfluenceObject(infDagPath)
 
+
     def getInfluencePhysicalIndex(self, inf):
         """Return physical influence index for the given influence."""
-        infDagPath = getMDagPath(str(inf))
+        infDagPath = proxy.node(inf).dagPath
         for i, infNode in enumerate(self._skinFn.influenceObjects()):
             if infNode == infDagPath:
                 return i
 
+
     def getInfluences(self):
         """Return influence names used by this skin cluster."""
         return [inf.partialPathName() for inf in self._skinFn.influenceObjects()]
+
 
     def getSkinWeights(self):
         """Return full skin weights wrapped as SkinWeights."""
         weights, numInf = self._skinFn.getWeights(self._objDagPath, om.MObject())
         return SkinWeights(weights, numInf)
 
+
     def getInfluenceWeights(self, inf):
         """Return vertex weights for one influence."""
         return self.getSkinWeights().getInfluenceWeights(self.getInfluencePhysicalIndex(inf))
+
 
     def setInfluenceWeights(self, inf, weights):
         """Set vertex weights for one influence."""
@@ -323,11 +350,13 @@ class SkinClusterHelper:
         skinWeights.setInfluenceWeights(self.getInfluencePhysicalIndex(inf), weights)
         self.setSkinWeights(skinWeights)
 
+
     def clearInfluenceWeights(self, inf):
         """Clear all weights for one influence."""
         skinWeights = self.getSkinWeights()
         skinWeights.clearInfluenceWeights(self.getInfluencePhysicalIndex(inf))
         self.setSkinWeights(skinWeights)
+
 
     def setSkinWeights(self, skinWeights):
         """Write SkinWeights data back to the skin cluster."""
@@ -339,10 +368,12 @@ class SkinClusterHelper:
         weights = om.MDoubleArray(skinWeights.weights)
         self._skinFn.setWeights(self._objDagPath, components, influences, weights)
 
+
     def getDqWeights(self):
         """Return dual quaternion weights for all vertices."""
         components = getAllComponents(self._objDagPath)
         return list(self._skinFn.getBlendWeights(self._objDagPath, components))
+
 
     def setDqWeights(self, dqWeights):
         """Set dual quaternion weights for all vertices."""
@@ -351,10 +382,12 @@ class SkinClusterHelper:
         mDqWeights = om.MDoubleArray(dqWeights)
         self._skinFn.setBlendWeights(self._objDagPath, components, mDqWeights)
 
+
     def clearDqWeights(self):
         """Zero all stored dual quaternion weights."""
         count = om.MItGeometry(self._objDagPath).count
         self.setDqWeights([0.0] * count)
+
 
     def fillDqWeights(self, value):
         """Fill all dual quaternion weights with a constant value."""
@@ -362,14 +395,17 @@ class SkinClusterHelper:
         count = om.MItGeometry(self._objDagPath).count
         self.setDqWeights([value] * count)
 
+
     def getSkinningMethod(self):
         """Return skinning method attribute (0=Linear, 1=Dual Quaternion, 2=Weight Blended)."""
-        return cmds.getAttr(self.node() + ".skinningMethod")
+        return proxy.node(self.node()).skinningMethod.get()
+
 
     def setSkinningMethod(self, method):
         """Set skinning method attribute (0=Linear, 1=Dual Quaternion, 2=Weight Blended)."""
         assert method in [0, 1, 2], "Skinning method must be 0 (Linear), 1 (Dual Quaternion), or 2 (Weight Blended)"
-        cmds.setAttr(self.node() + ".skinningMethod", method)
+        proxy.node(self.node()).skinningMethod.set(method)
+
 
     def getUnusedInfluences(self):
         """Return influence names with no significant contribution."""
@@ -377,20 +413,26 @@ class SkinClusterHelper:
         influences = self.getInfluences()
         return [influences[idx] for idx in skinWeights.getUnusedInfluences()]
 
+
     def updateBindMatrices(self):
         """Update bindPreMatrix values from current influence matrices."""
-        node = pm.PyNode(self.node())
+        node = proxy.node(self.node())
         for inf in self.getInfluences():
             idx = self.getInfluenceLogicalIndex(inf)
-            node.bindPreMatrix[idx].set(node.matrix[idx].get().inverse())
+            matrix = om.MMatrix(node.matrix[idx].get()).inverse()
+            node.bindPreMatrix[idx].set(matrix)
+
 
     def gotoBindPose(self):
         """Move influences to stored bind pose matrices."""
-        bindPreMatrix = pm.PyNode(self.node()).bindPreMatrix
-        for j in sorted(self.getInfluences(), key=lambda n: len(pm.PyNode(n).getAllParents())):
+        node = proxy.node(self.node())
+        influences = self.getInfluences()
+        influenceNodes = dict(zip(influences, proxy.nodes(influences)))
+        for j in sorted(influences, key=lambda n: len(influenceNodes[n].getAllParents())):
             idx = self.getInfluenceLogicalIndex(j)
-            m = bindPreMatrix[idx].get().inverse()
-            pm.xform(j, ws=True, m=m)
+            matrix = om.MMatrix(node.bindPreMatrix[idx].get()).inverse()
+            cmds.xform(j, ws=True, m=list(matrix))
+
 
     def toJson(self):
         """Return skin weights as a JSON-serializable mapping."""
@@ -406,7 +448,7 @@ class SkinClusterHelper:
                 if cmds.progressWindow(query=True, isCancelled=True):
                     break
                 progressPercent = int((i / float(numInfs)) * 100)
-                cmds.progressWindow(edit=True, progress=progressPercent, status="Exporting influence: {}".format(inf))
+                cmds.progressWindow(edit=True, progress=progressPercent, status=f"Exporting influence: {inf}")
 
                 weights[inf] = skinWeights.getInfluenceWeights(self.getInfluencePhysicalIndex(inf))
         finally:
@@ -415,6 +457,7 @@ class SkinClusterHelper:
         dqWeights = self.getDqWeights() if self.getSkinningMethod() == 2 else []
 
         return {"weights": weights, "skinningMethod": self.getSkinningMethod(), "dqWeights": dqWeights}
+
         
     def fromJson(self, data):
         """Apply weights from a JSON-style influence mapping."""
@@ -438,7 +481,7 @@ class SkinClusterHelper:
                 if cmds.progressWindow(query=True, isCancelled=True):
                     break
                 progressPercent = int((i / float(numItems)) * 100)
-                cmds.progressWindow(edit=True, progress=progressPercent, status="Importing influence: {}".format(inf))
+                cmds.progressWindow(edit=True, progress=progressPercent, status=f"Importing influence: {inf}")
 
                 if inf in self.getInfluences():
                     skinWeights.setInfluenceWeights(self.getInfluencePhysicalIndex(inf), weights)
@@ -452,10 +495,12 @@ class SkinClusterHelper:
             cmds.progressWindow(endProgress=True)
             SkinWeightsUndoStack.isUndoing = isUndoing
 
+
     def saveToFile(self, filePath):
         """Save skin weights to a JSON file."""
         with open(filePath, "w") as f:
             json.dump(self.toJson(), f)
+
 
     def loadFromFile(self, filePath):
         """Load skin weights from a JSON file."""

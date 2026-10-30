@@ -1,10 +1,12 @@
 import json
 import os
 
-import pymel.api as api
-import pymel.core as pm
+import maya.api.OpenMaya as om
 
-from .general import getColorByName
+from .. import proxy
+from .general import getColorByName, lockTRS
+
+cmds = proxy.cmds
 
 CurvesPath = os.path.join(os.path.dirname(__file__), "curveShapes")
 
@@ -14,59 +16,55 @@ from .naming import findSymmetricName
 
 def unlockTRS(obj):
     """Unlock transform attributes so they can be keyed."""
-    for a in ["tx", "ty", "tz", "t", "rx", "ry", "rz", "r", "sx", "sy", "sz", "s"]:
-        pm.setAttr(obj.attr(a), k=True, l=False)
+    lockTRS(proxy.node(obj), t=0, r=0, s=0, v=None)
 
 
 def shapeParent(objects):
     """Parent shapes of all but the last object to the last; remove intermediate transforms."""
     if not objects or len(objects) == 1:
-        pm.error("Select at least 2 object to make parenting")
-        return
+        cmds.error("Select at least 2 object to make parenting")
 
-    parent = objects[-1]
-    for obj in objects[:-1]:
+    parent = proxy.node(objects[-1])
+    for obj in proxy.nodes(objects[:-1]):
         unlockTRS(obj)
 
-        parent | obj
+        obj = parent | obj
 
-        pm.delete(pm.listRelatives(obj, s=False, type="transform"))
+        children = obj.getChildren(type="transform")
+        if children:
+            cmds.delete(children)
 
-        objShapes = pm.listRelatives(obj, s=True)
-        pm.makeIdentity(obj, apply=True, t=1, r=1, s=1, n=0)
+        objShapes = obj.getShapes()
+        cmds.makeIdentity(obj, apply=True, t=True, r=True, s=True, n=False)
 
-        for i, s in enumerate(objShapes):
-            pm.parent(s, parent, r=True, shape=True)
-            s.rename("{}Shape{}".format(parent, i + 1))
+        for i, shape in enumerate(objShapes):
+            shape = proxy.node(cmds.parent(shape, parent, r=True, shape=True)[0])
+            shapeName = str(parent).rsplit("|", 1)[-1]
+            shape.rename(f"{shapeName}Shape{i + 1}")
 
-        pm.delete(obj)
+        cmds.delete(obj)
 
     return parent
 
 
 def saveCurveData(curve, curveType):
     """Save NURBS curve data to JSON in the curves folder."""
-    curve = pm.PyNode(curve)
-
     data = []
-    for shape in curve.getShapes():
-        curve = api.MFnNurbsCurve(shape.__apimobject__())
+    for shape in proxy.node(curve).getShapes():
+        curveFn = om.MFnNurbsCurve(shape.dagPath)
 
-        cvs = api.MPointArray()
-        curve.getCVs(cvs)
-
-        knots = api.MDoubleArray()
-        curve.getKnots(knots)
+        cvs = curveFn.cvPositions(om.MSpace.kObject)
+        knots = curveFn.knots()
 
         curveData = {}
-        curveData["degree"] = curve.degree()
-        curveData["cvs"] = [[cvs[i].x, cvs[i].y, cvs[i].z] for i in range(cvs.length())]
-        curveData["knots"] = [knots[i] for i in range(knots.length())]
+        curveData["degree"] = curveFn.degree
+        curveData["cvs"] = [[cv.x, cv.y, cv.z] for cv in cvs]
+        curveData["knots"] = list(knots)
 
-        curveForms = {api.MFnNurbsCurve.kOpen: 0,
-                      api.MFnNurbsCurve.kClosed: 1,
-                      api.MFnNurbsCurve.kPeriodic: 2}
-        curveData["form"] = curveForms[curve.form()]
+        curveForms = {om.MFnNurbsCurve.kOpen: 0,
+                      om.MFnNurbsCurve.kClosed: 1,
+                      om.MFnNurbsCurve.kPeriodic: 2}
+        curveData["form"] = curveForms[curveFn.form]
 
         data.append(curveData)
 
@@ -82,40 +80,41 @@ def loadCurveData(curveType):
 
 def createCurveFromData(curveData):
     """Create a NURBS curve from saved curve data dict."""
-    return pm.curve(p=curveData["cvs"], d=curveData["degree"], k=curveData["knots"], per=False)
+    return proxy.node(cmds.curve(p=curveData["cvs"], d=curveData["degree"], k=curveData["knots"], per=False))
 
 
 def makeFromCurve(parent, otherCurve):
     """Duplicate otherCurve, match the duplicate's transform to the source, shape-parent it under parent and return the shapes."""
-    crv = pm.PyNode(otherCurve)
-    dup = crv.duplicate()[0]
+    crv = proxy.node(otherCurve)
+    parent = proxy.node(parent)
+    dup = proxy.node(cmds.duplicate(crv)[0])
     unlockTRS(dup)
-    dup.t.set(crv.t.get())
-    dup.r.set(crv.r.get())
-    dup.s.set(crv.s.get())
+    for attr in ("t", "r", "s"):
+        dup.attr(attr).set(crv.attr(attr).get()[0])
 
     # transfer lineWidth
-    for crvSh, dupSh in zip(crv.getShapes(), dup.getShapes()):
+    crvShapes = crv.getShapes()
+    dupShapes = dup.getShapes()
+    for crvSh, dupSh in zip(crvShapes, dupShapes):
         dupSh.lineWidth.set(crvSh.lineWidth.get())
 
-    return shapeParent([dup, parent]).getShapes()
+    return proxy.node(shapeParent([dup, parent])).getShapes()
 
 
 def makeCurve(name, curveType):
     """Create a curve helper from saved data; set color by left/right side."""
     curvePath = os.path.join(CurvesPath, f"{curveType}.json")
     if not os.path.exists(curvePath):
-        pm.error(f"makeCurve: cannot find '{curveType}' curve type")
-        return
+        cmds.error(f"makeCurve: cannot find '{curveType}' curve type")
 
     curves = [createCurveFromData(d) for d in loadCurveData(curveType)]
     crv = shapeParent(curves) if len(curves) > 1 else curves[0]
 
     color = getColorByName(name)
-    crv.rename(name)
-    for sh in crv.getShapes():
-        sh.overrideEnabled.set(True)
-        sh.overrideColor.set(color)
+    crv = proxy.node(crv).rename(name)
+    for shape in crv.getShapes():
+        shape.overrideEnabled.set(True)
+        shape.overrideColor.set(color)
 
     return crv
 
@@ -125,40 +124,47 @@ def mirrorCurveShape(curve):
     Find opposite curve using naming.findSymmetricName, check topology,
     and mirror CV positions from curve to its opposite counterpart.
     """
-    src = pm.PyNode(curve)
-    if isinstance(src, pm.nt.NurbsCurve):
-        src = src.getParent()
+    srcNode = proxy.node(curve)
+    if srcNode.type() == "nurbsCurve":
+        srcNode = srcNode.getParent(fullPath=True)
+    src = str(srcNode)
 
-    destName = findSymmetricName(src.name())
-    if destName == src.name():
-        pm.warning(f"mirrorCurveShape: No symmetric counterpart name pattern found for '{src.name()}'")
+    destName = findSymmetricName(src)
+    if destName == src:
+        cmds.warning(f"mirrorCurveShape: No symmetric counterpart name pattern found for '{src}'")
         return None
 
-    if not pm.objExists(destName):
-        pm.warning(f"mirrorCurveShape: Opposite curve '{destName}' does not exist")
+    if not cmds.objExists(destName):
+        cmds.warning(f"mirrorCurveShape: Opposite curve '{destName}' does not exist")
         return None
 
-    dest = pm.PyNode(destName)
+    dest = destName
 
-    srcShapes = [s for s in src.getShapes() if not s.isIntermediate() and isinstance(s, pm.nt.NurbsCurve)]
-    destShapes = [s for s in dest.getShapes() if not s.isIntermediate() and isinstance(s, pm.nt.NurbsCurve)]
+    srcNode = proxy.node(src)
+    destNode = proxy.node(dest)
+    srcShapes = srcNode.getShapes(type="nurbsCurve")
+    destShapes = destNode.getShapes(type="nurbsCurve")
 
     if len(srcShapes) != len(destShapes):
-        pm.warning(f"mirrorCurveShape: Shape count mismatch between '{src}' ({len(srcShapes)}) and '{dest}' ({len(destShapes)})")
+        cmds.warning(f"mirrorCurveShape: Shape count mismatch between '{src}' ({len(srcShapes)}) and '{dest}' ({len(destShapes)})")
         return None
 
     for sShape, dShape in zip(srcShapes, destShapes):
-        if sShape.numCVs() != dShape.numCVs():
-            pm.warning(f"mirrorCurveShape: Topology mismatch - CV count differs between '{sShape}' ({sShape.numCVs()}) and '{dShape}' ({dShape.numCVs()})")
+        srcCVs = sShape.controlPoints.get(size=True)
+        destCVs = dShape.controlPoints.get(size=True)
+        if srcCVs != destCVs:
+            cmds.warning(f"mirrorCurveShape: Topology mismatch - CV count differs between '{sShape}' ({srcCVs}) and '{dShape}' ({destCVs})")
             return None
-        if sShape.degree() != dShape.degree():
-            pm.warning(f"mirrorCurveShape: Topology mismatch - Degree differs between '{sShape}' ({sShape.degree()}) and '{dShape}' ({dShape.degree()})")
+        srcDegree = sShape.degree.get()
+        destDegree = dShape.degree.get()
+        if srcDegree != destDegree:
+            cmds.warning(f"mirrorCurveShape: Topology mismatch - Degree differs between '{sShape}' ({srcDegree}) and '{dShape}' ({destDegree})")
             return None
 
-    for sShape, dShape in zip(srcShapes, destShapes):
-        for i in range(sShape.numCVs()):
-            p = pm.xform(f"{sShape}.cv[{i}]", q=True, ws=True, t=True)
-            p[0] *= -1.0
-            pm.xform(f"{dShape}.cv[{i}]", ws=True, t=p)
+    for sourceShape, destinationShape in zip(srcShapes, destShapes):
+        for i in range(sourceShape.controlPoints.get(size=True)):
+            point = cmds.xform(f"{sourceShape}.cv[{i}]", q=True, ws=True, t=True)
+            point[0] *= -1.0
+            cmds.xform(f"{destinationShape}.cv[{i}]", ws=True, t=point)
 
     return dest

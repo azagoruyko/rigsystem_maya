@@ -1,59 +1,65 @@
 import maya.cmds as cmds
-import pymel.core as pm
+import maya.api.OpenMaya as om
+import maya.api.OpenMayaAnim as oma
+
+from rigsystem import proxy
    
 NAME = "selectionGizmo"
 
 def setWorldMatrixWithoutUndo(node, wm):
-    nodePath = node.__apimdagpath__()
-    lm = wm * nodePath.exclusiveMatrixInverse() # make local matrix    
+    nodePath = proxy.node(node).dagPath
+    lm = om.MMatrix(wm) * nodePath.exclusiveMatrixInverse() # make local matrix
     
-    if isinstance(node, pm.nt.Joint):
-        joInv = node.getOrientation().asMatrix().inverse()
+    if cmds.nodeType(node) == "joint":
+        joInv = oma.MFnIkJoint(nodePath).orientation(asQuaternion=True).asMatrix().inverse()
         m = lm * joInv # consider jointOrient if any
-        m.a30 = lm.a30
-        m.a31 = lm.a31
-        m.a32 = lm.a32
+        m[12], m[13], m[14] = lm[12], lm[13], lm[14]
     else:
         m = lm        
     
-    pm.api.MFnTransform(nodePath).set(pm.api.MTransformationMatrix(m)) 
+    om.MFnTransform(nodePath).setTransformation(om.MTransformationMatrix(m))
+
 
 def gizmoChange(msg, plug, otherPlug, data):
-    if msg & pm.api.MNodeMessage.kAttributeSet:
-        gizmoMat = data["gizmo"].wm.get()
+    if msg & om.MNodeMessage.kAttributeSet:
+        gizmoMat = om.MMatrix(proxy.plug(f"{data['gizmo']}.worldMatrix[0]").get())
         for ctrl, offset in zip(data["controls"], data["offsets"]):
             setWorldMatrixWithoutUndo(ctrl, offset*gizmoMat)
+
     
 def removeGizmoCallback(callbackId):
     """Remove the gizmo attribute callback and persistent selection scriptJob (scene change)."""
-    pm.api.MMessage.removeCallback(callbackId)
+    om.MMessage.removeCallback(callbackId)
+
 
 def makeGizmo():
-    selected = pm.selected(type="transform")
+    selected = cmds.ls(sl=True, type="transform", long=True) or []
     if not selected:
-        pm.warning("Select controls")
+        cmds.warning("Select controls")
         return
 
-    if pm.objExists(NAME):
-        pm.delete(NAME)
+    if cmds.objExists(NAME):
+        cmds.delete(NAME)
 
-    center = pm.dt.Vector()
+    center = om.MVector()
     for ctrl in selected:
-        center += ctrl.getTranslation("world")
+        center += om.MVector(cmds.xform(ctrl, q=True, ws=True, t=True))
     center /= len(selected)
     
-    gizmo = pm.createNode("transform", n=NAME)
-    gizmo.hiddenInOutliner.set(True)
+    gizmo = cmds.createNode("transform", n=NAME)
+    proxy.node(gizmo).hiddenInOutliner.set(True)
 
-    pm.api.MFnTransform(gizmo.__apimdagpath__()).setTranslation(center, pm.api.MSpace.kWorld) # set pos without undo
+    gizmoPath = proxy.node(gizmo).dagPath
+    om.MFnTransform(gizmoPath).setTranslation(center, om.MSpace.kWorld) # set pos without undo
     
-    offsets = [ctrl.wm.get() * gizmo.wim.get() for ctrl in selected]
+    gizmoInverse = om.MMatrix(proxy.plug(f"{gizmo}.worldInverseMatrix[0]").get())
+    offsets = [om.MMatrix(proxy.plug(f"{ctrl}.worldMatrix[0]").get()) * gizmoInverse for ctrl in selected]
     
     data = {"gizmo": gizmo, "controls": selected, "offsets": offsets}
-    callbackId = pm.api.MNodeMessage.addAttributeChangedCallback(gizmo.__apimobject__(), gizmoChange, data)
+    callbackId = om.MNodeMessage.addAttributeChangedCallback(gizmoPath.node(), gizmoChange, data)
     
-    pm.scriptJob(e=["NewSceneOpened", pm.Callback(removeGizmoCallback, callbackId)], ro=True)
-    pm.scriptJob(e=["SceneOpened", pm.Callback(removeGizmoCallback, callbackId)], ro=True)
+    cmds.scriptJob(e=["NewSceneOpened", lambda *args: removeGizmoCallback(callbackId)], ro=True)
+    cmds.scriptJob(e=["SceneOpened", lambda *args: removeGizmoCallback(callbackId)], ro=True)
     
     cmds.setToolTo('moveSuperContext')
     print("Gizmo created")
