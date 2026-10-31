@@ -1,10 +1,12 @@
 <module name="MakeJointBox" muted="0" uid="646f40fb76584fa1bd5e104aa8416978">
 <run><![CDATA[import maya.cmds as cmds
 import maya.mel as mel
-import pymel.core as pm
 import maya.api.OpenMaya as om
+from rigsystem import proxy
 from rigsystem.rig_utils import skinCluster as skin
 import math
+
+cmds = proxy.cmds
 
 IS_RETOPO_AVAILABLE = cmds.about(api=True) >= 20230000
 
@@ -45,16 +47,15 @@ def createMeshJointPatch(mesh, jointNames, threshold=0.1):
     Uses Maya API (OpenMaya) for high performance on dense meshes.
     
     Args:
-        mesh (str or PyNode): The source mesh with a skinCluster.
+        mesh (str or proxy.Node): The source mesh with a skinCluster.
         jointNames (list or str): A list of joint names to extract weights from.
         threshold (float): Minimum weight required to include a vertex.
         
     Returns:
-        pm.nt.Transform: The created patch mesh.
+        proxy.Node: The created patch mesh.
     """
-    # Ensure mesh is a PyNode for high-level operations
-    mesh = pm.PyNode(mesh)
-    if isinstance(jointNames, (str, unicode) if 'unicode' in globals() else str):
+    mesh = proxy.node(mesh)
+    if isinstance(jointNames, str):
         jointNames = [jointNames]
     
     # Get skin cluster helper
@@ -119,12 +120,14 @@ def createMeshJointPatch(mesh, jointNames, threshold=0.1):
             return
         
         # Duplicate mesh
-        patchMesh = pm.duplicate(mesh, n="{}_patch".format(mesh.nodeName()))[0]
+        patchMesh = proxy.node(cmds.duplicate(
+            str(mesh), n="{}_patch".format(str(mesh).rsplit("|", 1)[-1])
+        )[0])
         if patchMesh.getParent():
-            patchMesh.setParent(world=True)
+            cmds.parent(str(patchMesh), world=True)
 
         # Get all faces
-        numFaces = patchMesh.numFaces()
+        numFaces = cmds.polyEvaluate(str(patchMesh), face=True)
         numToKeep = len(faceIndices)
         
         if numToKeep < numFaces:
@@ -140,16 +143,18 @@ def createMeshJointPatch(mesh, jointNames, threshold=0.1):
                 cmds.progressWindow(edit=True, progress=85, status='Deleting unnecessary faces...')
             
             # Maya's internal inversion and deletion are extremely fast
-            pm.select(keepRanges, replace=True)
-            pm.mel.eval('InvertSelection;')
-            pm.delete()
+            cmds.select(keepRanges, replace=True)
+            mel.eval('InvertSelection;')
+            cmds.delete()
         
         # Cleanup history and wrap in PyNode
-        pm.delete(patchMesh, ch=True)
+        cmds.delete(str(patchMesh), ch=True)
         
         # Rename specifically if only one joint provided
         if len(jointNames) == 1:
-            patchMesh.rename("{}_{}_patch".format(mesh.nodeName(), jointNames[0]))
+            patchMesh.rename(
+                "{}_{}_patch".format(str(mesh).rsplit("|", 1)[-1], jointNames[0])
+            )
         
         if showProgress:
             cmds.progressWindow(edit=True, progress=100, status='Patch created.')
@@ -280,7 +285,7 @@ def createBoundingBox(selection=None, density=1):
         density (int, optional): Number of subdivisions in X, Y, and Z axes. Defaults to 1.
     """
     if not selection:
-        selection = pm.selected(flatten=True)
+        selection = cmds.ls(selection=True, flatten=True) or []
     
     if not selection:
         warning("Nothing selected! Please select a mesh or vertices.")
@@ -291,7 +296,7 @@ def createBoundingBox(selection=None, density=1):
     for item in selection:
         try:
             # Handle PyNode objects or strings
-            name = item.name() if hasattr(item, 'name') else str(item)
+            name = str(item)
             selList.add(name)
         except Exception:
             # Skip invalid selection items
@@ -377,14 +382,16 @@ def createBoundingBox(selection=None, density=1):
     # World center = centroid + local_center rotated by our axes
     worldCenter = centroid + (vecX * localCenter.x + vecY * localCenter.y + vecZ * localCenter.z)
     
-    # Create the cube with PyMEL
+    # Create the cube.
     boxName = "orientedBoundingBox_GEO"
     if len(selection) == 1:
-        # Use PyMEL nodeName if available
-        cleanName = selection[0].nodeName() if hasattr(selection[0], 'nodeName') else str(selection[0]).split('|')[-1]
+        cleanName = str(selection[0]).split('|')[-1]
         boxName = "{}_OOBB".format(cleanName)
 
-    newBox, boxShape = pm.polyCube(w=width, h=height, d=depth, sx=density, sy=density, sz=density, name=boxName)
+    newBox = proxy.node(cmds.polyCube(
+        w=width, h=height, d=depth, sx=density, sy=density, sz=density,
+        name=boxName,
+    )[0])
     
     # Build transformation matrix for the box
     matList = [
@@ -394,23 +401,22 @@ def createBoundingBox(selection=None, density=1):
         worldCenter.x, worldCenter.y, worldCenter.z, 1.0
     ]
     
-    # Apply rotation and position using PyMEL xform
-    pm.xform(newBox, matrix=matList, worldSpace=True)
-    pm.select(newBox)
+    cmds.xform(str(newBox), matrix=matList, worldSpace=True)
+    cmds.select(str(newBox))
     
     return newBox
 
 
 def conformMesh(deformMesh, liveMesh, offset=0.2):
-    pm.select(liveMesh)
-    pm.makeLive()
-    pm.select(deformMesh)
+    cmds.select(str(liveMesh))
+    cmds.makeLive()
+    cmds.select(str(deformMesh))
 
-    pm.mel.eval('optionVar -iv polyConformAlongNormals 0') 
-    pm.mel.eval('optionVar -fv polyConformOffset {}'.format(offset)) 
-    pm.mel.eval('performPolyConform 0;')
+    mel.eval('optionVar -iv polyConformAlongNormals 0')
+    mel.eval('optionVar -fv polyConformOffset {}'.format(offset))
+    mel.eval('performPolyConform 0;')
     
-    pm.makeLive(none=True)
+    cmds.makeLive(none=True)
     
 
 def applyDeltaMushSmooth(mesh):
@@ -443,38 +449,42 @@ def makeJointBox(mesh, joints, offset=0.1, density=3, targetFaceCount=None, skin
         
     bbox = createBoundingBox([patchMesh], density)
     if not bbox:
-        pm.delete(patchMesh)
+        cmds.delete(str(patchMesh))
         return
 
     conformMesh(bbox, patchMesh, offset)
-    pm.delete(patchMesh)
+    cmds.delete(str(patchMesh))
     
     # Set the local origin of the mesh to the bone position
     # so that when you zero the transforms, it goes to world origin
-    bonePos = pm.xform(joints[0], q=True, ws=True, t=True)
-    pm.xform(bbox, pivots=bonePos, ws=True)
+    bonePos = cmds.xform(str(joints[0]), q=True, ws=True, t=True)
+    cmds.xform(str(bbox), pivots=bonePos, ws=True)
 
-    tempGrp = pm.createNode("transform")
-    pm.xform(tempGrp, ws=True, t=bonePos)
+    tempGrp = proxy.create("transform")
+    cmds.xform(str(tempGrp), ws=True, t=bonePos)
     tempGrp | bbox
-    pm.makeIdentity(bbox, apply=True, t=True, r=True, s=True, n=0)
-    pm.parent(bbox, world=True)
-    pm.delete(tempGrp)
+    cmds.makeIdentity(str(bbox), apply=True, t=True, r=True, s=True, n=0)
+    cmds.parent(str(bbox), world=True)
+    cmds.delete(str(tempGrp))
 
     if targetFaceCount:
         retopoMesh(bbox, targetFaceCount)
     else:
         applyDeltaMushSmooth(bbox)
 
-    pm.parentConstraint(joints[0] if len(joints) > 1 else joints, bbox, mo=True)
+    cmds.parentConstraint(
+        str(joints[0]) if len(joints) > 1 else [str(joint) for joint in joints],
+        str(bbox),
+        mo=True,
+    )
 
     # Set the final name according to the format: [mesh]_[joints]_jointBox
-    jntNames = [jnt.nodeName() for jnt in joints]
+    jntNames = [str(jnt).rsplit("|", 1)[-1] for jnt in joints]
     jntLabel = "_".join(jntNames) + "_" if @joints else ""
     finalName = f"{@mesh}_{jntLabel}jointBox"
     bbox.rename(finalName)
 
-    pm.delete(bbox, ch=True) # Delete history
+    cmds.delete(str(bbox), ch=True) # Delete history
 
     return bbox
 
@@ -482,13 +492,13 @@ meshName = @mesh.strip()
 if not meshName:
     error("Specify a skinned source mesh.")
 
-skinName = mel.eval("findRelatedSkinCluster " + meshName)
+skinName = mel.eval('findRelatedSkinCluster "{}"'.format(meshName))
 if not skinName:
     error("No skinCluster found on {0}.".format(meshName))
 
-joints = [pm.PyNode(name) for name in @joints]
+joints = proxy.nodes(@joints)
 if not joints:
-    joints = pm.PyNode(skinName).influenceObjects()
+    joints = proxy.nodes(cmds.skinCluster(skinName, query=True, influence=True) or [])
 if not joints:
     error("No joints found for {0}.".format(meshName))
 
@@ -507,7 +517,7 @@ box = makeJointBox(
     targetFaceCount=targetFaceCount,
     skinWeightThreshold=@skinWeightThreshold,
 )
-@set_out_jointBox(box.name() if box else "")
+@set_out_jointBox(str(box) if box else "")
 ]]></run>
 <doc><![CDATA[## Summary
 Creates a conformed joint box from the skin weights of the specified joints. It extracts a weighted mesh patch, builds an oriented box, conforms it to the patch, and then retopologizes or smooths it.
@@ -529,7 +539,7 @@ Creates a conformed joint box from the skin weights of the specified joints. It 
 2. Adjust the shape and retopology settings.
 3. Run the module. It creates and constrains the joint box in the Maya scene. Inspect the result and save the scene when ready.]]></doc>
 <attributes>
-<attr name="mesh" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "hair", "placeholder": "Skinned mesh", "buttonCommand": "import pymel.core as pm\nselection = pm.selected()\nif selection:\n    value = selection[0].name()", "buttonLabel": "Set selected", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="mesh" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "hair", "placeholder": "Skinned mesh", "buttonCommand": "import maya.cmds as cmds\nselection = cmds.ls(sl=True) or []\nif selection:\n    value = selection[0]", "buttonLabel": "Set selected", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="joints" template="listBox" category="General" connect=""><![CDATA[{"items": [], "default": "items"}]]></attr>
 <attr name="offset" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": 0.4, "placeholder": "", "buttonCommand": "", "buttonLabel": "", "buttonEnabled": false, "min": 0, "max": 10, "validator": 2, "default": "value"}]]></attr>
 <attr name="density" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": 25, "placeholder": "", "buttonCommand": "", "buttonLabel": "", "buttonEnabled": false, "min": 1, "max": 100, "validator": 1, "default": "value"}]]></attr>

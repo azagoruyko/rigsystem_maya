@@ -1,24 +1,24 @@
 <module name="weightByCurve" type="" muted="0" uid="f155eae22ae348e79787de029d544b57">
-<run><![CDATA[import pymel.core as pm
-import pymel.api as api
+<run><![CDATA[import maya.api.OpenMaya as om
 import maya.cmds as cmds
+from rigsystem import proxy
 
-geo = pm.PyNode(@geo)
-pos = api.MPoint(pm.dt.Point(cmds.xform(@positionFrom, q=True, ws=True, t=True)))
+geo = proxy.node(@geo)
+pos = om.MPoint(cmds.xform(@positionFrom, q=True, ws=True, t=True))
 radius = @radius * @radiusMultiplier
 weightsAttrPattern = @outWeightAttr+"[%d]"
 
-geoFn = api.MFnMesh(geo.__apimdagpath__())
-geoPoints = api.MPointArray()
-geoFn.getPoints(geoPoints, api.MSpace.kWorld)
-N = geoFn.numVertices()
+geoShape = geo.getShapes(type="mesh")[0] if geo.type() == "transform" else geo
+geoFn = om.MFnMesh(geoShape.dagPath)
+geoPoints = geoFn.getPoints(om.MSpace.kWorld)
+N = geoFn.numVertices
 
 weights = [0.0] * N
 
 for i in range(N):
     dist = (pos - geoPoints[i]).length()
     if dist >= radius:
-        cmds.setAttr(weightsAttrPattern%i, 0)
+        cmds.setAttr(weightsAttrPattern % i, 0)
         continue
         
     param = (radius - dist) / float(radius)
@@ -26,7 +26,7 @@ for i in range(N):
     p = evaluateBezierCurveFromX(@curve, param)
     weights[i] = p[1]
     
-    cmds.setAttr(weightsAttrPattern%i, weights[i])
+    cmds.setAttr(weightsAttrPattern % i, weights[i])
 ]]></run>
 <doc><![CDATA[## Summary
 The **weightByCurve** module assigns vertex weights to a mesh based on the distance from a reference point and a fall‑off curve. It calculates a weighted influence for each vertex within a specified radius, using a Bezier curve to shape the fall‑off, and writes the resulting weights to a chosen weight attribute.

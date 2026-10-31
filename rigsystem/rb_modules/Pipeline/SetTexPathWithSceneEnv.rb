@@ -1,24 +1,26 @@
 <module name="setTexPathWithSceneEnv" type="" muted="0" uid="b2cb41b3508b4d0f84d20c9418db2f6d">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 import os
+
+cmds = proxy.cmds
 
 def n_dirname(path, n=0):
     parent = os.path.dirname(path)
     return parent if n <= 0 else n_dirname(parent, n-1)
     
 def createSceneEnvVar(sceneEnvVar, depth=0): # 0-current asset folder, 1-parent folder, etc
-    if pm.objExists(sceneEnvVar):
-        pm.warning("'{}' already exists".format(sceneEnvVar))
+    if cmds.objExists(sceneEnvVar):
+        cmds.warning(f"'{sceneEnvVar}' already exists")
         return
     
-    currentFile = pm.api.MFileIO.currentFile()
-    if currentFile.endswith("untitled"):
+    currentFile = cmds.file(q=True, sceneName=True)
+    if not currentFile:
         warning("Save scene first")        
         return
         
     code = '''
+import os
 import maya.cmds as cmds
-import maya.OpenMaya as om
 
 def n_dirname(path, n=0):
     dirname = lambda path: "/".join(path.split("/")[:-1])                  
@@ -27,28 +29,28 @@ def n_dirname(path, n=0):
     
 secretNode = cmds.ls("$VAR", r=True)
 if secretNode:
-    if cmds.referenceQuery(secretNode, isNodeReferenced=True):         
-        refNode = cmds.referenceQuery(secretNode, rfn=True)
+    if cmds.referenceQuery(secretNode[0], isNodeReferenced=True):
+        refNode = cmds.referenceQuery(secretNode[0], rfn=True)
         refPath = cmds.referenceQuery(refNode, f=True)
     else:
-        refPath = om.MFileIO.currentFile()
+        refPath = cmds.file(q=True, sceneName=True)
                
     path = n_dirname(refPath.replace("\\\\", "/"), $DEPTH)
     os.environ["$VAR"] = path
     print("Set $VAR to '{}'".format(path))'''.replace("$VAR", sceneEnvVar).replace("$DEPTH", str(depth))
        
-    pm.scriptNode(st=1, bs=code, n="sceneEnv_scriptNode", stp="python")        
-    pm.createNode("transform", n=sceneEnvVar) #  make secret node
+    cmds.scriptNode(st=1, bs=code, n="sceneEnv_scriptNode", stp="python")
+    proxy.create("transform", sceneEnvVar, suffix=False) # make secret node
     exec(code) # setup env
         
     # change file textures path_script
-    sceneRoot = os.path.normpath(n_dirname(pm.api.MFileIO.currentFile(), depth))
-    for n in pm.ls(type="file"):
+    sceneRoot = os.path.normpath(n_dirname(currentFile, depth))
+    for n in proxy.nodes(cmds.ls(type="file") or []):
          txPath = os.path.normpath(n.fileTextureName.get())
          if txPath.startswith(sceneRoot):
-            txPath = txPath.replace(sceneRoot, "$"+sceneEnvVar)
+            txPath = txPath.replace(sceneRoot, f"${sceneEnvVar}")
             n.fileTextureName.set(txPath)
-            print("{} => {}".format(n, txPath))
+            print(f"{n} => {txPath}")
 
 createSceneEnvVar(@sceneEnvPath, @depth) # depth=0-current asset folder, 1-parent folder, etc
         ]]></run>

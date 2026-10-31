@@ -15,6 +15,22 @@ def _wrapConnections(connections, kwargs):
     return [resultType(connection) for connection in connections]
 
 
+def _plugIdentity(mplug):
+    """Return an identity that stays stable when a node is renamed."""
+    parts = []
+    current = mplug
+    while True:
+        index = current.logicalIndex() if current.isElement else None
+        parts.append((om.MObjectHandle(current.attribute()), index))
+        if current.isChild:
+            current = current.parent()
+        elif current.isElement:
+            current = current.array()
+        else:
+            break
+    return om.MObjectHandle(mplug.node()), tuple(parts)
+
+
 class Plug:
     """A Maya attribute name with small cmds and API helpers."""
 
@@ -27,6 +43,7 @@ class Plug:
             self._mplug = selection.getPlug(0)
             if self._mplug.isElement and "[" not in str(value).rsplit(".", 1)[-1]:
                 self._mplug = self._mplug.array()
+        self._identity = _plugIdentity(self._mplug)
 
 
     def __str__(self):
@@ -37,6 +54,16 @@ class Plug:
             nodeName = om.MFnDependencyNode(obj).name()
         attribute = self._mplug.name().partition(".")[2]
         return f"{nodeName}.{attribute}"
+
+
+    def __eq__(self, other):
+        if not isinstance(other, Plug):
+            return NotImplemented
+        return self._identity == other._identity
+
+
+    def __hash__(self):
+        return hash(self._identity)
 
 
     def get(self, **kwargs):
@@ -68,16 +95,22 @@ class Plug:
         cmds.connectAttr(str(self), str(plug(destination)), force=force)
 
 
-    def disconnect(self, destination=None):
-        """Disconnect one destination or every incoming and outgoing connection."""
-        if destination is not None:
-            cmds.disconnectAttr(str(self), str(plug(destination)))
+    def disconnect(self, other=None, inputs=True, outputs=True):
+        """Disconnect one connected plug, or every incoming and/or outgoing connection."""
+        if other is not None:
+            other = plug(other)
+            if cmds.isConnected(str(other), str(self)):
+                cmds.disconnectAttr(str(other), str(self))
+            else:
+                cmds.disconnectAttr(str(self), str(other))
             return
 
-        for source in self.inputs():
-            cmds.disconnectAttr(str(source), str(self))
-        for target in self.outputs():
-            cmds.disconnectAttr(str(self), str(target))
+        if inputs:
+            for source in self.inputs():
+                cmds.disconnectAttr(str(source), str(self))
+        if outputs:
+            for target in self.outputs():
+                cmds.disconnectAttr(str(self), str(target))
 
 
     def inputs(self, **kwargs):
@@ -164,6 +197,16 @@ class Node:
         return om.MFnDependencyNode(obj).name()
 
 
+    def __eq__(self, other):
+        if not isinstance(other, Node):
+            return NotImplemented
+        return self._handle == other._handle
+
+
+    def __hash__(self):
+        return self._handle.hashCode()
+
+
     def localName(self):
         """Return the node name without its namespace or DAG path."""
         return om.MFnDependencyNode(self.mobject).name().rsplit(":", 1)[-1]
@@ -231,6 +274,7 @@ class Node:
         """Return direct child nodes, optionally filtered by Maya node type."""
         if type is not None:
             kwargs["type"] = type
+        kwargs.setdefault("fullPath", True)
         children = cmds.listRelatives(str(self), children=True, **kwargs) or []
         return [Node(child) for child in children]
 

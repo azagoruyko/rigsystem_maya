@@ -1,25 +1,31 @@
 <module name="attachToCurve" muted="0" uid="b79ce70fe8fc4009a31219c30b5eb506">
-<run><![CDATA[import pymel.core as pm
-import maya.cmds as cmds
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy
 
-curve = pm.PyNode(@curve)
-transforms = [pm.PyNode(t) for t in @transforms]
+cmds = proxy.cmds
 
-curveShape = curve.getShape() if curve.type() == "transform" else curve
+curve = proxy.node(@curve)
+transforms = proxy.nodes(@transforms)
+
+curveShape = curve.getShapes(type="nurbsCurve")[0] if curve.type() == "transform" else curve
+curveFn = om.MFnNurbsCurve(curveShape.dagPath)
 
 for t in transforms:
-    pos = pm.xform(t, q=True, ws=True, t=True)
-    
-    cl = curve.closestPoint(pos)
-    param = curve.getParamAtPoint(cl)
+    position = om.MPoint(cmds.xform(str(t), q=True, ws=True, t=True))
+    closest = curveFn.closestPoint(position, 1e-6, om.MSpace.kWorld)
+    param = curveFn.getParamAtPoint(closest, 1e-6, om.MSpace.kWorld)
 
     # Create pointOnCurveInfo to drive position
-    poci = pm.createNode("pointOnCurveInfo", n=t.name() + "_pointOnCurveInfo")
+    poci = proxy.create(
+        "pointOnCurveInfo", f"{t}"
+    )
     curveShape.worldSpace[0] >> poci.inputCurve
     poci.parameter.set(param)
     poci.turnOnPercentage.set(False)
     
-    pmm = pm.createNode("pointMatrixMultDL", n=t.name()+"_parentInverse_pointMatrixMultDL")
+    pmm = proxy.create(
+        "pointMatrixMultDL", f"{t}_parentInverse"
+    )
     poci.position >> pmm.inPoint
     t.parentInverseMatrix >> pmm.inMatrix    
     pmm.output >> t.translate

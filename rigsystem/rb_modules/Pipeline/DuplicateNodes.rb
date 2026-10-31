@@ -1,18 +1,19 @@
 <module name="duplicateNodes" muted="0" uid="76285d99838a4e2081ca89081a4ad5fc">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
-newNodes = pm.duplicate(@nodes, rc=True, ro=True)
+cmds = proxy.cmds
+newNodes = proxy.nodes(cmds.duplicate(@nodes, rc=True, returnRootsOnly=True))
 out = []
 for i, n in enumerate(newNodes):
-    n.rename(@pattern.format(i=i, type=pm.objectType(n)), old=n)
-    out.append(n.name())
+    n.rename(@pattern.format(i=i, type=n.type()))
+    out.append(str(n))
     
 @set_out_nodes(out)    ]]></run>
 <doc><![CDATA[## Summary  
 Duplicates a list of scene nodes, renames each duplicate using a user‑supplied format string that can include the duplicate index and the node type, and returns the names of the newly created nodes.
 
 ## Inputs  
-- **`nodes`** (`@nodes`): A list of PyMEL node objects (or names) that should be duplicated.  
+- **`nodes`** (`@nodes`): A list of Maya node names or proxy node objects that should be duplicated.
 - **`pattern`** (`@pattern`): A Python format string that may contain the placeholders `{i}` (the duplicate index) and `{type}` (the Maya type of the node, e.g., `transform`, `mesh`). This string is used to rename each duplicated node.
 
 ## Outputs  

@@ -1,15 +1,21 @@
 <module name="CombineSkinnedMeshes" muted="0" uid="631d966020084cd3af2e9802447454e6">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 resultName = "combinedSkinnedMesh"
 
 
 def _getMeshShapeFromNode(node):
-    if pm.nodeType(node) == "mesh":
-        return pm.PyNode(node)
+    node_name = str(node)
+    if cmds.nodeType(node_name) == "mesh":
+        return proxy.node(node_name)
 
-    shapes = pm.listRelatives(node, shapes=True, fullPath=True) or []
-    meshShapes = [shape for shape in shapes if pm.nodeType(shape) == "mesh"]
+    shapes = cmds.listRelatives(node_name, shapes=True, fullPath=True) or []
+    meshShapes = [
+        proxy.node(shape) for shape in shapes
+        if cmds.nodeType(shape) == "mesh"
+    ]
     if not meshShapes:
         return None
 
@@ -21,42 +27,44 @@ def _getMeshShapeFromNode(node):
 
 
 def _getSkinClusterFromMesh(meshShape):
-    history = pm.listHistory(meshShape) or []
-    skinClusters = pm.ls(history, type="skinCluster") or []
-    return skinClusters[0] if skinClusters else None
+    history = cmds.listHistory(str(meshShape)) or []
+    skinClusters = cmds.ls(history, type="skinCluster") or []
+    return proxy.node(skinClusters[0]) if skinClusters else None
 
 
 def _getInfluencesFromSkin(skinCluster):
     try:
-        influences = pm.skinCluster(skinCluster, query=True, influence=True) or []
-    except Exception:
-        influences = pm.listConnections(
-            "{0}.matrix".format(skinCluster),
+        influences = cmds.skinCluster(
+            str(skinCluster), query=True, influence=True
+        ) or []
+    except RuntimeError:
+        influences = cmds.listConnections(
+            "{}.matrix".format(skinCluster),
             source=True,
             destination=False
         ) or []
-    existing = [influence for influence in influences if pm.objExists(influence)]
-    if len(existing) != len(influences):
-        missing = [influence for influence in influences if influence not in existing]
+    existingNames = [influence for influence in influences if cmds.objExists(influence)]
+    existing = [proxy.node(influence) for influence in existingNames]
+    if len(existingNames) != len(influences):
+        missing = [influence for influence in influences if influence not in existingNames]
         if missing:
             warning(
                 "Missing influences were skipped: {0}".format(", ".join(str(influence) for influence in missing))
             )
     return existing
 def _getMaxInfluences(skinCluster):
-    try:
-        return int(pm.getAttr("{0}.maxInfluences".format(skinCluster)))
-    except Exception:
+    if not cmds.objExists("{}.maxInfluences".format(skinCluster)):
         return 1
+    return int(cmds.getAttr("{}.maxInfluences".format(skinCluster)))
 
 
 def _getUniqueName(baseName):
-    if not pm.objExists(baseName):
+    if not cmds.objExists(baseName):
         return baseName
     index = 1
     while True:
         candidate = "{0}_{1}".format(baseName, index)
-        if not pm.objExists(candidate):
+        if not cmds.objExists(candidate):
             return candidate
         index += 1
 
@@ -82,11 +90,13 @@ def _collectSourceInfos(selection):
         if not influences:
             error("SkinCluster has no influences: {0}".format(meshShape))
 
-        meshTransform = pm.listRelatives(meshShape, parent=True, fullPath=True)[0]
+        meshTransform = cmds.listRelatives(
+            str(meshShape), parent=True, fullPath=True
+        )[0]
         meshTransforms.append(meshTransform)
         maxInfluences = max(maxInfluences, _getMaxInfluences(skinCluster))
 
-        vertexCount = pm.polyEvaluate(meshShape, vertex=True)
+        vertexCount = cmds.polyEvaluate(str(meshShape), vertex=True)
         totalVertexCount += vertexCount
         sourceInfos.append({
             "meshShape": meshShape,
@@ -110,7 +120,7 @@ def combineSkinnedMeshes(
     """
     Combine skinned meshes into a single mesh and transfer weights to the combined skin.
     """
-    selection = selection or pm.selected()
+    selection = selection or (cmds.ls(selection=True) or [])
     if not selection:
         error("No mesh inputs provided.")
 
@@ -128,8 +138,8 @@ def combineSkinnedMeshes(
     if keepSources:
         dupRoots = []
         for meshTransform in meshTransforms:
-            dup = pm.duplicate(
-                meshTransform,
+            dup = cmds.duplicate(
+                str(meshTransform),
                 returnRootsOnly=True,
                 inputConnections=False,
                 renameChildren=True
@@ -137,17 +147,17 @@ def combineSkinnedMeshes(
             if not dup:
                 continue
             dupRoot = dup[0]
-            if pm.nodeType(dupRoot) != "transform":
+            if cmds.nodeType(dupRoot) != "transform":
                 continue
-            dupShapes = pm.listRelatives(dupRoot, shapes=True, fullPath=True) or []
+            dupShapes = cmds.listRelatives(dupRoot, shapes=True, fullPath=True) or []
             intermediateShapes = [
                 shape for shape in dupShapes
-                if shape.intermediateObject.get()
+                if cmds.getAttr(shape + ".intermediateObject")
             ]
             if intermediateShapes:
-                pm.delete(intermediateShapes)
+                cmds.delete(intermediateShapes)
             dupRoots.append(dupRoot)
-            duplicateNames.append(dupRoot.longName())
+            duplicateNames.append(dupRoot)
 
         if not dupRoots:
             error("No mesh transforms found in duplicated sources.")
@@ -162,28 +172,28 @@ def combineSkinnedMeshes(
     if not combineShapes:
         error("No mesh shapes found for combine.")
     expectedVtxCount = totalVertexCount
-    combined = pm.polyUnite(combineShapes, ch=False, mergeUVSets=True)[0]
+    combined = cmds.polyUnite(combineShapes, ch=False, mergeUVSets=True)[0]
     combinedShape = _getMeshShapeFromNode(combined)
-    combinedVtxCount = pm.polyEvaluate(combinedShape, vertex=True)
+    combinedVtxCount = cmds.polyEvaluate(str(combinedShape), vertex=True)
 
     if combinedVtxCount != expectedVtxCount:
-        pm.delete(combined)
-        combined = pm.polyUnite(combineTransforms, ch=False, mergeUVSets=True)[0]
+        cmds.delete(combined)
+        combined = cmds.polyUnite(combineTransforms, ch=False, mergeUVSets=True)[0]
         combinedShape = _getMeshShapeFromNode(combined)
-        combinedVtxCount = pm.polyEvaluate(combinedShape, vertex=True)
+        combinedVtxCount = cmds.polyEvaluate(str(combinedShape), vertex=True)
 
     if combinedVtxCount != expectedVtxCount:
-        pm.delete(combined)
+        cmds.delete(combined)
         error("Combined vertex count does not match the source meshes.")
 
-    combined = pm.rename(combined, _getUniqueName(resultName))
+    combined = cmds.rename(combined, _getUniqueName(resultName))
     uniqueInfluences = []
     for info in sourceInfos:
         for influence in info["influences"]:
             if influence not in uniqueInfluences:
                 uniqueInfluences.append(influence)
 
-    pm.skinCluster(
+    cmds.skinCluster(
         uniqueInfluences,
         combined,
         toSelectedBones=True,
@@ -198,7 +208,7 @@ def combineSkinnedMeshes(
     try:
         for index, info in enumerate(sourceInfos):
             sourceShape = info["meshShape"]
-            if not pm.objExists(sourceShape):
+            if not cmds.objExists(str(sourceShape)):
                 vertexOffset += info["vertexCount"]
                 stepProgress(index + 1)
                 continue
@@ -211,8 +221,8 @@ def combineSkinnedMeshes(
                 combined, startIndex, endIndex
             )
 
-            pm.copySkinWeights(
-                sourceTransform,
+            cmds.copySkinWeights(
+                str(sourceTransform),
                 combinedComponent,
                 noMirror=True,
                 surfaceAssociation="closestPoint",
@@ -225,13 +235,13 @@ def combineSkinnedMeshes(
         endProgress()
 
     if keepSources:
-        remainingDuplicates = [name for name in duplicateNames if pm.objExists(name)]
+        remainingDuplicates = [name for name in duplicateNames if cmds.objExists(name)]
         if remainingDuplicates:
-            pm.delete(remainingDuplicates)
+            cmds.delete(remainingDuplicates)
     else:
-        pm.delete(meshTransforms)
+        cmds.delete(meshTransforms)
 
-    pm.select(combined, replace=True)
+    cmds.select(combined, replace=True)
 
     return combined
 

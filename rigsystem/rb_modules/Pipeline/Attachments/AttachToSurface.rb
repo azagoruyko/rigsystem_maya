@@ -1,26 +1,27 @@
 <module name="attachToSurface" muted="0" uid="b21c578b1b144f4e9fe06ec449961b0f">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-surface = pm.PyNode(@surface)
-transforms = [pm.PyNode(t) for t in @transforms]
+cmds = proxy.cmds
+surface = proxy.node(@surface)
+surfaceShape = surface.getShapes(type="nurbsSurface")[0] if surface.type() == "transform" else surface
+transforms = proxy.nodes(@transforms)
 
-cpos = pm.createNode("closestPointOnSurface", n="attachToSurface_cpos_tmp")
-surface.worldSpace >> cpos.inputSurface
+cpos = proxy.create("closestPointOnSurface", "attachToSurface_cpos_tmp", suffix=False)
+surfaceShape.worldSpace[0] >> cpos.inputSurface
 
 for t in transforms:
-	pos = pm.xform(t, q=True, ws=True, t=True)
-	cpos.inPosition.set(pos)
-	u = cpos.parameterU.get()
-	v = cpos.parameterV.get()
+    pos = cmds.xform(str(t), q=True, ws=True, t=True)
+    cpos.inPosition.set(pos)
+    u = cpos.parameterU.get()
+    v = cpos.parameterV.get()
 
-	parent = t.getParent()
-	st = rig_utils.makeSurfaceTransform(t.name(), surface, u, v)
-	if parent:
-		pm.parent(st, parent)
-	pm.parent(t, st)
+    parent = t.getParent()
+    st = rig_utils.makeSurfaceTransform(str(t), surface, u, v)
+    if parent:
+        cmds.parent(str(st), str(parent))
+    cmds.parent(str(t), str(st))
 
-pm.delete(cpos)
+cmds.delete(str(cpos))
 ]]></run>
 <doc><![CDATA[## Summary
 The **attachToSurface** module projects a list of transforms onto a specified NURBS surface and creates a surface‑transform node at each transform’s closest point. Each original transform is then parented under its corresponding surface transform, preserving the original hierarchy.

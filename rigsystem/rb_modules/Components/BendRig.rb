@@ -1,48 +1,49 @@
 <module name="BendRig" muted="0" uid="c936e465689042df9808edc3ab5e712f">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy, rig_utils
 
-point1 = pm.PyNode(@point1)
-point2 = pm.PyNode(@point2)
+cmds = proxy.cmds
+point1 = proxy.node(@point1)
+point2 = proxy.node(@point2)
 
-rotate1 = pm.PyNode(@rotate1)
-rotate2 = pm.PyNode(@rotate2)
+rotate1 = proxy.node(@rotate1)
+rotate2 = proxy.node(@rotate2)
 
-internalParent = pm.PyNode("internal")
-controlsParent = pm.PyNode("controls")
-helpersParent = pm.PyNode("helpers")
+internalParent = proxy.node("internal")
+controlsParent = proxy.node("controls")
+helpersParent = proxy.node("helpers")
 
-mainControl = pm.PyNode("main_control")
+mainControl = proxy.node("main_control")
 
 if @mode == 0:
     scale = rig_utils.getDistance(point1, point2) / 10.0
 
-    @helper = rig_utils.curve.makeCurve(@name + "_helper", "axis")
-    pm.delete(pm.parentConstraint([point1, point2], helper))
+    helper = rig_utils.curve.makeCurve(f"{@name}_helper", "axis")
+    cmds.delete(cmds.parentConstraint([point1, point2], helper))
 
-    @helper.s.set([scale, scale, scale])
-    helpersParent | @helper
-    @set_helper(str(@helper))
+    helper.s.set((scale, scale, scale))
+    helpersParent | helper
+    @set_helper(str(helper))
 
 elif @mode == 1:
-    helper = pm.PyNode(@helper)
-    joints = [pm.PyNode(j) for j in @joints]
+    helper = proxy.node(@helper)
+    joints = proxy.nodes(@joints)
 
     if @updateJointsPos:
         numJoints = len(joints)
-        p1 = point1.getTranslation("world")
-        p2 = point2.getTranslation("world")
+        p1 = om.MVector(cmds.xform(point1, q=True, ws=True, t=True))
+        p2 = om.MVector(cmds.xform(point2, q=True, ws=True, t=True))
         for i in range(numJoints):
             perc = i / float(numJoints)
             pos = p1 + (p2 - p1) * perc
-            joints[i].setTranslation(pos, "world")
+            cmds.xform(joints[i], ws=True, t=(pos.x, pos.y, pos.z))
 
-    startTransform = pm.createNode("transform", n=@name + "_start_transform")
-    endTransform = pm.createNode("transform", n=@name + "_end_transform")
+    startTransform = proxy.create("transform", f"{@name}_start")
+    endTransform = proxy.create("transform", f"{@name}_end")
 
     internalParent | startTransform | endTransform
 
-    plane = pm.nurbsPlane(p=[0, 0, 0],
+    plane = proxy.node(cmds.nurbsPlane(p=[0, 0, 0],
                           ax=[0, 1, 0],
                           w=1,
                           lr=1,
@@ -50,7 +51,7 @@ elif @mode == 1:
                           u=len(@joints),
                           v=1,
                           ch=False,
-                          n=@name + "_plane")[0]
+                          n=f"{@name}_plane")[0])
 
     plane.inheritsTransform.set(False)
     plane.template.set(True)
@@ -58,12 +59,13 @@ elif @mode == 1:
     startTransform | plane
 
     actualNumControls = @numControls + 2
-    lattice = pm.lattice(plane,
+    latticeNames = cmds.lattice(plane,
                          divisions=[actualNumControls, 2, 2],
                          objectCentered=True,
                          ldv=[2, 2, 2],
                          ol=1,
-                         n=@name + "_lattice")
+                         n=f"{@name}_lattice")
+    lattice = proxy.nodes(latticeNames)
                          
     startTransform | lattice[1]
     startTransform | lattice[2]
@@ -75,39 +77,39 @@ elif @mode == 1:
     lattice[2].v.set(False)
 
     controlJoints = []
-    controlsGroup = pm.createNode("transform", n=@name + "_controls", p=controlsParent)
-    pm.parentConstraint(startTransform, controlsGroup, mo=True)
+    controlsGroup = proxy.create("transform", f"{@name}_controls", parent=controlsParent, suffix=False)
+    cmds.parentConstraint(startTransform, controlsGroup, mo=True)
 
     controls = []
     for i in range(actualNumControls):  # both tips must be present
-        transform = pm.createNode("transform", n=@name + "_" + str(i + 1) + "_control_null", p=controlsGroup)
+        transform = proxy.create("transform", f"{@name}_{i + 1}_control_null", parent=controlsGroup, suffix=False)
 
         perc = i / float(actualNumControls - 1)
 
-        pc = pm.pointConstraint(startTransform, endTransform, transform)
+        pc = proxy.node(cmds.pointConstraint(startTransform, endTransform, transform)[0])
         pc.w0.set(1 - perc)
         pc.w1.set(perc)
 
-        oc = pm.orientConstraint(startTransform, endTransform, transform, mo=True, skip=["y", "z"])
+        oc = proxy.node(cmds.orientConstraint(startTransform, endTransform, transform, mo=True, skip=["y", "z"])[0])
         oc.interpType.set(2)  # shortness
         oc.w0.set(1 - perc)
         oc.w1.set(perc)
 
         controlPrefix = "transform" if i == 0 or i == actualNumControls - 1 else "control"
-        control = pm.createNode("transform", n=@name + "_" + str(i + 1) + "_" + controlPrefix, p=transform)
+        control = proxy.create("transform", f"{@name}_{i + 1}_{controlPrefix}", parent=transform, suffix=False)
 
-        j = pm.createNode("joint", n=@name + "_" + str(i + 1) + "_control_joint", ss=True, p=startTransform)
+        j = proxy.create("joint", f"{@name}_{i + 1}_control", parent=startTransform, skipSelection=True)
         j.radius.set(0.5)
-        pm.parentConstraint(control, j)
+        cmds.parentConstraint(control, j)
         controlJoints.append(j)
 
         if i > 0 and i < actualNumControls - 1:
-            hlp = helper.duplicate()[0]
+            hlp = proxy.node(cmds.duplicate(helper)[0])
             s = hlp.s.get()
-            pm.matchTransform(hlp, control)
+            cmds.matchTransform(hlp, control)
             hlp.s.set(s)
             rig_utils.curve.makeFromCurve(control, hlp)
-            pm.delete(hlp)
+            cmds.delete(hlp)
             rig_utils.lockTRS(control, [], [1, 1, 1], [1, 1, 1], 1)
 
             controls.append(control)
@@ -115,29 +117,31 @@ elif @mode == 1:
     startTransform.tx.set(-0.5)
     endTransform.tx.set(1)
 
-    pm.skinCluster(controlJoints, lattice[1], tsb=True, dr=20)
+    cmds.skinCluster(controlJoints, lattice[1], tsb=True, dr=20)
 
-    pm.pointConstraint(point1, startTransform)
-    pm.pointConstraint(point2, endTransform)
+    cmds.pointConstraint(point1, startTransform)
+    cmds.pointConstraint(point2, endTransform)
 
-    pm.orientConstraint(rotate1, startTransform)
-    pm.orientConstraint(rotate2, endTransform, mo=True)
+    cmds.orientConstraint(rotate1, startTransform)
+    cmds.orientConstraint(rotate2, endTransform, mo=True)
 
+    surfaceFn = om.MFnNurbsSurface(plane.getShapes(type="nurbsSurface")[0].dagPath)
     for i in range(len(@joints)):
-        p, u, v = plane.closestPoint(joints[i].getTranslation("world"))
+        position = om.MPoint(cmds.xform(joints[i], q=True, ws=True, t=True))
+        _, u, v = surfaceFn.closestPoint(position, space=om.MSpace.kWorld)
 
-        surfaceTransform = rig_utils.makeSurfaceTransform(@name + "_" + str(i + 1) + "_onSurface", plane, u, v)
+        surfaceTransform = rig_utils.makeSurfaceTransform(f"{@name}_{i + 1}_onSurface", plane, u, v)
         startTransform | surfaceTransform
 
-        pm.parentConstraint(surfaceTransform, @joints[i], mo=True, decompRotationToChild=True)
+        cmds.parentConstraint(surfaceTransform, joints[i], mo=True, decompRotationToChild=True)
 
-    rig_utils.makeSurfaceTransform(@name + "_" + len(@joints) + "_onSurface", plane, 1.0, 0.5) # keep the last one
+    rig_utils.makeSurfaceTransform(f"{@name}_{len(joints)}_onSurface", plane, 1.0, 0.5) # keep the last one
 
     moduleInfo = rig_utils.moduleInfo.ModuleInfo(@name)
     moduleInfo.setAttr("type", "bendRig")
 
     for i, ctrl in enumerate(controls):
-        moduleInfo.setAttr("control" + str(i + 1), ctrl.message)
+        moduleInfo.setAttr(f"control{i + 1}", ctrl.message)
 ]]></run>
 <doc><![CDATA[## Summary
 Creates a flexible bend rig between two target points using a NURBS plane, lattice deformer, and control nulls. In **Helpers** mode it generates a guide curve; in **Run** mode it builds the full rig, positions twist joints, creates control joints, skins the lattice, and publishes a `moduleInfo` node for downstream modules.

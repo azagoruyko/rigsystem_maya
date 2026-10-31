@@ -1,36 +1,36 @@
 <module name="compensationCluster" muted="0" uid="e3bfce6c327f4c16ad859bea29ba1dcb">
-<run><![CDATA[import pymel.core as pm
-import maya.cmds as cmds
-import maya.mel as mel
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 if @type == "cluster":
-    deformer, handle = pm.cluster(n=@name+"_cluster")
-    cmds.disconnectAttr(handle+".clusterTransforms[0]", deformer+".clusterXforms")
+    deformer, handle = proxy.nodes(cmds.cluster(name=f"{@name}_cluster"))
+    deformer.clusterXforms.disconnect(handle.clusterTransforms[0])
 
 elif @type == "softMod":
-    deformer, handle = pm.softMod(n=@name+"_softMod")
-    cmds.disconnectAttr(handle+".softModTransforms[0]", deformer+".softModXforms")
+    deformer, handle = proxy.nodes(cmds.softMod(name=f"{@name}_softMod"))
+    deformer.softModXforms.disconnect(handle.softModTransforms[0])
     deformer.falloffMasking.set(0)
     deformer.falloffAroundSelection.set(1)
 
 deformer.envelope.set(0.99999) # when 1 deformer doesn't work, maybe bug
-cmds.disconnectAttr(handle+".worldMatrix", deformer+".matrix")
+deformer.matrix.disconnect(handle.worldMatrix)
 
-parent = pm.createNode("transform", n=@name+"_compensation_transform")
-child = pm.createNode("transform", n=@name+"_transform", p=parent)
-parent.t.set(pm.xform(handle, q=True, ws=True, rp=True))
-pm.delete(handle)
+parent = proxy.create("transform", f"{@name}_compensation")
+child = proxy.create("transform", f"{@name}", parent=parent)
+parent.t.set(cmds.xform(str(handle), q=True, ws=True, rp=True))
+cmds.delete(str(handle))
 
 def callback():
     child.matrix >> deformer.weightedMatrix
-    parent.wim >> deformer.postMatrix
-    parent.wm >> deformer.preMatrix
+    parent.worldInverseMatrix[0] >> deformer.postMatrix
+    parent.worldMatrix[0] >> deformer.preMatrix
     
-pm.scriptJob(ro=True, e=("idle", callback))
+cmds.scriptJob(runOnce=True, event=("idle", callback))
 
-@set_out_parent(parent.name())
-@set_out_handle(child.name())
-@set_out_deformer(deformer.name())
+@set_out_parent(str(parent))
+@set_out_handle(str(child))
+@set_out_deformer(str(deformer))
 
 ]]></run>
 <doc><![CDATA[## Summary

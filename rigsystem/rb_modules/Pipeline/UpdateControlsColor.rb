@@ -1,9 +1,8 @@
 <module name="updateControlsColor" muted="0" uid="30f854df893a476b83423f05a830ae7d">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-for ctrl in pm.selected(type="transform"):
-    c = rig_utils.getColorByName(ctrl.name())
+for ctrl in proxy.nodes(proxy.cmds.ls(selection=True, type="transform") or []):
+    c = rig_utils.curve.getColorByName(str(ctrl))
     for sh in ctrl.getShapes():
         sh.overrideEnabled.set(True)
         sh.overrideColor.set(c)]]></run>

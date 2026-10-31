@@ -1,45 +1,45 @@
 <module name="Spine" muted="0" uid="c8f6416f3c69439c94231c47ec5f6114">
 <run><![CDATA[import json
-import pymel.core as pm
-import pymel.api as api
-from rigsystem import rig_utils
+import maya.api.OpenMaya as om
+from rigsystem import proxy, rig_utils
 from rigsystem.anim_utils import dynamicParent, switcher
 
+cmds = proxy.cmds
 RotateOrder = 3  # XZY
 
-joints = [pm.PyNode(j) for j in @joints]
+joints = proxy.nodes(@joints)
 
-controlsParent = pm.PyNode("controls")
-internalParent = pm.PyNode("internal")
-othersParent = pm.PyNode("others")
-helpersParent = pm.PyNode("helpers")
+controlsParent = proxy.node("controls")
+internalParent = proxy.node("internal")
+othersParent = proxy.node("others")
+helpersParent = proxy.node("helpers")
 
 if @mode == 0:  # helpers
     scale_val = rig_utils.getDistance(joints[0], joints[-1]) / 3.0
 
-    L_curve = rig_utils.createPathCurve("L_" + @name, joints, spans=@spans)
+    L_curve = rig_utils.createPathCurve(f"L_{@name}", joints, spans=@spans)
     L_curve.t.set(@curveOffset)
 
-    R_curve = rig_utils.createPathCurve("R_" + @name, joints, spans=@spans)
+    R_curve = rig_utils.createPathCurve(f"R_{@name}", joints, spans=@spans)
     R_curve.t.set([-1 * x for x in @curveOffset])
 
-    surface = pm.loft(L_curve, R_curve, n=@name + "_surface", ch=1, u=1, c=0, ar=1, d=3, ss=1, rn=0, po=0, rsn=True)[0]
+    surface = proxy.node(cmds.loft(L_curve, R_curve, n=f"{@name}_surface", ch=1, u=1, c=0, ar=1, d=3, ss=1, rn=0, po=0, rsn=True)[0])
 
-    helpersGrp = pm.createNode("transform", n=@name + "_helpers", p=helpersParent)
-    pm.parentConstraint(joints[0], helpersGrp)
+    helpersGrp = proxy.create("transform", f"{@name}_helpers", parent=helpersParent, suffix=False)
+    cmds.parentConstraint(joints[0], helpersGrp)
     
     # hip helper
     if @makeHipControl:
-        surfaceTransform = rig_utils.makeSurfaceTransform(@name + "_hip", surface, @hipParam, 0.5)
-        hlp = rig_utils.curve.makeCurve(@name + "_hip_control_helper", "diamond")
+        surfaceTransform = rig_utils.makeSurfaceTransform(f"{@name}_hip", surface, @hipParam, 0.5)
+        hlp = rig_utils.curve.makeCurve(f"{@name}_hip_control_helper", "diamond")
         helpersGrp | hlp
 
-        pm.matchTransform(hlp, surfaceTransform)
+        cmds.matchTransform(hlp, surfaceTransform)
         hlp.s.set([scale_val/2, scale_val/2, scale_val/2])
 
-        pm.delete(surfaceTransform)
+        cmds.delete(surfaceTransform)
         rig_utils.lockTRS(hlp, [1,1,1], [1,1,0], [], 1) 
-        @set_h_hip(hlp.name())
+        @set_h_hip(str(hlp))
     
     data = [("fk", "circle", @fkControls, @set_h_fks),
             ("ik", "cube", @ikControls, @set_h_iks),
@@ -47,48 +47,44 @@ if @mode == 0:  # helpers
 
     for kin, helperType, controls, setter in data:
         helpers = []
-        for i, (name, param, _) in enumerate(controls):
-            surfaceTransform = rig_utils.makeSurfaceTransform(@name + "_" + name, surface, param, 0.5)
+        for i, (ctrlName, param, _) in enumerate(controls):
+            surfaceTransform = rig_utils.makeSurfaceTransform(f"{@name}_{ctrlName}", surface, param, 0.5)
 
-            hlp = rig_utils.curve.makeCurve(@name + "_" + name + "_control_helper", helperType)
+            hlp = rig_utils.curve.makeCurve(f"{@name}_{ctrlName}_control_helper", helperType)
             if kin in ["ik", "fix"]:
                 for sh in hlp.getShapes():
                     sh.overrideColor.set(18)
                     
-            pm.matchTransform(hlp, surfaceTransform)
+            cmds.matchTransform(hlp, surfaceTransform)
             
             hlp.s.set([scale_val, scale_val/3, scale_val])
             helpersGrp | hlp
             rig_utils.lockTRS(hlp, [1,1,1], [1,1,0], [], 1) 
             
-            helpers.append(hlp.name())
-            pm.delete(surfaceTransform)
+            helpers.append(str(hlp))
+            cmds.delete(surfaceTransform)
 
         setter(helpers)
 
-    pm.delete([L_curve, R_curve, surface])
+    cmds.delete([L_curve, R_curve, surface])
 
 elif @mode == 1:  # run
 
     def getParamAtPoint(surface, pnt):
-        ns = api.MFnNurbsSurface(surface.__apimdagpath__())
-        p = ns.closestPoint(api.MPoint(pnt[0], pnt[1], pnt[2]))
-        return surface.getParamAtPoint(p, "world")
+        shape = proxy.node(surface).getShapes(type="nurbsSurface")[0]
+        surfaceFn = om.MFnNurbsSurface(shape.dagPath)
+        _, u, v = surfaceFn.closestPoint(om.MPoint(pnt), space=om.MSpace.kWorld)
+        return u, v
 
     def getLengthFromParam(curve, param):
         if param <= 0:
-            return 0              
-        curve = pm.PyNode(curve)
-        arcLenDim = pm.createNode("arcLengthDimension")
-        curve.worldSpace >> arcLenDim.nurbsGeometry
-        arcLenDim.uParamValue.set(param)
-        l = arcLenDim.arcLength.get()
-        pm.delete(arcLenDim.getParent())
-        return l
+            return 0
+        shape = proxy.node(curve).getShapes(type="nurbsCurve")[0]
+        return om.MFnNurbsCurve(shape.dagPath).findLengthFromParam(param)
 
-    h_fks = [pm.PyNode(n) for n in @h_fks]
-    h_iks = [pm.PyNode(n) for n in @h_iks]
-    h_fixs = [pm.PyNode(n) for n in @h_fixs]
+    h_fks = proxy.nodes(@h_fks)
+    h_iks = proxy.nodes(@h_iks)
+    h_fixs = proxy.nodes(@h_fixs)
 
     scale_mode = str(@scale)
     use_scale = scale_mode != "None"
@@ -96,31 +92,31 @@ elif @mode == 1:  # run
 
     fkDropoff, ikDropoff, fixDropoff = @skinDropoff[0]  # first row
 
-    controls_grp = pm.createNode("transform", n=@name + "_controls_group", p=controlsParent)
-    internal_grp = pm.createNode("transform", n=@name + "_internal_group", p=internalParent)
-    others_grp = pm.createNode("transform", n=@name + "_others_group", p=othersParent)
+    controls_grp = proxy.create("transform", f"{@name}_controls_group", parent=controlsParent, suffix=False)
+    internal_grp = proxy.create("transform", f"{@name}_internal_group", parent=internalParent, suffix=False)
+    others_grp = proxy.create("transform", f"{@name}_others_group", parent=othersParent, suffix=False)
     rig_utils.lockTRS(controls_grp, [1,1,1], [1,1,1], [1,1,1], 0.5)
     rig_utils.lockTRS(internal_grp, [1,1,1], [1,1,1], [1,1,1], 0.5)
     rig_utils.lockTRS(others_grp, [1,1,1], [1,1,1], [1,1,1], 0.5)
     internal_grp.v.set(False)
     others_grp.v.set(False)
 
-    surfaceTransforms_grp = pm.createNode("transform", n=@name + "_surfaceTransforms_group", p=internal_grp)
+    surfaceTransforms_grp = proxy.create("transform", f"{@name}_surfaceTransforms_group", parent=internal_grp, suffix=False)
     rig_utils.lockTRS(surfaceTransforms_grp, [1,1,1], [1,1,1], [1,1,1], 0.5)
     
-    L_base_curve = rig_utils.createPathCurve("L_" + @name + "_base", joints, spans=@spans)
+    L_base_curve = rig_utils.createPathCurve(f"L_{@name}_base", joints, spans=@spans)
     L_base_curve.t.set(@curveOffset)
 
-    R_base_curve = rig_utils.createPathCurve("R_" + @name + "_base", joints, spans=@spans)
+    R_base_curve = rig_utils.createPathCurve(f"R_{@name}_base", joints, spans=@spans)
     R_base_curve.t.set([-1 * x for x in @curveOffset])
 
-    base_surface = pm.loft(L_base_curve,
+    base_surface = proxy.node(cmds.loft(L_base_curve,
                            R_base_curve,
-                           n=@name + "_base_surface",
+                           n=f"{@name}_base_surface",
                            ch=1, u=1, c=0, ar=1, d=3,
-                           ss=1, rn=0, po=0, rsn=True)[0]
+                           ss=1, rn=0, po=0, rsn=True)[0])
 
-    pm.delete([L_base_curve, R_base_curve])  # remove curves
+    cmds.delete([L_base_curve, R_base_curve])  # remove curves
     
     hip_ctrl = None
 
@@ -130,28 +126,28 @@ elif @mode == 1:  # run
     attrsControl = None
     
     for i, (ctrlName, u, orientation) in enumerate(@fkControls):
-        surfaceTransform = rig_utils.makeSurfaceTransform(@name + "_" + ctrlName, base_surface, u, 0.5)
+        surfaceTransform = rig_utils.makeSurfaceTransform(f"{@name}_{ctrlName}", base_surface, u, 0.5)
 
-        ctrl = pm.createNode("transform", n=@name + "_" + ctrlName + "_control", p=fk_controls[i - 1] if i > 0 else controls_grp)
+        ctrl = proxy.create("transform", f"{@name}_{ctrlName}_control", parent=fk_controls[i - 1] if i > 0 else controls_grp, suffix=False)
         ctrl.ro.set(RotateOrder)
         
-        jnt = pm.createNode("joint", n=@name + "_" + ctrlName + "_joint", p=internal_grp)
+        jnt = proxy.create("joint", f"{@name}_{ctrlName}", parent=internal_grp)
 
         if @makeHipControl:
             if i > 0:
-                pm.parentConstraint(ctrl, jnt)
+                cmds.parentConstraint(ctrl, jnt)
         else:                
-            pm.parentConstraint(ctrl, jnt)
+            cmds.parentConstraint(ctrl, jnt)
 
         if use_scale:
             if not (@makeHipControl and i == 0):
-                pm.scaleConstraint(ctrl, jnt)
+                cmds.scaleConstraint(ctrl, jnt)
 
-        pm.matchTransform(ctrl, surfaceTransform, position=True, rotation=False)  # position
-        pm.delete(surfaceTransform)
+        cmds.matchTransform(ctrl, surfaceTransform, position=True, rotation=False)  # position
+        cmds.delete(surfaceTransform)
 
-        if pm.objExists(orientation):  # local orientation
-            pm.matchTransform(ctrl, orientation, position=False, rotation=True)
+        if cmds.objExists(orientation):  # local orientation
+            cmds.matchTransform(ctrl, orientation, position=False, rotation=True)
         
         rig_utils.curve.makeFromCurve(ctrl, h_fks[i])
         rig_utils.setToOffsetParentMatrix(ctrl)
@@ -160,31 +156,31 @@ elif @mode == 1:  # run
             if @attrsOn == "fk":
                 attrsControl = ctrl
             
-            if pm.objExists(@parent):
-                ctrl_transform = pm.createNode("transform", n=@name + "_" + ctrlName + "_control_transform", p=controls_grp)
-                pm.matchTransform(ctrl_transform, ctrl)
+            if cmds.objExists(@parent):
+                ctrl_transform = proxy.create("transform", f"{@name}_{ctrlName}_control", parent=controls_grp)
+                cmds.matchTransform(ctrl_transform, ctrl)
                 ctrl_transform | ctrl
                 rig_utils.setToOffsetParentMatrix(ctrl)
-                pm.parentConstraint(@parent, ctrl_transform, mo=True)
+                cmds.parentConstraint(@parent, ctrl_transform, mo=True)
                                 
             rig_utils.lockTRS(ctrl, [], [], scale_lock, 1)
 
             # hip control
             if @makeHipControl:
-                hip_surfaceTransform = rig_utils.makeSurfaceTransform(@name + "_hip", base_surface, @hipParam, 0.5)
+                hip_surfaceTransform = rig_utils.makeSurfaceTransform(f"{@name}_hip", base_surface, @hipParam, 0.5)
 
-                hip_ctrl = pm.createNode("transform", n=@name + "_hip_control", p=ctrl)
+                hip_ctrl = proxy.create("transform", f"{@name}_hip_control", parent=ctrl, suffix=False)
                 hip_ctrl.ro.set(RotateOrder)
 
-                pm.matchTransform(hip_ctrl, hip_surfaceTransform, position=True, rotation=False)  # position
+                cmds.matchTransform(hip_ctrl, hip_surfaceTransform, position=True, rotation=False)  # position
                 rig_utils.setToOffsetParentMatrix(hip_ctrl)
-                rig_utils.curve.makeFromCurve(hip_ctrl, pm.PyNode(@h_hip))
+                rig_utils.curve.makeFromCurve(hip_ctrl, proxy.node(@h_hip))
                 
-                pm.delete(hip_surfaceTransform)
-                pm.parentConstraint(hip_ctrl, jnt)
+                cmds.delete(hip_surfaceTransform)
+                cmds.parentConstraint(hip_ctrl, jnt)
                 
                 if use_scale:
-                    pm.scaleConstraint(hip_ctrl, jnt)
+                    cmds.scaleConstraint(hip_ctrl, jnt)
                     
                 rig_utils.lockTRS(hip_ctrl, [], [], scale_lock, 1)
         else:
@@ -196,31 +192,31 @@ elif @mode == 1:  # run
         dynamicParent.makeDynamicParent(ctrl, ctrl)
 
         if i == len(@fkControls) - 1:
-            surfaceTransform = rig_utils.makeSurfaceTransform(@name + "_" + ctrlName + "_end", base_surface, 1, 0.5)
-            jnt_end = pm.createNode("joint", n=@name + "_" + ctrlName + "_end_joint", p=jnt)
+            surfaceTransform = rig_utils.makeSurfaceTransform(f"{@name}_{ctrlName}_end", base_surface, 1, 0.5)
+            jnt_end = proxy.create("joint", f"{@name}_{ctrlName}_end", parent=jnt)
 
             fk_joints.append(jnt_end)
 
-            pm.matchTransform(jnt_end, surfaceTransform)
-            pm.delete(surfaceTransform)
+            cmds.matchTransform(jnt_end, surfaceTransform)
+            cmds.delete(surfaceTransform)
 
         fk_controls.append(ctrl)
         fk_joints.append(jnt)
         
-    fk_surface = base_surface.duplicate()[0]
-    fk_surface.rename(@name + "_fk_surface")
+    fk_surface = proxy.node(cmds.duplicate(base_surface)[0])
+    fk_surface.rename(f"{@name}_fk_surface")
 
     if @fkControls:
-        skin = pm.skinCluster(fk_joints, fk_surface, tsb=True, dr=fkDropoff)
+        skin = cmds.skinCluster(fk_joints, fk_surface, tsb=True, dr=fkDropoff)[0]
         if @fkWeights:
-            rig_utils.skinCluster.SkinClusterHelper(skin.name()).fromJson(@fkWeights)
+            rig_utils.skinCluster.SkinClusterHelper(skin).fromJson(@fkWeights)
 
     others_grp | fk_surface
     
-    ik_surface = base_surface.duplicate()[0]
-    ik_surface.rename(@name + "_ik_surface")
+    ik_surface = proxy.node(cmds.duplicate(base_surface)[0])
+    ik_surface.rename(f"{@name}_ik_surface")
 
-    fk_surface.worldSpace >> ik_surface.create
+    fk_surface.getShapes(type="nurbsSurface")[0].worldSpace[0] >> ik_surface.getShapes(type="nurbsSurface")[0].create
 
     others_grp | ik_surface
     
@@ -229,27 +225,27 @@ elif @mode == 1:  # run
     ik_controls = []
 
     for i, (ctrlName, u, orientation) in enumerate(@ikControls):
-        surfaceTransform = rig_utils.makeSurfaceTransform(@name + "_" + ctrlName, fk_surface, u, 0.5)
+        surfaceTransform = rig_utils.makeSurfaceTransform(f"{@name}_{ctrlName}", fk_surface, u, 0.5)
         surfaceTransforms_grp | surfaceTransform
 
-        ctrl_transform = pm.createNode("transform", n=@name + "_" + ctrlName + "_control_transform", p=controls_grp)
-        ctrl = pm.createNode("transform", n=@name + "_" + ctrlName + "_control", p=ctrl_transform)
+        ctrl_transform = proxy.create("transform", f"{@name}_{ctrlName}_control", parent=controls_grp)
+        ctrl = proxy.create("transform", f"{@name}_{ctrlName}_control", parent=ctrl_transform, suffix=False)
         ctrl.ro.set(RotateOrder)
 
-        jnt = pm.createNode("joint", n=@name + "_" + ctrlName + "_joint", p=internal_grp)
-        pm.parentConstraint(ctrl, jnt)
+        jnt = proxy.create("joint", f"{@name}_{ctrlName}", parent=internal_grp)
+        cmds.parentConstraint(ctrl, jnt)
         if use_scale:
-            pm.scaleConstraint(ctrl, jnt)
+            cmds.scaleConstraint(ctrl, jnt)
 
-        baseJoint = pm.createNode("joint", n=@name + "_" + ctrlName + "_base_joint", p=internal_grp)
-        pm.parentConstraint(ctrl_transform, baseJoint)
+        baseJoint = proxy.create("joint", f"{@name}_{ctrlName}_base", parent=internal_grp)
+        cmds.parentConstraint(ctrl_transform, baseJoint)
 
-        pm.matchTransform(ctrl_transform, surfaceTransform, position=True, rotation=False)  # position
+        cmds.matchTransform(ctrl_transform, surfaceTransform, position=True, rotation=False)  # position
 
-        if pm.objExists(orientation):  # local orientation
-            pm.matchTransform(ctrl_transform, orientation, position=False, rotation=True)
+        if cmds.objExists(orientation):  # local orientation
+            cmds.matchTransform(ctrl_transform, orientation, position=False, rotation=True)
 
-        pm.parentConstraint(surfaceTransform, ctrl_transform, mo=True)
+        cmds.parentConstraint(surfaceTransform, ctrl_transform, mo=True)
 
         rig_utils.curve.makeFromCurve(ctrl, h_iks[i])        
         dynamicParent.makeDynamicParent(ctrl, ctrl)
@@ -264,18 +260,18 @@ elif @mode == 1:  # run
             attrsControl = ctrl
 
     if @ikControls:
-        skin = pm.skinCluster(ik_joints, ik_surface, tsb=True, dr=ikDropoff)
+        skin = proxy.node(cmds.skinCluster(ik_joints, ik_surface, tsb=True, dr=ikDropoff)[0])
 
         for i in range(len(ik_base_joints)):
-            ik_base_joints[i].worldInverseMatrix >> skin.bindPreMatrix[i]
+            ik_base_joints[i].worldInverseMatrix[0] >> skin.bindPreMatrix[i]
 
         if @ikWeights:
-            rig_utils.skinCluster.SkinClusterHelper(skin.name()).fromJson(@ikWeights)
+            rig_utils.skinCluster.SkinClusterHelper(str(skin)).fromJson(@ikWeights)
 
-    fix_surface = base_surface.duplicate()[0]
-    fix_surface.rename(@name + "_fix_surface")
+    fix_surface = proxy.node(cmds.duplicate(base_surface)[0])
+    fix_surface.rename(f"{@name}_fix_surface")
 
-    ik_surface.worldSpace >> fix_surface.create
+    ik_surface.getShapes(type="nurbsSurface")[0].worldSpace[0] >> fix_surface.getShapes(type="nurbsSurface")[0].create
 
     others_grp | fix_surface
     
@@ -283,27 +279,27 @@ elif @mode == 1:  # run
     fix_controls = []
 
     for i, (ctrlName, u, orientation) in enumerate(@fixControls):
-        surfaceTransform = rig_utils.makeSurfaceTransform(@name + "_" + ctrlName, ik_surface, u, 0.5)
+        surfaceTransform = rig_utils.makeSurfaceTransform(f"{@name}_{ctrlName}", ik_surface, u, 0.5)
         surfaceTransforms_grp | surfaceTransform
 
-        ctrl_transform = pm.createNode("transform", n=@name + "_" + ctrlName + "_control_transform", p=controls_grp)
-        ctrl = pm.createNode("transform", n=@name + "_" + ctrlName + "_control", p=ctrl_transform)
+        ctrl_transform = proxy.create("transform", f"{@name}_{ctrlName}_control", parent=controls_grp)
+        ctrl = proxy.create("transform", f"{@name}_{ctrlName}_control", parent=ctrl_transform, suffix=False)
         ctrl.ro.set(RotateOrder)
 
-        jnt = pm.createNode("joint", n=@name + "_" + ctrlName + "_joint", p=internal_grp)
-        pm.parentConstraint(ctrl, jnt)
+        jnt = proxy.create("joint", f"{@name}_{ctrlName}", parent=internal_grp)
+        cmds.parentConstraint(ctrl, jnt)
         if use_scale:
-            pm.scaleConstraint(ctrl, jnt)
+            cmds.scaleConstraint(ctrl, jnt)
 
-        baseJoint = pm.createNode("joint", n=@name + "_" + ctrlName + "_base_joint", p=internal_grp)
-        pm.parentConstraint(ctrl_transform, baseJoint)
+        baseJoint = proxy.create("joint", f"{@name}_{ctrlName}_base", parent=internal_grp)
+        cmds.parentConstraint(ctrl_transform, baseJoint)
 
-        pm.matchTransform(ctrl_transform, surfaceTransform, position=True, rotation=False)  # position
+        cmds.matchTransform(ctrl_transform, surfaceTransform, position=True, rotation=False)  # position
 
-        if pm.objExists(orientation):  # local orientation
-            pm.matchTransform(ctrl_transform, orientation, position=False, rotation=True)
+        if cmds.objExists(orientation):  # local orientation
+            cmds.matchTransform(ctrl_transform, orientation, position=False, rotation=True)
 
-        pm.parentConstraint(surfaceTransform, ctrl_transform, mo=True)
+        cmds.parentConstraint(surfaceTransform, ctrl_transform, mo=True)
 
         rig_utils.curve.makeFromCurve(ctrl, h_fixs[i])
         
@@ -319,19 +315,20 @@ elif @mode == 1:  # run
         ik_fix = ik_joints + fix_joints
         ik_fix_base = ik_joints + fix_base_joints
 
-        skin = pm.skinCluster(ik_fix, fix_surface, tsb=True, dr=fixDropoff)
+        skin = proxy.node(cmds.skinCluster(ik_fix, fix_surface, tsb=True, dr=fixDropoff)[0])
 
         for i, j in enumerate(ik_fix_base):
-            j.worldInverseMatrix >> skin.bindPreMatrix[i]
+            j.worldInverseMatrix[0] >> skin.bindPreMatrix[i]
 
         if @fixWeights:
-            rig_utils.skinCluster.SkinClusterHelper(skin.name()).fromJson(@fixWeights)
+            rig_utils.skinCluster.SkinClusterHelper(str(skin)).fromJson(@fixWeights)
     
-    attrsControl.addAttr("stretch", min=0, max=1, dv=1, k=True)
+    attrsControl.addAttr(ln="stretch", min=0, max=1, dv=1, k=True)
         
     # make enlarged surface
-    L_cvs = [pm.dt.Vector(pm.xform(fix_surface.cv[i][0], q=True, ws=True, t=True)) for i in range(fix_surface.numCVsInU())]
-    R_cvs = [pm.dt.Vector(pm.xform(fix_surface.cv[i][fix_surface.numCVsInV()-1], q=True, ws=True, t=True)) for i in range(fix_surface.numCVsInU())]
+    surfaceFn = om.MFnNurbsSurface(fix_surface.getShapes(type="nurbsSurface")[0].dagPath)
+    L_cvs = [om.MVector(cmds.xform(f"{fix_surface}.cv[{i}][0]", q=True, ws=True, t=True)) for i in range(surfaceFn.numCVsInU)]
+    R_cvs = [om.MVector(cmds.xform(f"{fix_surface}.cv[{i}][{surfaceFn.numCVsInV - 1}]", q=True, ws=True, t=True)) for i in range(surfaceFn.numCVsInU)]
     
     for lst in [L_cvs, R_cvs]:
         l = (lst[0]-lst[-1]).length()/2.0
@@ -347,40 +344,40 @@ elif @mode == 1:  # run
     
     finalSurface = fix_surface
 
-    L_crv = pm.curve(d=3, p=L_cvs)
-    R_crv = pm.curve(d=3, p=R_cvs)
-    enlarged_surface = pm.loft(L_crv, R_crv, n=@name + "_slide_surface", ch=1, u=1, c=0, ar=1, d=3, ss=1, rn=0, po=0, rsn=True)[0]
+    L_crv = proxy.node(cmds.curve(d=3, p=[(p.x, p.y, p.z) for p in L_cvs]))
+    R_crv = proxy.node(cmds.curve(d=3, p=[(p.x, p.y, p.z) for p in R_cvs]))
+    enlarged_surface = proxy.node(cmds.loft(L_crv, R_crv, n=f"{@name}_slide_surface", ch=1, u=1, c=0, ar=1, d=3, ss=1, rn=0, po=0, rsn=True)[0])
     others_grp | enlarged_surface
-    pm.delete([L_crv, R_crv])
+    cmds.delete([L_crv, R_crv])
         
     rig_utils.createWrap(fix_surface, enlarged_surface)    
 
-    fix_curve = pm.PyNode(pm.duplicateCurve(enlarged_surface + ".v[0.5]", ch=1, rn=False, local=0, n=@name + "_stretch_fix_curve")[0])
-    curveInfo = pm.createNode("curveInfo", n=fix_curve + "_stretch_curveInfo")
-    fix_curve.worldSpace >> curveInfo.inputCurve
+    fix_curve = proxy.node(cmds.duplicateCurve(f"{enlarged_surface}.v[0.5]", ch=1, rn=False, local=0, n=f"{@name}_stretch_fix_curve")[0])
+    curveInfo = proxy.create("curveInfo", f"{fix_curve.localName()}_stretch")
+    fix_curve.getShapes(type="nurbsCurve")[0].worldSpace[0] >> curveInfo.inputCurve
     others_grp | fix_curve
     finalSurface = enlarged_surface
     
     surfaceTransforms = []
     for i, sj in enumerate(joints):
-        u, v = getParamAtPoint(finalSurface, sj.getTranslation("world"))    
+        u, v = getParamAtPoint(finalSurface, cmds.xform(sj, q=True, ws=True, t=True))
         
-        paramMult = pm.createNode("multDL", n=@name + "_joint" + str(i + 1) + "_scaleParam_multDL")
+        paramMult = proxy.create("multDL", f"{@name}_joint{i + 1}_scaleParam")
         paramMult.input1.set(getLengthFromParam(fix_curve, u))
-        pm.PyNode("main_control").scaleFactor >> paramMult.input2
+        proxy.node("main_control").scaleFactor >> paramMult.input2
             
-        paramFromLength = pm.createNode("paramFromLength", n=@name + "_joint" + str(i + 1) + "_paramFromLength")
-        fix_curve.worldSpace >> paramFromLength.inputCurve
+        paramFromLength = proxy.create("paramFromLength", f"{@name}_joint{i + 1}")
+        fix_curve.getShapes(type="nurbsCurve")[0].worldSpace[0] >> paramFromLength.inputCurve
         paramMult.output >> paramFromLength.length
 
-        b2a = pm.createNode("blendTwoAttr", n=@name + "_joint" + str(i + 1) + "_paramSelector_blendTwoAttr")        
+        b2a = proxy.create("blendTwoAttr", f"{@name}_joint{i + 1}_paramSelector")
         attrsControl.stretch >> b2a.attributesBlender
         paramFromLength.outParam >> b2a.input[0]
         b2a.input[1].set(u)
             
         paramAttr = b2a.output                     
         
-        surfaceTransform = rig_utils.makeSurfaceTransform(@name + "_joint" + str(i + 1), finalSurface, paramAttr, v)
+        surfaceTransform = rig_utils.makeSurfaceTransform(f"{@name}_joint{i + 1}", finalSurface, paramAttr, v)
         surfaceTransforms_grp | surfaceTransform
         surfaceTransforms.append(surfaceTransform)
         
@@ -389,21 +386,21 @@ elif @mode == 1:  # run
             surfaceTransform.rx.disconnect()
             surfaceTransform.ry.disconnect()
             surfaceTransform.rz.disconnect()
-            pm.orientConstraint(ik_controls[0 if i == 0 else -1], surfaceTransform, mo=True)
+            cmds.orientConstraint(ik_controls[0 if i == 0 else -1], surfaceTransform, mo=True)
 
         if use_scale:
-            oppositeTransform = rig_utils.makeSurfaceTransform(@name + "_joint" + str(i + 1) + "_opposite", finalSurface, paramAttr, 1.0)
+            oppositeTransform = rig_utils.makeSurfaceTransform(f"{@name}_joint{i + 1}_opposite", finalSurface, paramAttr, 1.0)
             surfaceTransforms_grp | oppositeTransform
 
             init_dist = rig_utils.getDistance(surfaceTransform, oppositeTransform)
             if init_dist < 0.0001:
                 init_dist = 0.0001
 
-            distBetween = pm.createNode("distanceBetween", n=@name + "_joint" + str(i + 1) + "_width_distanceBetween")
+            distBetween = proxy.create("distanceBetween", f"{@name}_joint{i + 1}_width")
             surfaceTransform.matrix >> distBetween.inMatrix1
             oppositeTransform.matrix >> distBetween.inMatrix2
 
-            scaleMult = pm.createNode("multiplyDivide", n=@name + "_joint" + str(i + 1) + "_width_scale_multiplyDivide")
+            scaleMult = proxy.create("multiplyDivide", f"{@name}_joint{i + 1}_width_scale")
             scaleMult.operation.set(2)
             distBetween.distance >> scaleMult.input1X
             scaleMult.input2X.set(init_dist)
@@ -421,23 +418,23 @@ elif @mode == 1:  # run
             next_sj = joints[i + 1]
             next_st = surfaceTransforms[i + 1]
 
-            sc_bone1 = pm.createNode("joint", n=@name + "_joint" + str(i + 1) + "_sc_start_joint", p=internal_grp)
-            pm.matchTransform(sc_bone1, sj)
+            sc_bone1 = proxy.create("joint", f"{@name}_joint{i + 1}_sc_start", parent=internal_grp)
+            cmds.matchTransform(sc_bone1, sj)
 
-            sc_bone2 = pm.createNode("joint", n=@name + "_joint" + str(i + 1) + "_sc_end_joint", p=sc_bone1)
-            pm.matchTransform(sc_bone2, next_sj, position=True, rotation=False)
-            pm.matchTransform(sc_bone2, sj, position=False, rotation=True)
+            sc_bone2 = proxy.create("joint", f"{@name}_joint{i + 1}_sc_end", parent=sc_bone1)
+            cmds.matchTransform(sc_bone2, next_sj, position=True, rotation=False)
+            cmds.matchTransform(sc_bone2, sj, position=False, rotation=True)
 
-            sc_handle, _ = pm.ikHandle(n=@name + "_joint" + str(i + 1) + "_ikHandle", sj=sc_bone1, ee=sc_bone2, solver="ikSCsolver")
+            sc_handle = proxy.node(cmds.ikHandle(n=f"{@name}_joint{i + 1}_ikHandle", sj=sc_bone1, ee=sc_bone2, solver="ikSCsolver")[0])
             
-            pm.pointConstraint(st, sc_bone1)
+            cmds.pointConstraint(st, sc_bone1)
             next_st | sc_handle
             
-            pm.parentConstraint(sc_bone1, sj, mo=True)
+            cmds.parentConstraint(sc_bone1, sj, mo=True)
         else:
-            pm.parentConstraint(st, sj, mo=True)
+            cmds.parentConstraint(st, sj, mo=True)
 
-    pm.delete(base_surface)
+    cmds.delete(base_surface)
 
     moduleInfo = rig_utils.moduleInfo.ModuleInfo(@name)
     moduleInfo.setAttr("type", "spine")
@@ -449,15 +446,15 @@ elif @mode == 1:  # run
         moduleInfo.setAttr("hip", hip_ctrl.message)
     
     for i, fk in enumerate(fk_controls):
-        moduleInfo.setAttr("fk"+str(i+1), fk_controls[i].message)
+        moduleInfo.setAttr(f"fk{i + 1}", fk.message)
         
     for i, ik in enumerate(ik_controls):
-        moduleInfo.setAttr("ik"+str(i+1), ik_controls[i].message)
+        moduleInfo.setAttr(f"ik{i + 1}", ik.message)
         
     for i, fix in enumerate(fix_controls):
-        moduleInfo.setAttr("fix"+str(i+1), fix_controls[i].message)        
+        moduleInfo.setAttr(f"fix{i + 1}", fix.message)
     
-    data = {"ik":[], "fk":[], "fix":[], "name": @name}            
+    data = {"ik":[], "fk":[], "fix":[], "name": @name}
     for ctrlName, u, _ in @fkControls:
         data["fk"].append([ctrlName, u])
         

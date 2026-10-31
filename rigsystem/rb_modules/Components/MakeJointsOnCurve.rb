@@ -1,49 +1,52 @@
 <module name="makeJointsOnCurve" muted="0" uid="edca6ffb8012413abb1b69a4fbd15f8f">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy
 
-crv = pm.PyNode(@curve)
+cmds = proxy.cmds
+crv = proxy.node(@curve)
+crvShape = crv.getShapes(type="nurbsCurve")[0] if crv.type() == "transform" else crv
+curveFn = om.MFnNurbsCurve(crvShape.dagPath)
 
-start, end = crv.getKnotDomain()
+start, end = curveFn.knotDomain
 
 joints = []
-count = @numJoints if not @numAsCVs else crv.numCVs()
+count = @numJoints if not @numAsCVs else curveFn.numCVs
     
 for i in range(count):
-    joints.append( pm.createNode("joint", n=f"{@name}_{i+1}_joint") )
+    joint = proxy.create("joint", f"{@name}_{i + 1}", skipSelection=True)
+    joints.append(joint)
 
     if not @numAsCVs:
         perc = (i / float(count - 1) * (end - start) + start) if count > 1 else start
-        p = crv.getPointAtParam(perc)
-        joints[i].setTranslation(p)
+        p = curveFn.getPointAtParam(perc, om.MSpace.kWorld)
     else:
-        joints[i].setTranslation(crv.cv[i].getPosition("world"))
+        p = curveFn.cvPositions(om.MSpace.kWorld)[i]
+    cmds.xform(joint, ws=True, t=(p.x, p.y, p.z))
 
     if i > 0:
-        joints[i-1] | joints[i]
+        joints[i - 1] | joint
 
 # reorient
-pm.joint(joints[0], e=True, zso=True, oj="xyz", sao="yup", ch=True)
+cmds.joint(joints[0], e=True, zso=True, oj="xyz", sao="yup", ch=True)
 
 if not @makeConnected:
     for i in range(1, len(joints)):
-        pm.parent(joints[i], world=True)
+        cmds.parent(joints[i], world=True)
 
 if @attach:
-    crv_shape = crv.getShape() if crv.type() == "transform" else crv
     for i in range(count):
-        poci = pm.createNode("pointOnCurveInfo", n=joints[i]+"_pointOnCurveInfo")
-        crv_shape.worldSpace[0] >> poci.inputCurve
+        poci = proxy.create("pointOnCurveInfo", f"{joints[i].localName()}_pointOnCurveInfo")
+        crvShape.worldSpace[0] >> poci.inputCurve
         
         if not @numAsCVs:
             perc = (i / float(count - 1) * (end - start) + start) if count > 1 else start
             poci.parameter.set(perc)
         else:
-            cl = crv.closestPoint(crv.cv[i].getPosition("world"))
-            param = crv.getParamAtPoint(cl)
+            param = curveFn.closestPoint(curveFn.cvPositions(om.MSpace.kWorld)[i], space=om.MSpace.kWorld)[1]
             poci.parameter.set(param)
         poci.position >> joints[i].translate
 
-@set_out_joints([j.name() for j in joints])
+@set_out_joints([str(j) for j in joints])
 ]]></run>
 <doc><![CDATA[## Summary  
 Creates a joint chain positioned along a specified Maya curve. The joint count can be set manually or derived from the curve’s CVs, joints can be left connected or unparented, and optional `pointOnCurveInfo` nodes can be generated to keep the joints dynamically attached to the curve.

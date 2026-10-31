@@ -8,6 +8,7 @@ class ModuleInfo:
     MayaNodePostfix = "_moduleInfo"
 
     def __init__(self, name):
+        """Bind to the module info node for the given module name, creating it when missing."""
         name = str(name)
         nodeName = name.replace(self.MayaNodePostfix, "") + self.MayaNodePostfix
         self.node = proxy.node(nodeName) if cmds.objExists(nodeName) else proxy.create(
@@ -17,15 +18,18 @@ class ModuleInfo:
 
     @staticmethod
     def exists(name):
+        """Return True if the module info node for the given module name exists."""
         nodeName = name.replace(ModuleInfo.MayaNodePostfix, "") + ModuleInfo.MayaNodePostfix
         return cmds.objExists(nodeName)
 
 
     def name(self):
+        """Return the module info node name."""
         return str(self.node)
 
 
     def setAttr(self, name, value):
+        """Store a value or connection on the named attribute, creating the attribute when missing."""
         source = value.node.message if isinstance(value, ModuleInfo) else value
         isConnection = isinstance(source, (str, proxy.Plug)) and "." in str(source) and cmds.objExists(source)
 
@@ -60,19 +64,23 @@ class ModuleInfo:
 
 
     def getParent(self):
+        """Return the parent ModuleInfo, or None when the module has no parent."""
         if self.hasAttr("_parent"):
             return ModuleInfo(self.getAttr("_parent").node)
 
 
     def getRoot(self):
+        """Return the topmost parent ModuleInfo of this module."""
         return self.getParent().getRoot() if self.hasAttr("_parent") else self
 
 
     def setParent(self, parentModuleInfo):
+        """Connect the parent module info node as this module's parent."""
         self.setAttr("_parent", parentModuleInfo.node.message)
 
 
     def hasAttr(self, name):
+        """Return True if the module info node has the named attribute."""
         return cmds.attributeQuery(name, node=self.node, exists=True)
 
 
@@ -84,14 +92,17 @@ class ModuleInfo:
 
 
     def deleteAttr(self, name):
+        """Remove the named attribute from the module info node."""
         self.node.deleteAttr(name)
 
 
     def listAttrs(self):
+        """Return all user defined attributes of the module info node."""
         return [self.node.attr(attr) for attr in self.node.listAttr(ud=True)]
 
 
 def getModuleInfo(object, root=True):
+    """Return the ModuleInfo connected to the given object, or its root when requested."""
     connections = proxy.node(object).message.listConnections(
         source=False,
         destination=True,

@@ -1,34 +1,33 @@
 <module name="Head" muted="0" uid="b79cb052aef143f7ad8ea6d3260f8e98">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 from rigsystem.anim_utils import dynamicParent, switcher
 
+cmds = proxy.cmds
 ROTATE_ORDER = 3  # XZY
 
-neckJoint = pm.PyNode(@neckJoint)
-headJoint = pm.PyNode(@headJoint)
+neckJoint = proxy.node(@neckJoint)
+headJoint = proxy.node(@headJoint)
 
-controlsParent = pm.PyNode("controls")
-internalParent = pm.PyNode("internal")
-othersParent = pm.PyNode("others")
-helpersParent = pm.PyNode("helpers")
+controlsParent = proxy.node("controls")
+internalParent = proxy.node("internal")
+helpersParent = proxy.node("helpers")
         
 if @mode == 0:  # helpers
     scale = rig_utils.getDistance(neckJoint, headJoint)
 
     # neck FK helper
-    neckHelper_transform = pm.createNode("transform", n="M_neck_helper_transform", p=helpersParent)
-    pm.parentConstraint(neckJoint, neckHelper_transform)
+    neckHelper_transform = proxy.create("transform", "M_neck_helper", parent=helpersParent)
+    cmds.parentConstraint(neckJoint, neckHelper_transform)
     
     neckFKHelper = rig_utils.curve.makeCurve("M_neck_fk_ctrl_helper", "circle")
     neckHelper_transform | neckFKHelper
     neckFKHelper.s.set([scale/2, scale/2, scale/2])
     rig_utils.lockTRS(neckFKHelper, [0,1,1], [1,1,1], [], 1)    
-    @set_h_neckFK(neckFKHelper.name())
+    @set_h_neckFK(str(neckFKHelper))
 
     # head options helper
-    headHelpers_transform = pm.createNode("transform", n="M_head_helpers_transform", p=helpersParent)
-    pm.parentConstraint(headJoint, headHelpers_transform)
+    headHelpers_transform = proxy.create("transform", "M_head_helpers", parent=helpersParent)
+    cmds.parentConstraint(headJoint, headHelpers_transform)
     
     helper = rig_utils.curve.makeCurve("M_head_options_ctrl_helper", "flag")
 
@@ -36,7 +35,7 @@ if @mode == 0:  # helpers
     headHelpers_transform | helper
     helper.t.set([0,0,-scale])
     rig_utils.lockTRS(helper, [1,1,0], [1,1,1], [], 1)
-    @set_h_options(helper.name())
+    @set_h_options(str(helper))
 
     # head FK helper
     helper = rig_utils.curve.makeCurve("M_head_fk_ctrl_helper", "circle")
@@ -45,7 +44,7 @@ if @mode == 0:  # helpers
     helper.r.set([0, 0, 90])
     helper.s.set([scale, scale, scale])
     rig_utils.lockTRS(helper, [0,1,1], [1,1,1], [], 1)
-    @set_h_headFK(helper.name())
+    @set_h_headFK(str(helper))
 
     # head IK helper
     helper = rig_utils.curve.makeCurve("M_head_ik_ctrl_helper", "sphere")
@@ -53,29 +52,29 @@ if @mode == 0:  # helpers
     helper.t.set([scale/2, 0, 0])
     helper.s.set([scale, scale, scale])
     rig_utils.lockTRS(helper, [0,1,1], [1,1,1], [], 1)    
-    @set_h_headIK(helper.name())
+    @set_h_headIK(str(helper))
 
 elif @mode == 1:  # run
     neckParent = neckJoint.getParent()
 
-    neckFKHelper = pm.PyNode(@h_neckFK)
-    headFKHelper = pm.PyNode(@h_headFK)
-    headIKHelper = pm.PyNode(@h_headIK)
-    optionsHelper = pm.PyNode(@h_options)
+    neckFKHelper = proxy.node(@h_neckFK)
+    headFKHelper = proxy.node(@h_headFK)
+    headIKHelper = proxy.node(@h_headIK)
+    optionsHelper = proxy.node(@h_options)
 
-    controls_grp = pm.createNode("transform", n="M_neck_controls_group", p=controlsParent)
+    controls_grp = proxy.create("transform", "M_neck_controls_group", parent=controlsParent, suffix=False)
     rig_utils.lockTRS(controls_grp)
 
-    internal_grp = pm.createNode("transform", n="M_neck_internal_group", p=internalParent)
+    internal_grp = proxy.create("transform", "M_neck_internal_group", parent=internalParent, suffix=False)
     rig_utils.lockTRS(internal_grp, v=0.5)
 
     # head options control
-    head_options_ctrl = pm.createNode("transform", n="M_head_options_control", p=controls_grp)
-    pm.parentConstraint(headJoint, head_options_ctrl)
+    head_options_ctrl = proxy.create("transform", "M_head_options_control", parent=controls_grp, suffix=False)
+    cmds.parentConstraint(headJoint, head_options_ctrl)
 
-    head_options_ctrl.addAttr("ikfk", min=0, max=1, dv=1, k=True)  # fk default
+    head_options_ctrl.addAttr(ln="ikfk", min=0, max=1, dv=1, k=True)  # fk default
 
-    head_options_ctrl.addAttr("scaleFactor", min=0.01, dv=1.0, k=True)
+    head_options_ctrl.addAttr(ln="scaleFactor", min=0.01, dv=1.0, k=True)
     head_options_ctrl.scaleFactor >> headJoint.sx
     head_options_ctrl.scaleFactor >> headJoint.sy
     head_options_ctrl.scaleFactor >> headJoint.sz
@@ -83,35 +82,35 @@ elif @mode == 1:  # run
     rig_utils.curve.makeFromCurve(head_options_ctrl, optionsHelper)
     rig_utils.lockTRS(head_options_ctrl)
 
-    ikfk_rev = pm.createNode("reverse", n="M_neck_ikfk_reverse")
+    ikfk_rev = proxy.create("reverse", "M_neck_ikfk")
     head_options_ctrl.ikfk >> ikfk_rev.inputX
     
     # ik/fk bones
-    fk1 = rig_utils.matchJoint(neckJoint, name="M_neck_fk_joint")
-    fk2 = rig_utils.matchJoint(headJoint, name="M_head_fk_joint")
+    fk1 = proxy.node(rig_utils.matchJoint(neckJoint, name="M_neck_fk_joint"))
+    fk2 = proxy.node(rig_utils.matchJoint(headJoint, name="M_head_fk_joint"))
     internal_grp | fk1 | fk2
 
-    ik1 = rig_utils.matchJoint(neckJoint, name="M_neck_ik_joint")
-    ik2 = rig_utils.matchJoint(headJoint, name="M_head_ik_joint")
+    ik1 = proxy.node(rig_utils.matchJoint(neckJoint, name="M_neck_ik_joint"))
+    ik2 = proxy.node(rig_utils.matchJoint(headJoint, name="M_head_ik_joint"))
     internal_grp | ik1 | ik2
     
-    pm.pointConstraint(neckJoint, ik1)
+    cmds.pointConstraint(neckJoint, ik1)
 
     # neck FK control
-    neck_fk_ctrl_transform = pm.createNode("transform", n="M_neck_fk_control_transform", p=controls_grp)
-    pm.matchTransform(neck_fk_ctrl_transform, neckParent)
-    pm.pointConstraint(neckJoint, neck_fk_ctrl_transform)
+    neck_fk_ctrl_transform = proxy.create("transform", "M_neck_fk_control", parent=controls_grp)
+    cmds.matchTransform(neck_fk_ctrl_transform, neckParent)
+    cmds.pointConstraint(neckJoint, neck_fk_ctrl_transform)
     head_options_ctrl.ikfk >> neck_fk_ctrl_transform.v
     
-    neck_fk_ctrl = pm.createNode("transform", n="M_neck_fk_control")
+    neck_fk_ctrl = proxy.create("transform", "M_neck_fk_control", suffix=False)
     neck_fk_ctrl_transform | neck_fk_ctrl
     neck_fk_ctrl.ro.set(ROTATE_ORDER)
-    neck_fk_ctrl.addAttr("scaleFactor",min=0.01, dv=1.0, k=True)
+    neck_fk_ctrl.addAttr(ln="scaleFactor", min=0.01, dv=1.0, k=True)
         
-    pm.matchTransform(neck_fk_ctrl, neckJoint, position=True, rotation=False)  # position
+    cmds.matchTransform(neck_fk_ctrl, neckJoint, position=True, rotation=False)  # position
 
-    if pm.objExists(@neckOrient):  # local orientation
-        pm.matchTransform(neck_fk_ctrl, @neckOrient, position=False, rotation=True)
+    if cmds.objExists(@neckOrient):  # local orientation
+        cmds.matchTransform(neck_fk_ctrl, @neckOrient, position=False, rotation=True)
             
     switcher.addFollow(neck_fk_ctrl, controls_grp, neckParent, attr="followBody", default=1.0, transform=neck_fk_ctrl_transform, type="orient")
     
@@ -119,31 +118,31 @@ elif @mode == 1:  # run
     rig_utils.curve.makeFromCurve(neck_fk_ctrl, neckFKHelper)
     rig_utils.lockTRS(neck_fk_ctrl, [1, 1, 1], [], [1, 1, 1], 1)
     
-    pm.parentConstraint(neck_fk_ctrl, fk1, mo=True)
+    cmds.parentConstraint(neck_fk_ctrl, fk1, mo=True)
     neck_fk_ctrl.scaleFactor >> fk1.sx    
     
     # head FK control
-    head_fk_ctrl = pm.createNode("transform", n="M_head_fk_control", p=neck_fk_ctrl)
+    head_fk_ctrl = proxy.create("transform", "M_head_fk_control", parent=neck_fk_ctrl, suffix=False)
     head_fk_ctrl.ro.set(ROTATE_ORDER)
 
-    pm.matchTransform(head_fk_ctrl, headJoint, position=True, rotation=False)  # position
+    cmds.matchTransform(head_fk_ctrl, headJoint, position=True, rotation=False)  # position
 
-    if pm.objExists(@headOrient):  # local orientation
-        pm.matchTransform(head_fk_ctrl, @headOrient, position=False, rotation=True)
+    if cmds.objExists(@headOrient):  # local orientation
+        cmds.matchTransform(head_fk_ctrl, @headOrient, position=False, rotation=True)
 
     switcher.addFollow(head_fk_ctrl, controls_grp, neck_fk_ctrl, attr="followNeck", default=0.0, type="orient")
         
     rig_utils.setToOffsetParentMatrix(head_fk_ctrl)
     rig_utils.curve.makeFromCurve(head_fk_ctrl, headFKHelper)
     
-    pm.pointConstraint(fk2, head_fk_ctrl, mo=True)
+    cmds.pointConstraint(fk2, head_fk_ctrl, mo=True)
     
     rig_utils.lockTRS(head_fk_ctrl, [1, 1, 1], [], [1, 1, 1], 1)
     
-    pm.orientConstraint(head_fk_ctrl, fk2, mo=True)
+    cmds.orientConstraint(head_fk_ctrl, fk2, mo=True)
 
     # head IK control
-    head_ik_ctrl = pm.createNode("joint", n="M_head_ik_control", p=controls_grp)
+    head_ik_ctrl = proxy.create("joint", "M_head_ik_control", parent=controls_grp, suffix=False)
     head_ik_ctrl.ro.set(ROTATE_ORDER)
     head_ik_ctrl.radius.set(0)
     
@@ -152,10 +151,10 @@ elif @mode == 1:  # run
     switcher.addFollow(head_ik_ctrl, controls_grp, neckParent, attr="followBody", default=1.0, type="parent")
     switcher.addFollow(head_ik_ctrl, controls_grp, neckParent, attr="followNeck", default=0.0, type="jointOrient")
     
-    pm.matchTransform(head_ik_ctrl, headJoint, position=True, rotation=False)  # position
+    cmds.matchTransform(head_ik_ctrl, headJoint, position=True, rotation=False)  # position
 
-    if pm.objExists(@headOrient):  # local orientation
-        pm.matchTransform(head_ik_ctrl, @headOrient, position=False, rotation=True)
+    if cmds.objExists(@headOrient):  # local orientation
+        cmds.matchTransform(head_ik_ctrl, @headOrient, position=False, rotation=True)
 
     rig_utils.setToOffsetParentMatrix(head_ik_ctrl)
 
@@ -165,14 +164,14 @@ elif @mode == 1:  # run
     rig_utils.lockTRS(head_ik_ctrl, [], [], [1, 1, 1], 1)
     rig_utils.lockAttr(head_ik_ctrl.radius)
     
-    ik_sc_ikHandle = pm.ikHandle(
+    ik_sc_ikHandle = proxy.node(cmds.ikHandle(
         sj=ik1,
         ee=ik2,
         solver="ikSCsolver",
-        n="M_neck_ik_ikHandle")[0]
+        n="M_neck_ik_ikHandle")[0])
     internal_grp | ik_sc_ikHandle
     
-    pm.parentConstraint(head_ik_ctrl, ik_sc_ikHandle, mo=True)
+    cmds.parentConstraint(head_ik_ctrl, ik_sc_ikHandle, mo=True)
     
     d = rig_utils.createDistance("M_neck_ik_distance", ik1, head_ik_ctrl)
     
@@ -185,15 +184,15 @@ elif @mode == 1:  # run
         scales=(True, False, False),
     )
     
-    pm.orientConstraint(head_ik_ctrl, ik2, mo=True)
+    cmds.orientConstraint(head_ik_ctrl, ik2, mo=True)
     
     # head constraints
-    oc = pm.orientConstraint(fk1, ik1, neckJoint)
+    oc = proxy.node(cmds.orientConstraint(fk1, ik1, neckJoint)[0])
     oc.interpType.set(2)
     head_options_ctrl.ikfk >> oc.w0
     ikfk_rev.outputX >> oc.w1
     
-    pc = pm.parentConstraint(fk2, ik2, headJoint, mo=True)
+    pc = proxy.node(cmds.parentConstraint(fk2, ik2, headJoint, mo=True)[0])
     pc.interpType.set(2)
     head_options_ctrl.ikfk >> pc.w0
     ikfk_rev.outputX >> pc.w1

@@ -144,7 +144,7 @@ class DynamicParent:
             scalePlug = pc.attr(f"target[{idx}].targetScale")
             source = scalePlug.inputs()
             if source:
-                source[0].disconnect(scalePlug)
+                scalePlug.disconnect(source[0])
 
         except Exception:
             raise

@@ -1,9 +1,10 @@
 <module name="matrixToOffsetParentMatrix" muted="0" uid="18853f5b0d0c472791a6371f8c6b5838">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
+
+selected = proxy.nodes(proxy.cmds.ls(selection=True, type=["transform", "joint"]) or [])
 
 if @mode == 0: # to
-    for t in pm.selected(type=["transform", "joint"]):
+    for t in selected:
         if t.offsetParentMatrix.inputs():
             warning(f"{t}.offsetParentMatrix has inputs, skipped")
             continue
@@ -11,7 +12,7 @@ if @mode == 0: # to
         rig_utils.setToOffsetParentMatrix(t)
         
 else: # from
-    for t in pm.selected(type=["transform", "joint"]):
+    for t in selected:
         rig_utils.setFromOffsetParentMatrix(t)]]></run>
 <doc><![CDATA[## Summary  
 This module transfers the current matrix of selected transform nodes into their `offsetParentMatrix` attribute (mode 0) or restores the original matrix from the `offsetParentMatrix` (mode 1). It is useful for baking or unbaking offset transforms in a Maya scene.

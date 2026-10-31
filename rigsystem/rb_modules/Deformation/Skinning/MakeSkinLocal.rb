@@ -1,24 +1,31 @@
 <module name="makeSkinLocal" muted="0" uid="c3d086240a8642d5bcd762328d68df91">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.api.OpenMaya as om
+import maya.api.OpenMayaAnim as oma
+import maya.mel as mel
+from rigsystem import proxy
 
-skinned = pm.PyNode(@skinnedGeo)
-skin = pm.mel.eval("findRelatedSkinCluster "+skinned)
+cmds = proxy.cmds
+skinned = proxy.node(@skinnedGeo)
+skin = mel.eval(f'findRelatedSkinCluster "{skinned}"')
 if not skin:
     error(f"Cannot find skinCluster for {skinned}")
     
-skin = pm.PyNode(skin)
+skin = proxy.node(skin)
+skinFn = oma.MFnSkinCluster(skin.mobject)
 basis = []
     
-for i, inf in enumerate(skin.influenceObjects()):
-    if skin.bindPreMatrix[i].inputs():
-        warning(f"bindPreMatrix[{i}] is connected, skipped")
+for influence in skinFn.influenceObjects():
+    index = skinFn.indexForInfluenceObject(influence)
+    preMatrix = skin.bindPreMatrix[index]
+    if preMatrix.inputs():
+        warning(f"bindPreMatrix[{index}] is connected, skipped")
         continue
         
-    t = pm.createNode("transform", n=inf+"_basis")
-    m = skin.bindPreMatrix[i].get().inverse()
-    pm.xform(t, ws=True, m=m)
-    t.worldInverseMatrix >> skin.bindPreMatrix[i]
-    basis.append(t.name())
+    t = proxy.create("transform", f"{influence.partialPathName()}_basis", suffix=False)
+    matrix = om.MMatrix(preMatrix.get()).inverse()
+    cmds.xform(str(t), ws=True, matrix=list(matrix))
+    t.worldInverseMatrix[0] >> preMatrix
+    basis.append(str(t))
     
 @set_out_basis(basis)    ]]></run>
 <doc><![CDATA[## Summary  

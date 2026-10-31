@@ -1,11 +1,12 @@
 <module name="AutoWindRotation" muted="0" uid="5c066feddef04e8f8e649fa9822c4cf9">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
-transforms = [pm.PyNode(t) for t in @transforms if pm.objExists(t)]
+cmds = proxy.cmds
+transforms = proxy.nodes(t for t in @transforms if cmds.objExists(t))
 if not transforms:
     print("AutoWindRotation: No valid transforms supplied.")
 else:
-    controlNode = pm.PyNode(@controlNode)
+    controlNode = proxy.node(@controlNode)
 
     # Rotation axis mapping
     axisMap = {0: "X", 1: "Y", 2: "Z"}
@@ -21,23 +22,23 @@ else:
 
     # Add control attributes to the control node
     if not controlNode.hasAttr("windAmplitude"):
-        controlNode.addAttr("windAmplitude", at="float", k=True, dv=0.0, min=0)
+        controlNode.addAttr(ln="windAmplitude", at="float", k=True, dv=0.0, min=0)
     if not controlNode.hasAttr("windFrequency"):
-        controlNode.addAttr("windFrequency", at="float", k=True, dv=4.0, min=0)
+        controlNode.addAttr(ln="windFrequency", at="float", k=True, dv=4.0, min=0)
     if not controlNode.hasAttr("windCurlOffset"):
-        controlNode.addAttr("windCurlOffset", at="float", k=True, dv=1.0)
+        controlNode.addAttr(ln="windCurlOffset", at="float", k=True, dv=1.0)
     if not controlNode.hasAttr("windDepthScale"):
-        controlNode.addAttr("windDepthScale", at="float", k=True, dv=2.0, min=0)
+        controlNode.addAttr(ln="windDepthScale", at="float", k=True, dv=2.0, min=0)
     if not controlNode.hasAttr("windOffset"):
-        controlNode.addAttr("windOffset", at="float", k=True, dv=0.0)
+        controlNode.addAttr(ln="windOffset", at="float", k=True, dv=0.0)
     if not controlNode.hasAttr(attrUName):
-        controlNode.addAttr(attrUName, at="float", k=True, dv=0.0, min=-1.0, max=1.0)
+        controlNode.addAttr(ln=attrUName, at="float", k=True, dv=0.0, min=-1.0, max=1.0)
     if not controlNode.hasAttr(attrVName):
-        controlNode.addAttr(attrVName, at="float", k=True, dv=0.0, min=-1.0, max=1.0)
+        controlNode.addAttr(ln=attrVName, at="float", k=True, dv=0.0, min=-1.0, max=1.0)
     if not controlNode.hasAttr("windFalloff"):
-        controlNode.addAttr("windFalloff", at="float", k=True, dv=1.0, min=0.001)
+        controlNode.addAttr(ln="windFalloff", at="float", k=True, dv=1.0, min=0.001)
 
-    ctrl = controlNode.name()
+    ctrl = str(controlNode)
     transforms_set = set(transforms)
 
     # Automatically analyze hierarchy regardless of input list order:
@@ -56,7 +57,7 @@ else:
         chain_info[t] = {"root": root, "depth": depth}
 
     # Unique roots sorted deterministically
-    unique_roots = sorted(list(set(info["root"] for info in chain_info.values())), key=lambda x: x.name())
+    unique_roots = sorted({info["root"] for info in chain_info.values()}, key=str)
 
     # Compute average world position for each curl chain (centroid of all controls in the curl)
     curl_members = {}
@@ -66,9 +67,10 @@ else:
     curl_avg_positions = {}
     for r, members in curl_members.items():
         count = float(len(members))
-        avg_x = sum(t.getTranslation("world").x for t in members) / count
-        avg_y = sum(t.getTranslation("world").y for t in members) / count
-        avg_z = sum(t.getTranslation("world").z for t in members) / count
+        positions = [cmds.xform(t, q=True, ws=True, t=True) for t in members]
+        avg_x = sum(p[0] for p in positions) / count
+        avg_y = sum(p[1] for p in positions) / count
+        avg_z = sum(p[2] for p in positions) / count
         curl_avg_positions[r] = {"x": avg_x, "y": avg_y, "z": avg_z}
 
     # Bake 2D normalized coordinates based on curl centroids on the selected projection plane in [-1.0, 1.0] range
@@ -129,12 +131,11 @@ else:
     exprStr = "\n".join(exprLines)
 
     # Accumulate into a single expression: update if exists, create if not
-    if pm.objExists(@expressionName):
-        exprNode = pm.PyNode(@expressionName)
-        existing = exprNode.getString()
-        exprNode.setString(existing + "\n" + exprStr)
+    if cmds.objExists(@expressionName):
+        existing = cmds.expression(@expressionName, q=True, s=True)
+        cmds.expression(@expressionName, e=True, s=existing + "\n" + exprStr)
     else:
-        pm.expression(s=exprStr, n=@expressionName, ae=True)
+        cmds.expression(s=exprStr, n=@expressionName, ae=True)
 ]]></run>
 <doc><![CDATA[## Summary
 The **hairAutoWindRotation** module automatically drives a sine‑based wind animation for multiple hair curl chains. It analyses the input transforms, determines each chain’s depth, calculates a 2‑D wind spot on a chosen projection plane, and builds a single Maya expression that drives per‑transform rotation along a specified axis with depth‑dependent amplitude, phase offsets, and a quadratic fall‑off.

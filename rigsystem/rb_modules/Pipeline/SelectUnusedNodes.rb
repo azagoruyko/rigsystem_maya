@@ -1,24 +1,31 @@
 <module name="SelectUnusedNodes" muted="0" uid="ab761cd64d194e00a36920a9780abbdc">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy
+
+cmds = proxy.cmds
 
 if not @noInputs and not @noOutputs:
     error("noInputs or noOutputs must be specified")
 
-nodes = set()
-for n in pm.ls(type=@type or None):
-    if pm.objectType(n) in @skipTypes:
+nodes = []
+defaultNodes = set(cmds.ls(defaultNodes=True) or [])
+for n in proxy.nodes((cmds.ls(type=@type) if @type else cmds.ls()) or []):
+    if n.type() in @skipTypes:
         continue
         
-    if isinstance(n, pm.nt.Transform) or isinstance(n, pm.nt.Shape):
+    if n.mobject.hasFn(om.MFn.kDagNode):
         continue
     
-    if n.isDefaultNode():
+    if str(n) in defaultNodes:
         continue                        
         
     if (@noOutputs and not n.outputs()) or (@noInputs and not n.inputs()):
-        nodes.add(n)
+        nodes.append(str(n))
         
-pm.select(nodes)]]></run>
+if nodes:
+    cmds.select(nodes, replace=True)
+else:
+    cmds.select(clear=True)]]></run>
 <doc><![CDATA[## Summary
 Selects nodes in the Maya scene that are either input‑only or output‑only, optionally filtered by node type and excluded types. The module ensures that at least one of the `noInputs` or `noOutputs` flags is set before performing the selection.
 

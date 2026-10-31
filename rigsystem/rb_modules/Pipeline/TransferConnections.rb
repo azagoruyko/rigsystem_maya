@@ -1,40 +1,50 @@
 <module name="transferConnections" type="Tools/TransferConnections" muted="0" uid="af899998ea1544a8a63825cbd28d84e9">
-<run><![CDATA[import pymel.core as pm
-import json
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
+
+
+def connectionPairs(node, source, destination):
+    connections = cmds.listConnections(node, source=source, destination=destination, plugs=True, connections=True) or []
+    return zip(connections[::2], connections[1::2])
+
+
+def attrName(plug):
+    return plug.partition(".")[2]
 
 def transferConnections(src, dest, inputs=True, outputs=True):
-    src = pm.PyNode(src)
-    dest = pm.PyNode(dest)
+    src = str(proxy.plug(src)) if "." in str(src) else str(proxy.node(src))
+    dest = str(proxy.node(dest))
     
     if inputs:
-        for aDest, aSrc in src.inputs(p=True, c=True):
-            newDest = dest + "." + aDest.longName()
+        for aDest, aSrc in connectionPairs(src, True, False):
+            newDest = f"{dest}.{attrName(aDest)}"
             
-            if pm.objExists(newDest):
-                if aDest.longName() == "inverseScale" and aSrc.longName() == "scale":
+            if cmds.objExists(newDest):
+                if attrName(aDest) == "inverseScale" and attrName(aSrc) == "scale":
                     continue
                     
-                print("Connect '%s' to '%s'"%(aSrc, newDest))            
-                pm.connectAttr(aSrc, newDest, f=True)
-                pm.disconnectAttr(aSrc, aDest)
+                print(f"Connect '{aSrc}' to '{newDest}'")
+                cmds.connectAttr(aSrc, newDest, force=True)
+                cmds.disconnectAttr(aSrc, aDest)
             else:
-                pm.warning("transferConnections: cannot find destination "+newDest)  
+                cmds.warning(f"transferConnections: cannot find destination {newDest}")
     
     if outputs:            
-        for aSrc, aDest in src.outputs(p=True, c=True):
-            newSrc = dest + "." + aSrc.longName()
+        for aSrc, aDest in connectionPairs(src, False, True):
+            newSrc = f"{dest}.{attrName(aSrc)}"
     
-            if pm.objExists(newSrc):
-                if aDest.longName() == "inverseScale" and aSrc.longName() == "scale":
+            if cmds.objExists(newSrc):
+                if attrName(aDest) == "inverseScale" and attrName(aSrc) == "scale":
                     continue
                 
-                print("Connect '%s' to '%s'"%(dest+"."+aSrc.longName(), aDest))
+                print(f"Connect '{newSrc}' to '{aDest}'")
                 try:
-                    pm.connectAttr(newSrc, aDest, f=True)
-                except:
-                    pm.warning("transferConnections: cannot connect '%s' to '%s'"%(newSrc, aDest))                
+                    cmds.connectAttr(newSrc, aDest, force=True)
+                except RuntimeError:
+                    cmds.warning(f"transferConnections: cannot connect '{newSrc}' to '{aDest}'")
             else:
-                pm.warning("transferConnections: cannot find source "+newSrc) 
+                cmds.warning(f"transferConnections: cannot find source {newSrc}")
 
 transferConnections(@src, @dest, @inputs, @outputs)
         ]]></run>

@@ -1,10 +1,12 @@
 <module name="SaveLoadTransform" muted="0" uid="8fb4d6c44f1f4743a962a6385fadb21c">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 import json
 import os
 
+cmds = proxy.cmds
+
 if @mode==0: # save transformation
-    data = {n: pm.xform(n, q=True, ws=True, m=True)
+    data = {n: cmds.xform(n, q=True, ws=True, m=True)
             for n in @objects}
     
     with open(os.path.expandvars(@file), "w") as f:
@@ -14,19 +16,18 @@ else: # load transformation
     with open(os.path.expandvars(@file), "r") as f:
         data = json.load(f)
         
-    existingNodes = [pm.PyNode(k) for k in data.keys() if pm.objExists(k)]
-    existingNodes = sorted(existingNodes, key=lambda x: len(x.getAllParents()))
+    existingNodes = [(key, proxy.node(key)) for key in data if cmds.objExists(key)]
+    existingNodes.sort(key=lambda item: len(item[1].getAllParents()))
         
-    for n in existingNodes:
-        k = n.name()
+    for k, n in existingNodes:
         
         if not @loadAllObjects and k not in @objects:
             continue
             
         s = n.s.get()
-        pm.xform(n, ws=True, m=data[k])
+        cmds.xform(n, ws=True, m=data[k])
             
-        if @keepScale and n.s.isSettable():
+        if @keepScale and cmds.getAttr(n.s, settable=True):
             n.s.set(s)
                 
         print(n)

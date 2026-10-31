@@ -1,114 +1,100 @@
-<module name="curveSkinLayers" muted="0" uid="28b7e6993fe94ae384cd4bcff1328692">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<module name="CurveSkinLayers" muted="0" uid="28b7e6993fe94ae384cd4bcff1328692">
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy, rig_utils
 
-mainCurve = pm.PyNode(@mainCurve)
-
+cmds = proxy.cmds
+mainCurve = proxy.node(@mainCurve)
 makeSkinLocalMod = module.child("makeSkinLocal")
 attachToCurveMod = module.child("attachToCurve")
 
+def curveShape(curve):
+    curve = proxy.node(curve)
+    return curve.getShapes(type="nurbsCurve")[0] if curve.type() == "transform" else curve
+
+def curveTransform(curve):
+    curve = proxy.node(curve)
+    return curve.getParent() if curve.type() == "nurbsCurve" else curve
+
 def generateJoints(curve, params, layerName):
-    curve = pm.PyNode(curve)
-    
+    curveFn = om.MFnNurbsCurve(curveShape(curve).dagPath)
     sizes = {"major": 0.5, "minor": 0.3}
-    
     joints = []
     for i, param in enumerate(params):
-        j = pm.createNode("joint", n=f"{@prefix}_{layerName}_{i+1}_joint")
-        p = curve.getPointAtParam(param)
-        j.t.set(p)    
-        j.radius.set(sizes.get(layerName, 1.0))      
-        
-        joints.append(j)
-        
-    return joints        
+        joint = proxy.create("joint", f"{@prefix}_{layerName}_{i + 1}_joint", suffix=False, skipSelection=True)
+        point = curveFn.getPointAtParam(param, om.MSpace.kWorld)
+        joint.t.set((point.x, point.y, point.z))
+        joint.radius.set(sizes.get(layerName, 1.0))
+        joints.append(joint)
+    return joints
 
-def generateControls(crv, joints, layerName, curveType, *, addTransform=False):
+def generateControls(curve, joints, layerName, curveType, *, addTransform=False):
     sizes = {"major": 0.5, "minor": 0.3}
-    
+    curveFn = om.MFnNurbsCurve(curveShape(curve).dagPath)
+    size = curveFn.length() / (len(joints) * 1.5) * sizes.get(layerName, 1.0)
     controls = []
-    sz = crv.length() / (len(joints)*1.5) * sizes.get(layerName, 1.0)        
-    
-    for i, j in enumerate(joints):
-        ctrl = pm.createNode("transform", n=f"{@prefix}_{layerName}_{i+1}_control")
-        pm.matchTransform(ctrl, j)
-        pm.parentConstraint(ctrl, j)
-        ctrl.s >> j.s
-        
+    for i, joint in enumerate(joints):
+        ctrl = proxy.create("transform", f"{@prefix}_{layerName}_{i + 1}_control", suffix=False)
+        cmds.matchTransform(str(ctrl), str(joint))
+        cmds.parentConstraint(str(ctrl), str(joint))
+        ctrl.s >> joint.s
+
         if addTransform:
-            t = pm.createNode("transform", n=ctrl+"_transform")
-            pm.matchTransform(t, ctrl)
-            t | ctrl
-        
+            transform = proxy.create("transform", f"{ctrl}_transform", suffix=False)
+            cmds.matchTransform(str(transform), str(ctrl))
+            transform | ctrl
+
         rig_utils.setToOffsetParentMatrix(ctrl)
-        
-        h = rig_utils.curve.makeCurve("helper", curveType)
-        pm.matchTransform(h, ctrl)
-        h.s.set([sz, sz, sz])
-        
-        rig_utils.curve.makeFromCurve(ctrl, h)
-        pm.delete(h)
-        
-        if layerName in ["main", "major"]:
+        helper = rig_utils.curve.makeCurve("helper", curveType)
+        cmds.matchTransform(str(helper), str(ctrl))
+        helper.s.set((size, size, size))
+        rig_utils.curve.makeFromCurve(ctrl, helper)
+        cmds.delete(str(helper))
+
+        if layerName in ("main", "major"):
             rig_utils.lockTRS(ctrl, [], [], [], 1)
-        else:            
-            rig_utils.lockTRS(ctrl, [], [1,1,1], [1,1,1], 1)
-        
-        controls.append(ctrl)        
-        
-    return controls        
-    
+        else:
+            rig_utils.lockTRS(ctrl, [], [1, 1, 1], [1, 1, 1], 1)
+        controls.append(ctrl)
+    return controls
+
+def duplicateCurve(curve, layerName):
+    duplicate = proxy.node(cmds.duplicate(str(curveTransform(curve)))[0])
+    duplicate.rename(f"{@prefix}_{layerName}_curve")
+    curveShape(curve).local >> curveShape(duplicate).create
+    return duplicate
+
+def attachControls(curve, controls):
+    attachToCurveMod.attr.curve.set(str(curve))
+    attachToCurveMod.attr.transforms.set([str(ctrl.getParent()) for ctrl in controls])
+    attachToCurveMod.run()
+
+def makeLocal(curve, controls):
+    makeSkinLocalMod.attr.skinnedGeo.set(str(curve))
+    makeSkinLocalMod.run()
+    basis = makeSkinLocalMod.attr.out_basis.get()
+    for ctrl, basisName in zip(controls, basis):
+        ctrl.getParent() | proxy.node(basisName)
+
 mainJoints = generateJoints(mainCurve, @mainParams, "main")
-pm.skinCluster(mainJoints, mainCurve, tsb=True, dr=3.0)
+cmds.skinCluster([str(joint) for joint in mainJoints], str(curveTransform(mainCurve)), tsb=True, dr=3.0)
 mainControls = generateControls(mainCurve, mainJoints, "main", "rect")
 
-# major
-majorCurve = mainCurve.duplicate()[0]
-majorCurve.rename(@prefix+"_major_curve")
-mainCurve.local >> majorCurve.create
-
+majorCurve = duplicateCurve(mainCurve, "major")
 majorJoints = generateJoints(majorCurve, @majorParams, "major")
-pm.skinCluster(majorJoints, majorCurve, tsb=True, dr=3.0)
-
+cmds.skinCluster([str(joint) for joint in majorJoints], str(majorCurve), tsb=True, dr=3.0)
 majorControls = generateControls(majorCurve, majorJoints, "major", "sphere", addTransform=True)
+attachControls(mainCurve, majorControls)
+makeLocal(majorCurve, majorControls)
 
-attachToCurveMod.attr.curve.set(mainCurve.name())
-attachToCurveMod.attr.transforms.set([ctrl.getParent().name() for ctrl in majorControls])
-attachToCurveMod.run()
-
-makeSkinLocalMod.attr.skinnedGeo.set(majorCurve.name())
-makeSkinLocalMod.run()
-out_basis = makeSkinLocalMod.attr.out_basis.get()
-
-for i, ctrl in enumerate(majorControls):
-    ctrl.getParent() | pm.PyNode(out_basis[i])
-
-# minor
-minorCurve = mainCurve.duplicate()[0]
-minorCurve.rename(@prefix+"_minor_curve")
-majorCurve.local >> minorCurve.create
-
+minorCurve = duplicateCurve(mainCurve, "minor")
 minorJoints = generateJoints(minorCurve, @minorParams, "minor")
-pm.skinCluster(minorJoints, minorCurve, tsb=True, dr=3.0)
-
+cmds.skinCluster([str(joint) for joint in minorJoints], str(minorCurve), tsb=True, dr=3.0)
 minorControls = generateControls(minorCurve, minorJoints, "minor", "sphere", addTransform=True)
+attachControls(majorCurve, minorControls)
+makeLocal(minorCurve, minorControls)
 
-attachToCurveMod.attr.curve.set(majorCurve.name())
-attachToCurveMod.attr.transforms.set([ctrl.getParent().name() for ctrl in minorControls])
-attachToCurveMod.run()
-
-makeSkinLocalMod.attr.skinnedGeo.set(minorCurve.name())
-makeSkinLocalMod.run()
-
-out_basis = makeSkinLocalMod.attr.out_basis.get()
-
-for i, ctrl in enumerate(minorControls):
-    ctrl.getParent() | pm.PyNode(out_basis[i])
-
-# apply wire    
-pm.wire(@edgeCurve, gw=False, ce=0.0, li=0.0, dds=[0, 100], w=minorCurve, name=@edgeCurve+'_wire')
-
-    ]]></run>
+cmds.wire(@edgeCurve, gw=False, ce=0.0, li=0.0, dds=[0, 100], w=str(minorCurve), name=f"{@edgeCurve}_wire")
+]]></run>
 <attributes>
 <attr name="prefix" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="edgeCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower_curve", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
@@ -119,26 +105,33 @@ pm.wire(@edgeCurve, gw=False, ce=0.0, li=0.0, dds=[0, 100], w=minorCurve, name=@
 </attributes>
 <children>
 <module name="makeSkinLocal" muted="1" uid="c3d086240a8642d5bcd762328d68df91">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.api.OpenMaya as om
+import maya.api.OpenMayaAnim as oma
+import maya.mel as mel
+from rigsystem import proxy
 
-skinned = pm.PyNode(@skinnedGeo)
-skin = pm.mel.eval("findRelatedSkinCluster "+skinned)
+cmds = proxy.cmds
+skinned = proxy.node(@skinnedGeo)
+skin = mel.eval(f'findRelatedSkinCluster "{skinned}"')
 if not skin:
     error(f"Cannot find skinCluster for {skinned}")
     
-skin = pm.PyNode(skin)
+skin = proxy.node(skin)
+skinFn = oma.MFnSkinCluster(skin.mobject)
 basis = []
     
-for i, inf in enumerate(skin.influenceObjects()):
-    if skin.bindPreMatrix[i].inputs():
-        warning(f"bindPreMatrix[{i}] is connected, skipped")
+for influence in skinFn.influenceObjects():
+    index = skinFn.indexForInfluenceObject(influence)
+    preMatrix = skin.bindPreMatrix[index]
+    if preMatrix.inputs():
+        warning(f"bindPreMatrix[{index}] is connected, skipped")
         continue
         
-    t = pm.createNode("transform", n=inf+"_basis")
-    m = skin.bindPreMatrix[i].get().inverse()
-    pm.xform(t, ws=True, m=m)
-    t.worldInverseMatrix >> skin.bindPreMatrix[i]
-    basis.append(t.name())
+    t = proxy.create("transform", f"{influence.partialPathName()}_basis", suffix=False)
+    matrix = om.MMatrix(preMatrix.get()).inverse()
+    cmds.xform(str(t), ws=True, matrix=list(matrix))
+    t.worldInverseMatrix[0] >> preMatrix
+    basis.append(str(t))
     
 @set_out_basis(basis)    ]]></run>
 <doc><![CDATA[## Summary  
@@ -163,33 +156,37 @@ Creates a local basis transform for each influence of a skin cluster, replacing 
 </attributes>
 </module>
 <module name="attachToCurve" muted="1" uid="b79ce70fe8fc4009a31219c30b5eb506">
-<run><![CDATA[import pymel.core as pm
-import maya.cmds as cmds
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy
 
-curve = pm.PyNode(@curve)
-transforms = [pm.PyNode(t) for t in @transforms]
+cmds = proxy.cmds
 
-curveShape = curve.getShape() if curve.type() == "transform" else curve
+curve = proxy.node(@curve)
+transforms = proxy.nodes(@transforms)
 
-cpos = pm.createNode("nearestPointOnCurve", n="attachToCurve_cpos_tmp")
-curveShape.worldSpace[0] >> cpos.inputCurve
+curveShape = curve.getShapes(type="nurbsCurve")[0] if curve.type() == "transform" else curve
+curveFn = om.MFnNurbsCurve(curveShape.dagPath)
 
 for t in transforms:
-	pos = pm.xform(t, q=True, ws=True, t=True)
-	cpos.inPosition.set(pos)
-	param = cpos.parameter.get()
+    position = om.MPoint(cmds.xform(str(t), q=True, ws=True, t=True))
+    closest = curveFn.closestPoint(position, 1e-6, om.MSpace.kWorld)
+    param = curveFn.getParamAtPoint(closest, 1e-6, om.MSpace.kWorld)
 
-	# Create pointOnCurveInfo to drive position
-	poci = pm.createNode("pointOnCurveInfo", n=t.name() + "_pointOnCurveInfo")
-	curveShape.worldSpace[0] >> poci.inputCurve
-	poci.parameter.set(param)
-	poci.turnOnPercentage.set(False)
-
-	# Connect position to transform translate
-	poci.position >> t.translate
-
-pm.delete(cpos)
-]]></run>
+    # Create pointOnCurveInfo to drive position
+    poci = proxy.create(
+        "pointOnCurveInfo", f"{t}"
+    )
+    curveShape.worldSpace[0] >> poci.inputCurve
+    poci.parameter.set(param)
+    poci.turnOnPercentage.set(False)
+    
+    pmm = proxy.create(
+        "pointMatrixMultDL", f"{t}_parentInverse"
+    )
+    poci.position >> pmm.inPoint
+    t.parentInverseMatrix >> pmm.inMatrix    
+    pmm.output >> t.translate
+    ]]></run>
 <doc><![CDATA[## Summary  
 The **attachToCurve** module snaps a list of transforms to a NURBS curve by projecting each transform’s world position onto the curve. It uses a `nearestPointOnCurve` node to find the closest curve parameter and a `pointOnCurveInfo` node to drive the transform’s translate, leaving rotation and scale untouched.
 

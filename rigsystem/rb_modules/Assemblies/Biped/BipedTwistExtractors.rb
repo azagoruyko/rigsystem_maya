@@ -31,32 +31,34 @@ For each limb (neck, left/right arms, left/right legs) the module generates two 
 </attributes>
 <children>
 <module name="neck" muted="0" uid="08fbae9dd4ed41d48dc05d69ddbf6134">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 prefix = @name + "_twistExtractor"
 
-orientation = pm.PyNode(@orientation)
-parent = pm.PyNode(@parent)
+orientation = proxy.node(@orientation)
+parent = proxy.node(@parent)
 
-aux1 = pm.createNode("joint", n=prefix+"_1_joint", p=parent)
-aux2 = pm.createNode("joint", n=prefix+"_2_joint", p=aux1)
+aux1 = proxy.create("joint", prefix + "_1", parent=parent)
+aux2 = proxy.create("joint", prefix + "_2", parent=aux1)
 
-pm.delete(pm.orientConstraint(@orientation, aux1))
-pm.delete(pm.orientConstraint(@orientation, aux2))
+cmds.delete(cmds.orientConstraint(orientation, aux1))
+cmds.delete(cmds.orientConstraint(orientation, aux2))
 
-pm.delete(pm.pointConstraint(@point1, aux1))
-pm.delete(pm.pointConstraint(@point2, aux2))
+cmds.delete(cmds.pointConstraint(@point1, aux1))
+cmds.delete(cmds.pointConstraint(@point2, aux2))
 
-ik = pm.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")
-ik[0].rename(prefix+"_ikHandle")
-ik[0].v.set(False)
-parent | ik[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")[0])
+ikHandle.rename(prefix + "_ikHandle")
+ikHandle.v.set(False)
+parent | ikHandle
 
-pm.scaleConstraint(parent, aux1)
+cmds.scaleConstraint(parent, aux1)
 
-pm.pointConstraint(@point1, aux1)
-pm.pointConstraint(@point2, ik[0])
-pm.orientConstraint(@orient, ik[0], mo=True)]]></run>
+cmds.pointConstraint(@point1, aux1)
+cmds.pointConstraint(@point2, ikHandle)
+cmds.orientConstraint(@orient, ikHandle, mo=True)]]></run>
 <doc><![CDATA[## Summary
 The module creates a twist‑extractor rig for a two‑joint limb. It builds two helper joints, an IK handle between them, and applies orientation, point, and scale constraints so that the twist of the source joint is distributed smoothly along the chain.
 
@@ -99,32 +101,34 @@ These nodes can be connected to downstream deformation or control systems to app
 </attributes>
 </module>
 <module name="L_arm_1" muted="0" uid="08fbae9dd4ed41d48dc05d69ddbf6134">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 prefix = @name + "_twistExtractor"
 
-orientation = pm.PyNode(@orientation)
-parent = pm.PyNode(@parent)
+orientation = proxy.node(@orientation)
+parent = proxy.node(@parent)
 
-aux1 = pm.createNode("joint", n=prefix+"_1_joint", p=parent)
-aux2 = pm.createNode("joint", n=prefix+"_2_joint", p=aux1)
+aux1 = proxy.create("joint", prefix + "_1", parent=parent)
+aux2 = proxy.create("joint", prefix + "_2", parent=aux1)
 
-pm.delete(pm.orientConstraint(@orientation, aux1))
-pm.delete(pm.orientConstraint(@orientation, aux2))
+cmds.delete(cmds.orientConstraint(orientation, aux1))
+cmds.delete(cmds.orientConstraint(orientation, aux2))
 
-pm.delete(pm.pointConstraint(@point1, aux1))
-pm.delete(pm.pointConstraint(@point2, aux2))
+cmds.delete(cmds.pointConstraint(@point1, aux1))
+cmds.delete(cmds.pointConstraint(@point2, aux2))
 
-ik = pm.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")
-ik[0].rename(prefix+"_ikHandle")
-ik[0].v.set(False)
-parent | ik[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")[0])
+ikHandle.rename(prefix + "_ikHandle")
+ikHandle.v.set(False)
+parent | ikHandle
 
-pm.scaleConstraint(parent, aux1)
+cmds.scaleConstraint(parent, aux1)
 
-pm.pointConstraint(@point1, aux1)
-pm.pointConstraint(@point2, ik[0])
-pm.orientConstraint(@orient, ik[0], mo=True)]]></run>
+cmds.pointConstraint(@point1, aux1)
+cmds.pointConstraint(@point2, ikHandle)
+cmds.orientConstraint(@orient, ikHandle, mo=True)]]></run>
 <doc><![CDATA[## Summary
 The module creates a twist‑extractor rig for a two‑joint limb. It builds two helper joints, an IK handle between them, and applies orientation, point, and scale constraints so that the twist of the source joint is distributed smoothly along the chain.
 
@@ -167,32 +171,34 @@ These nodes can be connected to downstream deformation or control systems to app
 </attributes>
 </module>
 <module name="L_arm_2" muted="0" uid="08fbae9dd4ed41d48dc05d69ddbf6134">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 prefix = @name + "_twistExtractor"
 
-orientation = pm.PyNode(@orientation)
-parent = pm.PyNode(@parent)
+orientation = proxy.node(@orientation)
+parent = proxy.node(@parent)
 
-aux1 = pm.createNode("joint", n=prefix+"_1_joint", p=parent)
-aux2 = pm.createNode("joint", n=prefix+"_2_joint", p=aux1)
+aux1 = proxy.create("joint", prefix + "_1", parent=parent)
+aux2 = proxy.create("joint", prefix + "_2", parent=aux1)
 
-pm.delete(pm.orientConstraint(@orientation, aux1))
-pm.delete(pm.orientConstraint(@orientation, aux2))
+cmds.delete(cmds.orientConstraint(orientation, aux1))
+cmds.delete(cmds.orientConstraint(orientation, aux2))
 
-pm.delete(pm.pointConstraint(@point1, aux1))
-pm.delete(pm.pointConstraint(@point2, aux2))
+cmds.delete(cmds.pointConstraint(@point1, aux1))
+cmds.delete(cmds.pointConstraint(@point2, aux2))
 
-ik = pm.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")
-ik[0].rename(prefix+"_ikHandle")
-ik[0].v.set(False)
-parent | ik[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")[0])
+ikHandle.rename(prefix + "_ikHandle")
+ikHandle.v.set(False)
+parent | ikHandle
 
-pm.scaleConstraint(parent, aux1)
+cmds.scaleConstraint(parent, aux1)
 
-pm.pointConstraint(@point1, aux1)
-pm.pointConstraint(@point2, ik[0])
-pm.orientConstraint(@orient, ik[0], mo=True)]]></run>
+cmds.pointConstraint(@point1, aux1)
+cmds.pointConstraint(@point2, ikHandle)
+cmds.orientConstraint(@orient, ikHandle, mo=True)]]></run>
 <doc><![CDATA[## Summary
 The module creates a twist‑extractor rig for a two‑joint limb. It builds two helper joints, an IK handle between them, and applies orientation, point, and scale constraints so that the twist of the source joint is distributed smoothly along the chain.
 
@@ -235,32 +241,34 @@ These nodes can be connected to downstream deformation or control systems to app
 </attributes>
 </module>
 <module name="R_arm_1" muted="0" uid="08fbae9dd4ed41d48dc05d69ddbf6134">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 prefix = @name + "_twistExtractor"
 
-orientation = pm.PyNode(@orientation)
-parent = pm.PyNode(@parent)
+orientation = proxy.node(@orientation)
+parent = proxy.node(@parent)
 
-aux1 = pm.createNode("joint", n=prefix+"_1_joint", p=parent)
-aux2 = pm.createNode("joint", n=prefix+"_2_joint", p=aux1)
+aux1 = proxy.create("joint", prefix + "_1", parent=parent)
+aux2 = proxy.create("joint", prefix + "_2", parent=aux1)
 
-pm.delete(pm.orientConstraint(@orientation, aux1))
-pm.delete(pm.orientConstraint(@orientation, aux2))
+cmds.delete(cmds.orientConstraint(orientation, aux1))
+cmds.delete(cmds.orientConstraint(orientation, aux2))
 
-pm.delete(pm.pointConstraint(@point1, aux1))
-pm.delete(pm.pointConstraint(@point2, aux2))
+cmds.delete(cmds.pointConstraint(@point1, aux1))
+cmds.delete(cmds.pointConstraint(@point2, aux2))
 
-ik = pm.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")
-ik[0].rename(prefix+"_ikHandle")
-ik[0].v.set(False)
-parent | ik[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")[0])
+ikHandle.rename(prefix + "_ikHandle")
+ikHandle.v.set(False)
+parent | ikHandle
 
-pm.scaleConstraint(parent, aux1)
+cmds.scaleConstraint(parent, aux1)
 
-pm.pointConstraint(@point1, aux1)
-pm.pointConstraint(@point2, ik[0])
-pm.orientConstraint(@orient, ik[0], mo=True)]]></run>
+cmds.pointConstraint(@point1, aux1)
+cmds.pointConstraint(@point2, ikHandle)
+cmds.orientConstraint(@orient, ikHandle, mo=True)]]></run>
 <doc><![CDATA[## Summary
 The module creates a twist‑extractor rig for a two‑joint limb. It builds two helper joints, an IK handle between them, and applies orientation, point, and scale constraints so that the twist of the source joint is distributed smoothly along the chain.
 
@@ -303,32 +311,34 @@ These nodes can be connected to downstream deformation or control systems to app
 </attributes>
 </module>
 <module name="R_arm_2" muted="0" uid="08fbae9dd4ed41d48dc05d69ddbf6134">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 prefix = @name + "_twistExtractor"
 
-orientation = pm.PyNode(@orientation)
-parent = pm.PyNode(@parent)
+orientation = proxy.node(@orientation)
+parent = proxy.node(@parent)
 
-aux1 = pm.createNode("joint", n=prefix+"_1_joint", p=parent)
-aux2 = pm.createNode("joint", n=prefix+"_2_joint", p=aux1)
+aux1 = proxy.create("joint", prefix + "_1", parent=parent)
+aux2 = proxy.create("joint", prefix + "_2", parent=aux1)
 
-pm.delete(pm.orientConstraint(@orientation, aux1))
-pm.delete(pm.orientConstraint(@orientation, aux2))
+cmds.delete(cmds.orientConstraint(orientation, aux1))
+cmds.delete(cmds.orientConstraint(orientation, aux2))
 
-pm.delete(pm.pointConstraint(@point1, aux1))
-pm.delete(pm.pointConstraint(@point2, aux2))
+cmds.delete(cmds.pointConstraint(@point1, aux1))
+cmds.delete(cmds.pointConstraint(@point2, aux2))
 
-ik = pm.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")
-ik[0].rename(prefix+"_ikHandle")
-ik[0].v.set(False)
-parent | ik[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")[0])
+ikHandle.rename(prefix + "_ikHandle")
+ikHandle.v.set(False)
+parent | ikHandle
 
-pm.scaleConstraint(parent, aux1)
+cmds.scaleConstraint(parent, aux1)
 
-pm.pointConstraint(@point1, aux1)
-pm.pointConstraint(@point2, ik[0])
-pm.orientConstraint(@orient, ik[0], mo=True)]]></run>
+cmds.pointConstraint(@point1, aux1)
+cmds.pointConstraint(@point2, ikHandle)
+cmds.orientConstraint(@orient, ikHandle, mo=True)]]></run>
 <doc><![CDATA[## Summary
 The module creates a twist‑extractor rig for a two‑joint limb. It builds two helper joints, an IK handle between them, and applies orientation, point, and scale constraints so that the twist of the source joint is distributed smoothly along the chain.
 
@@ -371,32 +381,34 @@ These nodes can be connected to downstream deformation or control systems to app
 </attributes>
 </module>
 <module name="L_leg_1" muted="0" uid="08fbae9dd4ed41d48dc05d69ddbf6134">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 prefix = @name + "_twistExtractor"
 
-orientation = pm.PyNode(@orientation)
-parent = pm.PyNode(@parent)
+orientation = proxy.node(@orientation)
+parent = proxy.node(@parent)
 
-aux1 = pm.createNode("joint", n=prefix+"_1_joint", p=parent)
-aux2 = pm.createNode("joint", n=prefix+"_2_joint", p=aux1)
+aux1 = proxy.create("joint", prefix + "_1", parent=parent)
+aux2 = proxy.create("joint", prefix + "_2", parent=aux1)
 
-pm.delete(pm.orientConstraint(@orientation, aux1))
-pm.delete(pm.orientConstraint(@orientation, aux2))
+cmds.delete(cmds.orientConstraint(orientation, aux1))
+cmds.delete(cmds.orientConstraint(orientation, aux2))
 
-pm.delete(pm.pointConstraint(@point1, aux1))
-pm.delete(pm.pointConstraint(@point2, aux2))
+cmds.delete(cmds.pointConstraint(@point1, aux1))
+cmds.delete(cmds.pointConstraint(@point2, aux2))
 
-ik = pm.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")
-ik[0].rename(prefix+"_ikHandle")
-ik[0].v.set(False)
-parent | ik[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")[0])
+ikHandle.rename(prefix + "_ikHandle")
+ikHandle.v.set(False)
+parent | ikHandle
 
-pm.scaleConstraint(parent, aux1)
+cmds.scaleConstraint(parent, aux1)
 
-pm.pointConstraint(@point1, aux1)
-pm.pointConstraint(@point2, ik[0])
-pm.orientConstraint(@orient, ik[0], mo=True)]]></run>
+cmds.pointConstraint(@point1, aux1)
+cmds.pointConstraint(@point2, ikHandle)
+cmds.orientConstraint(@orient, ikHandle, mo=True)]]></run>
 <doc><![CDATA[## Summary
 The module creates a twist‑extractor rig for a two‑joint limb. It builds two helper joints, an IK handle between them, and applies orientation, point, and scale constraints so that the twist of the source joint is distributed smoothly along the chain.
 
@@ -439,32 +451,34 @@ These nodes can be connected to downstream deformation or control systems to app
 </attributes>
 </module>
 <module name="L_leg_2" muted="0" uid="08fbae9dd4ed41d48dc05d69ddbf6134">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 prefix = @name + "_twistExtractor"
 
-orientation = pm.PyNode(@orientation)
-parent = pm.PyNode(@parent)
+orientation = proxy.node(@orientation)
+parent = proxy.node(@parent)
 
-aux1 = pm.createNode("joint", n=prefix+"_1_joint", p=parent)
-aux2 = pm.createNode("joint", n=prefix+"_2_joint", p=aux1)
+aux1 = proxy.create("joint", prefix + "_1", parent=parent)
+aux2 = proxy.create("joint", prefix + "_2", parent=aux1)
 
-pm.delete(pm.orientConstraint(@orientation, aux1))
-pm.delete(pm.orientConstraint(@orientation, aux2))
+cmds.delete(cmds.orientConstraint(orientation, aux1))
+cmds.delete(cmds.orientConstraint(orientation, aux2))
 
-pm.delete(pm.pointConstraint(@point1, aux1))
-pm.delete(pm.pointConstraint(@point2, aux2))
+cmds.delete(cmds.pointConstraint(@point1, aux1))
+cmds.delete(cmds.pointConstraint(@point2, aux2))
 
-ik = pm.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")
-ik[0].rename(prefix+"_ikHandle")
-ik[0].v.set(False)
-parent | ik[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")[0])
+ikHandle.rename(prefix + "_ikHandle")
+ikHandle.v.set(False)
+parent | ikHandle
 
-pm.scaleConstraint(parent, aux1)
+cmds.scaleConstraint(parent, aux1)
 
-pm.pointConstraint(@point1, aux1)
-pm.pointConstraint(@point2, ik[0])
-pm.orientConstraint(@orient, ik[0], mo=True)]]></run>
+cmds.pointConstraint(@point1, aux1)
+cmds.pointConstraint(@point2, ikHandle)
+cmds.orientConstraint(@orient, ikHandle, mo=True)]]></run>
 <doc><![CDATA[## Summary
 The module creates a twist‑extractor rig for a two‑joint limb. It builds two helper joints, an IK handle between them, and applies orientation, point, and scale constraints so that the twist of the source joint is distributed smoothly along the chain.
 
@@ -507,32 +521,34 @@ These nodes can be connected to downstream deformation or control systems to app
 </attributes>
 </module>
 <module name="R_leg_1" muted="0" uid="08fbae9dd4ed41d48dc05d69ddbf6134">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 prefix = @name + "_twistExtractor"
 
-orientation = pm.PyNode(@orientation)
-parent = pm.PyNode(@parent)
+orientation = proxy.node(@orientation)
+parent = proxy.node(@parent)
 
-aux1 = pm.createNode("joint", n=prefix+"_1_joint", p=parent)
-aux2 = pm.createNode("joint", n=prefix+"_2_joint", p=aux1)
+aux1 = proxy.create("joint", prefix + "_1", parent=parent)
+aux2 = proxy.create("joint", prefix + "_2", parent=aux1)
 
-pm.delete(pm.orientConstraint(@orientation, aux1))
-pm.delete(pm.orientConstraint(@orientation, aux2))
+cmds.delete(cmds.orientConstraint(orientation, aux1))
+cmds.delete(cmds.orientConstraint(orientation, aux2))
 
-pm.delete(pm.pointConstraint(@point1, aux1))
-pm.delete(pm.pointConstraint(@point2, aux2))
+cmds.delete(cmds.pointConstraint(@point1, aux1))
+cmds.delete(cmds.pointConstraint(@point2, aux2))
 
-ik = pm.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")
-ik[0].rename(prefix+"_ikHandle")
-ik[0].v.set(False)
-parent | ik[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")[0])
+ikHandle.rename(prefix + "_ikHandle")
+ikHandle.v.set(False)
+parent | ikHandle
 
-pm.scaleConstraint(parent, aux1)
+cmds.scaleConstraint(parent, aux1)
 
-pm.pointConstraint(@point1, aux1)
-pm.pointConstraint(@point2, ik[0])
-pm.orientConstraint(@orient, ik[0], mo=True)]]></run>
+cmds.pointConstraint(@point1, aux1)
+cmds.pointConstraint(@point2, ikHandle)
+cmds.orientConstraint(@orient, ikHandle, mo=True)]]></run>
 <doc><![CDATA[## Summary
 The module creates a twist‑extractor rig for a two‑joint limb. It builds two helper joints, an IK handle between them, and applies orientation, point, and scale constraints so that the twist of the source joint is distributed smoothly along the chain.
 
@@ -575,32 +591,34 @@ These nodes can be connected to downstream deformation or control systems to app
 </attributes>
 </module>
 <module name="R_leg_2" muted="0" uid="08fbae9dd4ed41d48dc05d69ddbf6134">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 prefix = @name + "_twistExtractor"
 
-orientation = pm.PyNode(@orientation)
-parent = pm.PyNode(@parent)
+orientation = proxy.node(@orientation)
+parent = proxy.node(@parent)
 
-aux1 = pm.createNode("joint", n=prefix+"_1_joint", p=parent)
-aux2 = pm.createNode("joint", n=prefix+"_2_joint", p=aux1)
+aux1 = proxy.create("joint", prefix + "_1", parent=parent)
+aux2 = proxy.create("joint", prefix + "_2", parent=aux1)
 
-pm.delete(pm.orientConstraint(@orientation, aux1))
-pm.delete(pm.orientConstraint(@orientation, aux2))
+cmds.delete(cmds.orientConstraint(orientation, aux1))
+cmds.delete(cmds.orientConstraint(orientation, aux2))
 
-pm.delete(pm.pointConstraint(@point1, aux1))
-pm.delete(pm.pointConstraint(@point2, aux2))
+cmds.delete(cmds.pointConstraint(@point1, aux1))
+cmds.delete(cmds.pointConstraint(@point2, aux2))
 
-ik = pm.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")
-ik[0].rename(prefix+"_ikHandle")
-ik[0].v.set(False)
-parent | ik[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=aux1, ee=aux2, solver="ikSCsolver")[0])
+ikHandle.rename(prefix + "_ikHandle")
+ikHandle.v.set(False)
+parent | ikHandle
 
-pm.scaleConstraint(parent, aux1)
+cmds.scaleConstraint(parent, aux1)
 
-pm.pointConstraint(@point1, aux1)
-pm.pointConstraint(@point2, ik[0])
-pm.orientConstraint(@orient, ik[0], mo=True)]]></run>
+cmds.pointConstraint(@point1, aux1)
+cmds.pointConstraint(@point2, ikHandle)
+cmds.orientConstraint(@orient, ikHandle, mo=True)]]></run>
 <doc><![CDATA[## Summary
 The module creates a twist‑extractor rig for a two‑joint limb. It builds two helper joints, an IK handle between them, and applies orientation, point, and scale constraints so that the twist of the source joint is distributed smoothly along the chain.
 
@@ -643,12 +661,10 @@ These nodes can be connected to downstream deformation or control systems to app
 </attributes>
 </module>
 <module name="resetOffsets" muted="0" uid="">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
-pm.PyNode("L_arm_1_twistExtractor_ikHandle_orientConstraint1").offset.set([0,0,0])
-pm.PyNode("R_arm_1_twistExtractor_ikHandle_orientConstraint1").offset.set([0,0,0])
-pm.PyNode("L_arm_2_twistExtractor_ikHandle_orientConstraint1").offset.set([0,0,0])
-pm.PyNode("R_arm_2_twistExtractor_ikHandle_orientConstraint1").offset.set([0,0,0])]]></run>
+for name in ("L_arm_1", "R_arm_1", "L_arm_2", "R_arm_2"):
+    proxy.node(name + "_twistExtractor_ikHandle_orientConstraint1").offset.set((0, 0, 0))]]></run>
 </module>
 </children>
 </module>

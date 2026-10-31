@@ -1,33 +1,30 @@
 <module name="SkinWeightsToCluster" muted="0" uid="3a23aeeaaeab4e46b893c1e5725b0f72">
 <run><![CDATA[import maya.cmds as cmds
-import pymel.core as pm
+import maya.mel as mel
 from rigsystem.rig_utils import skinCluster as skin_utils
 
-mesh = @mesh
-bone = pm.PyNode(@bone)
-cluster = @cluster
 
-if cmds.nodeType(cluster) != "cluster":
-    error(f"'{cluster}' is not a cluster deformer.")
+if cmds.nodeType(@cluster) != "cluster":
+    error(f"'{@cluster}' is not a cluster deformer.")
 
-meshShape = (cmds.listRelatives(mesh, shapes=True, noIntermediate=True, fullPath=True) or [mesh])[0]
+meshShape = (cmds.listRelatives(@mesh, shapes=True, noIntermediate=True, fullPath=True) or [@mesh])[0]
 if cmds.nodeType(meshShape) != "mesh":
-    error(f"'{mesh}' is not a polygon mesh.")
-if not pm.mel.findRelatedSkinCluster(mesh):
-    error(f"'{mesh}' has no skin cluster.")
+    error(f"'{@mesh}' is not a polygon mesh.")
+if not mel.eval(f'findRelatedSkinCluster "{@mesh}"'):
+    error(f"'{@mesh}' has no skin cluster.")
 
-skinHelper = skin_utils.SkinClusterHelper(mesh)
-if skinHelper.getInfluencePhysicalIndex(bone) is None:
-    error(f"'{bone}' is not an influence of '{skinHelper.node()}'.")
+skinHelper = skin_utils.SkinClusterHelper(@mesh)
+if skinHelper.getInfluencePhysicalIndex(@bone) is None:
+    error(f"'{@bone}' is not an influence of '{skinHelper.node()}'.")
 
-weights = skinHelper.getInfluenceWeights(bone)
+weights = skinHelper.getInfluenceWeights(@bone)
 if len(weights) != cmds.polyEvaluate(meshShape, vertex=True):
     error("Skin weight count does not match the mesh vertex count.")
 
-geometries = cmds.deformer(cluster, query=True, geometry=True) or []
-geometryIndices = cmds.getAttr(f"{cluster}.outputGeometry", multiIndices=True) or []
+geometries = cmds.deformer(@cluster, query=True, geometry=True) or []
+geometryIndices = cmds.getAttr(f"{@cluster}.outputGeometry", multiIndices=True) or []
 if len(geometries) != 1 or len(geometryIndices) != 1:
-    error(f"'{cluster}' must deform exactly one geometry.")
+    error(f"'{@cluster}' must deform exactly one geometry.")
 
 clusterGeometry = geometries[0]
 clusterShape = (cmds.listRelatives(clusterGeometry, shapes=True, noIntermediate=True, fullPath=True) or
@@ -40,7 +37,7 @@ if len(weights) != cmds.polyEvaluate(clusterShape, vertex=True):
 geometryIndex = geometryIndices[0]
 
 cmds.setAttr(
-    f"{cluster}.weightList[{geometryIndex}].weights[0:{len(weights) - 1}]",
+    f"{@cluster}.weightList[{geometryIndex}].weights[0:{len(weights) - 1}]",
     *weights,
     size=len(weights),
 )]]></run>

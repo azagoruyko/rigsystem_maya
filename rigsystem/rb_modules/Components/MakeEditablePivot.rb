@@ -1,48 +1,50 @@
 <module name="makeEditablePivot" muted="0" uid="14932544be434020a1338edbc2110db2">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
+
+cmds = proxy.cmds
 
 makeHelperMod = module.child("MakeHelper")
 
 controls = []
 for tr in @transforms:
-    tr = pm.PyNode(tr)
+    tr = proxy.node(tr)
     children = tr.getChildren(type="transform")
     if not children:
-        warning(f"{tr.name()} must have children to edit pivot for")
+        warning(f"{tr} must have children to edit pivot for")
         continue
         
-    pivot = pm.createNode("transform", n=tr+"_pivot_transform", p=tr.getParent())
-    pm.matchTransform(pivot, tr)
+    name = f"{tr.namespace()}{tr.localName()}"
+    pivot = proxy.create("transform", f"{name}_pivot", parent=tr.getParent())
+    cmds.matchTransform(pivot, tr)
     rig_utils.setToOffsetParentMatrix(pivot)
     
     pivot | tr
             
-    pivotOffset = pm.createNode("transform", n=tr+"_pivot_offset_transform", p=tr)
-    pm.parent(children, pivotOffset)
+    pivotOffset = proxy.create("transform", f"{name}_pivot_offset", parent=tr)
+    cmds.parent(children, pivotOffset)
     
     rig_utils.lockTRS(pivotOffset)
     
     pivot.inverseMatrix >> pivotOffset.offsetParentMatrix
 
     if @makeShape:
-        h = pivot + "_helper"
+        h = f"{name}_pivot_helper"
         makeHelperMod.attr.name.set(h)
         makeHelperMod.run()
-        pm.matchTransform(h, tr)
+        cmds.matchTransform(h, tr)
         
-        ctrl = pm.createNode("transform", n=tr+"_pivot_control")
-        pivot.parentMatrix >> ctrl.offsetParentMatrix
+        ctrl = proxy.create("transform", f"{name}_pivot_control", suffix=False)
+        pivot.parentMatrix[0] >> ctrl.offsetParentMatrix
         ctrl.inheritsTransform.set(False)
         
         rig_utils.curve.makeFromCurve(ctrl, h)
-        pm.delete(h)
+        cmds.delete(h)
         rig_utils.lockTRS(ctrl, [], [])
         
-        pm.parentConstraint(ctrl, pivot, mo=True)
+        cmds.parentConstraint(ctrl, pivot, mo=True)
         controls.append(ctrl)
         
-@set_out_controls([c.name() for c in controls])
+@set_out_controls([str(c) for c in controls])
 
 ]]></run>
 <doc><![CDATA[## Summary  

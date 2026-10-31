@@ -44,17 +44,24 @@ This setup provides a reusable, symmetric averaging framework for all major bipe
 </attributes>
 <children>
 <module name="L_shoulder" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -65,15 +72,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -81,13 +88,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -100,21 +110,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -122,16 +138,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -140,46 +156,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         
@@ -237,17 +257,24 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </attributes>
 </module>
 <module name="R_shoulder" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -258,15 +285,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -274,13 +301,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -293,21 +323,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -315,16 +351,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -333,46 +369,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         
@@ -430,17 +470,24 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </attributes>
 </module>
 <module name="L_elbow" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -451,15 +498,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -467,13 +514,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -486,21 +536,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -508,16 +564,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -526,46 +582,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         
@@ -623,17 +683,24 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </attributes>
 </module>
 <module name="R_elbow" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -644,15 +711,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -660,13 +727,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -679,21 +749,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -701,16 +777,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -719,46 +795,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         
@@ -816,17 +896,24 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </attributes>
 </module>
 <module name="L_hand" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -837,15 +924,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -853,13 +940,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -872,21 +962,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -894,16 +990,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -912,46 +1008,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         
@@ -1009,17 +1109,24 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </attributes>
 </module>
 <module name="R_hand" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -1030,15 +1137,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -1046,13 +1153,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -1065,21 +1175,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -1087,16 +1203,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -1105,46 +1221,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         
@@ -1202,17 +1322,24 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </attributes>
 </module>
 <module name="L_knee" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -1223,15 +1350,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -1239,13 +1366,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -1258,21 +1388,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -1280,16 +1416,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -1298,46 +1434,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         
@@ -1395,17 +1535,24 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </attributes>
 </module>
 <module name="R_knee" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -1416,15 +1563,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -1432,13 +1579,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -1451,21 +1601,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -1473,16 +1629,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -1491,46 +1647,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         
@@ -1588,17 +1748,24 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </attributes>
 </module>
 <module name="L_hip" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -1609,15 +1776,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -1625,13 +1792,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -1644,21 +1814,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -1666,16 +1842,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -1684,46 +1860,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         
@@ -1781,17 +1961,24 @@ The **AverageJoints** module creates a helper group that averages the positions 
 </attributes>
 </module>
 <module name="R_hip" muted="0" uid="aa34933cc99d4d389840950f60ed08be">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
-parent = pm.PyNode("internal")
+cmds = proxy.cmds
+
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
+parent = proxy.node("internal")
+
+def createNode(nodeType, name, parent=None):
+    return proxy.create(nodeType, name, parent=parent, suffix=False)
+
+def locator(name):
+    return proxy.node(cmds.spaceLocator(name=name)[0])
 
 def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
-    plus12 = pm.createNode("plusMinusAverage", n=name+"_joint12_plusMinusAverage")
-    plus23 = pm.createNode("plusMinusAverage", n=name+"_joint23_plusMinusAverage")
+    plus12 = createNode("plusMinusAverage", name + "_joint12_plusMinusAverage")
+    plus23 = createNode("plusMinusAverage", name + "_joint23_plusMinusAverage")
     
     plus12.operation.set(2) # -
     plus23.operation.set(2) # -
@@ -1802,15 +1989,15 @@ def makeAngleBetweenRig(name, outPosition1, outPosition2, outPosition3):
     outPosition3 >> plus23.input3D[0]
     outPosition2 >> plus23.input3D[1]
     
-    ab = pm.createNode("angleBetween", n=name+"_angleBetween")
+    ab = createNode("angleBetween", name + "_angleBetween")
     plus12.output3D >> ab.vector1
     plus23.output3D >> ab.vector2
     
     return ab.angle
 
-grp = pm.createNode("transform", n=@name+"_average_group")
-origLoc = pm.spaceLocator(n=@name+"_average_orig_locator")
-endLoc = pm.spaceLocator(n=@name+"_average_end_locator")
+grp = createNode("transform", @name + "_average_group")
+origLoc = locator(@name + "_average_orig_locator")
+endLoc = locator(@name + "_average_end_locator")
 origLoc.v.set(0)
 endLoc.v.set(0)
 
@@ -1818,13 +2005,16 @@ parent | grp
 grp | origLoc
 grp | endLoc
 
-pm.pointConstraint(@joint3, endLoc)
+cmds.pointConstraint(str(joint3), str(endLoc))
 
-pm.matchTransform(grp, @joint2)
-pm.pointConstraint(@joint2, grp)
-pm.PyNode(@joint2).s >> grp.s
+cmds.matchTransform(str(grp), str(joint2))
+cmds.pointConstraint(str(joint2), str(grp))
+joint2.s >> grp.s
 
-oc = pm.parentConstraint(@joint1, @joint2, grp, st=["x", "y", "z"], mo=True)
+oc = proxy.node(cmds.parentConstraint(
+    str(joint1), str(joint2), str(grp),
+    skipTranslate=["x", "y", "z"], maintainOffset=True,
+)[0])
 oc.interpType.set(2) # shortest
 
 for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
@@ -1837,21 +2027,27 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
             
         name = @name + "_average_%s_%s"%(k, n)
         
-        loc1 = pm.spaceLocator(n=name+"_locator")
+        loc1 = locator(name + "_locator")
         grp | loc1
         loc1.t.set([0,0,0])
         loc1.r.set([0,0,0])
         
-        loc2 = pm.createNode("transform", n=name+"_transform", p=loc1)
+        loc2 = createNode("transform", name + "_transform", parent=loc1)
         loc2.displayHandle.set(True)
         
         loc1.t.set([coeff*@offset*o for o in offset])
         
-        a = makeAngleBetweenRig(name, loc1.worldPosition, origLoc.worldPosition, endLoc.worldPosition)
-        loc1.addAttr("outWeight", dv=0, k=True)
-        loc1.addAttr("outWeightAbs", dv=0, k=True)
-        loc1.addAttr("outAngle", dv=0, k=True)
-        loc1.addAttr("baseAngle", dv=0, k=True)     
+        loc1Shape = loc1.getShapes(type="locator")[0]
+        origLocShape = origLoc.getShapes(type="locator")[0]
+        endLocShape = endLoc.getShapes(type="locator")[0]
+        a = makeAngleBetweenRig(
+            name,
+            loc1Shape.worldPosition[0],
+            origLocShape.worldPosition[0],
+            endLocShape.worldPosition[0],
+        )
+        for attrName in ("outWeight", "outWeightAbs", "outAngle", "baseAngle"):
+            cmds.addAttr(str(loc1), longName=attrName, defaultValue=0, keyable=True)
         loc1.baseAngle.set(-a.get())
         
         rig_utils.lockTRS(loc1, [], [1,1,1], [1,1,1], 1)
@@ -1859,16 +2055,16 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         
         a >> loc1.outAngle
 
-        add = pm.createNode("addDL", n=name+"_angle_addDL")
+        add = createNode("addDL", name + "_angle_addDL")
         a >> add.input1
         loc1.baseAngle >> add.input2                      
         add.output >> loc1.outWeight
 
-        multAbs = pm.createNode("multDL", n=name+"_abs_multDL")
+        multAbs = createNode("multDL", name + "_abs_multDL")
         add.output >> multAbs.input1
         multAbs.input2.set(-1)
                     
-        condAbs = pm.createNode("condition", n=name+"_abs_condition")
+        condAbs = createNode("condition", name + "_abs_condition")
         condAbs.operation.set(2) # >
         add.output >> condAbs.firstTerm
         add.output >> condAbs.colorIfTrueR
@@ -1877,46 +2073,50 @@ for enabled, n, offset in [(@yAxis, "y", [0,1,0]), (@zAxis, "z", [0,0,1])]:
         condAbs.outColorR >> loc1.outWeightAbs
         
         # tweaks            
-        loc1.addAttr("speedInner", at="double3")
-        loc1.addAttr("speedInnerX", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerY", at="double", k=True, p="speedInner")
-        loc1.addAttr("speedInnerZ", at="double", k=True, p="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInner", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedInnerX", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerY", attributeType="double", keyable=True, parent="speedInner")
+        cmds.addAttr(str(loc1), longName="speedInnerZ", attributeType="double", keyable=True, parent="speedInner")
         loc1.speedInner.set([@speed*o for o in offset])
 
-        loc1.addAttr("speedOutter", at="double3")
-        loc1.addAttr("speedOutterX", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterY", at="double", k=True, p="speedOutter")
-        loc1.addAttr("speedOutterZ", at="double", k=True, p="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutter", attributeType="double3")
+        cmds.addAttr(str(loc1), longName="speedOutterX", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterY", attributeType="double", keyable=True, parent="speedOutter")
+        cmds.addAttr(str(loc1), longName="speedOutterZ", attributeType="double", keyable=True, parent="speedOutter")
         loc1.speedOutter.set([@speed*o for o in offset])
         
         speedInnerAttr = loc1.speedInner
         speedOutterAttr = loc1.speedOutter
         
         if coeff > 0:
-            speedInnerInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedInnerInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedInnerAttr >> speedInnerInvert.input1
             speedInnerInvert.input2.set([-1, -1, -1])
             speedInnerAttr = speedInnerInvert.output
                     
-        speedInnerMult = pm.createNode("multiplyDivide", n=name+"_speedInner_multiplyDivide")
+        speedInnerMult = createNode("multiplyDivide", name + "_speedInner_multiplyDivide")
         speedInnerAttr >> speedInnerMult.input1
         add.output >> speedInnerMult.input2X
         add.output >> speedInnerMult.input2Y
         add.output >> speedInnerMult.input2Z
         
         if coeff < 0:
-            speedOutterInvert = pm.createNode("multiplyDivide", n=name+"_speedInner_inverse_multiplyDivide")
+            speedOutterInvert = createNode(
+                "multiplyDivide", name + "_speedInner_inverse_multiplyDivide"
+            )
             speedOutterAttr >> speedOutterInvert.input1
             speedOutterInvert.input2.set([-1, -1, -1])
             speedOutterAttr = speedOutterInvert.output
                         
-        speedOutterMult = pm.createNode("multiplyDivide", n=name+"_speedOutter_multiplyDivide")
+        speedOutterMult = createNode("multiplyDivide", name + "_speedOutter_multiplyDivide")
         speedOutterAttr >> speedOutterMult.input1
         add.output >> speedOutterMult.input2X
         add.output >> speedOutterMult.input2Y
         add.output >> speedOutterMult.input2Z
                     
-        cond = pm.createNode("condition", n=name+"_speedSelector_condition")
+        cond = createNode("condition", name + "_speedSelector_condition")
         cond.operation.set(2) # >            
         add.output >> cond.firstTerm
         

@@ -75,7 +75,7 @@ class BlendShapeHelper(object):
 
         # Add internal target via temporary physical mesh.
         tmp = cmds.duplicate(geo, n=targetName)[0]
-        cmds.blendShape(self.node, e=True, target=(geo, newIdx, tmp, 1.0))
+        cmds.blendShape(self.node, e=True, target=(geo, newIdx, targetName, 1.0))
         cmds.delete(tmp)
         return newIdx
 
@@ -202,9 +202,9 @@ class BlendShapeHelper(object):
 
         # optimize deltas
         data = {
-            idx: delta 
-            for idx, delta in data.items() 
-            if om.MVector(delta[:3]).length() >= 1e-3
+            idx: delta
+            for idx, delta in data.items()
+            if om.MVector(delta[0], delta[1], delta[2]).length() >= 1e-3
         }
 
         targetComponents = [f"vtx[{v}]" for v in data]

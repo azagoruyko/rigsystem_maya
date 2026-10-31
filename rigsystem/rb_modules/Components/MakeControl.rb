@@ -1,49 +1,49 @@
 <module name="MakeControl" muted="0" uid="d25b5dd9832e485d89561e7a13924fb8">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 from rigsystem.anim_utils import dynamicParent
 
-controlsParent = pm.PyNode("controls")
-helpersParent = pm.PyNode("helpers")
+cmds = proxy.cmds
+controlsParent = proxy.node("controls")
+helpersParent = proxy.node("helpers")
 
 rotateOrder = @rotateOrder_data["items"].index(@rotateOrder)
 
 if @mode == 0: # helpers
     hlp = rig_utils.curve.makeCurve(@name + "_control_helper", @curveType)
     helpersParent | hlp
-    pm.parentConstraint(@helperAtTransform, hlp)
+    cmds.parentConstraint(@helperAtTransform, hlp)
     rig_utils.lockTRS(hlp, [1,1,1], [1,1,1], [], 1)
     rig_utils.connectFromSymmetric(hlp)  
-    @set_helper(hlp.name())
+    @set_helper(str(hlp))
     
 elif @mode == 1: # run
-    helper = pm.PyNode(@helper)
+    helper = proxy.node(@helper)
     
-    transform = pm.createNode("transform", n=@name + "_control_transform", p=controlsParent)
-    ctrl = pm.createNode("transform", n=@name + "_control", p=transform)
+    transform = proxy.create("transform", @name + "_control", parent=controlsParent)
+    ctrl = proxy.create("transform", @name + "_control", parent=transform, suffix=False)
     ctrl.ro.set(rotateOrder)
 
     rig_utils.lockTRS(ctrl, [1,1,1] if @translateLock else [], [1,1,1] if @rotateLock else [], [1,1,1], 1)
         
-    pm.matchTransform(transform, helper)
+    cmds.matchTransform(transform, helper)
     rig_utils.curve.makeFromCurve(ctrl, helper)
     
     if @parent:
-        pm.parentConstraint(@parent, transform, mo=True)
+        cmds.parentConstraint(@parent, transform, mo=True)
         
     dynamicParent.makeDynamicParent(ctrl, ctrl)
     
     for n in @driven:
         if @constraint == 0: # pointConstraint
-            pm.pointConstraint(ctrl, n)
+            cmds.pointConstraint(ctrl, n)
     
         elif @constraint == 1: # orientConstraint
-            pm.orientConstraint(ctrl, n, mo=True)
+            cmds.orientConstraint(ctrl, n, mo=True)
     
         elif @constraint == 2: # parentConstraint
-            pm.parentConstraint(ctrl, n, mo=True)
+            cmds.parentConstraint(ctrl, n, mo=True)
             
-    @set_out_control(ctrl.name())            
+    @set_out_control(str(ctrl))
 ]]></run>
 <doc><![CDATA[## Summary  
 Creates a shoulder animation control curve with optional helper placement. In **Helpers** mode it generates a guide curve at a specified transform, while in **Run** mode it builds a control hierarchy (transform + control), applies channel locks, matches the helper, and drives selected objects with the chosen constraint type. The module outputs the final control name for downstream connections.

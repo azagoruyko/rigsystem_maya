@@ -1,32 +1,36 @@
 <module name="BindMode" muted="0" uid="c7ae99e054f94721afc9256cf449e180">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.api.OpenMayaAnim as oma
+from rigsystem import proxy
 
-joints = [pm.PyNode(j) for j in @joints]
+cmds = proxy.cmds
+joints = proxy.nodes(@joints)
 
 def getJointsSkinClusters(joint):
-    skins = [obj for obj in pm.PyNode(joint).worldMatrix.listConnections() if pm.objectType(obj)=="skinCluster"]
-    return set(skins)
+    return {plug.node for plug in joint.worldMatrix.outputs(type="skinCluster")}
+
+def influenceIndex(skin, joint):
+    return oma.MFnSkinCluster(skin.mobject).indexForInfluenceObject(joint.dagPath)
 
 if @mode == 0: # unbind
     for j in joints:
         for skin in getJointsSkinClusters(j):
-            idx = skin.indexForInfluenceObject(j)
+            idx = influenceIndex(skin, j)
         
-            if not pm.isConnected(j.worldInverseMatrix, skin.bindPreMatrix[idx]) and\
-               not skin.bindPreMatrix[idx].inputs():
-                j.worldInverseMatrix >> skin.bindPreMatrix[idx]
+            preMatrix = skin.bindPreMatrix[idx]
+            if not preMatrix.inputs():
+                j.worldInverseMatrix[0] >> preMatrix
     
     print("Unbinded")
     @set_mode("Unbinded")
 else:
     for j in joints:
         for skin in getJointsSkinClusters(j):
-            idx = skin.indexForInfluenceObject(j)
+            idx = influenceIndex(skin, j)
         
-            matrix = j.worldInverseMatrix.get()
+            matrix = j.worldInverseMatrix[0].get()
 
-            if pm.isConnected(j.worldInverseMatrix, skin.bindPreMatrix[idx]):
-                j.worldInverseMatrix // skin.bindPreMatrix[idx]                
+            if cmds.isConnected(str(j.worldInverseMatrix[0]), str(skin.bindPreMatrix[idx])):
+                cmds.disconnectAttr(str(j.worldInverseMatrix[0]), str(skin.bindPreMatrix[idx]))
                 skin.bindPreMatrix[idx].set(matrix)
     
     print("Binded")
@@ -53,6 +57,6 @@ The **bindMode** module toggles the binding state of selected joints to their sk
 <attr name="" template="label" category="General" connect=""><![CDATA[{"text": "<html>\nHow to use: <br>\n1. Set joints and press <b>Run</b> to unbind joints from skin clusters.<br>\n2. Change joints position.<br>\n3. Press <b>Run</b> to rebind again.<br>\n</html>", "default": "text"}]]></attr>
 <attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"items": ["Unbind", "Bind"], "current": 0, "columns": 3, "default": "current"}]]></attr>
 <attr name="joints" template="listBox" category="General" connect=""><![CDATA[{"items": [], "default": "items"}]]></attr>
-<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import pymel.core as pm\n\njoints = set()\nfor mesh in pm.selected():\n    skin = pm.mel.eval(\"findRelatedSkinCluster \"+mesh)\n    if skin:\n        joints = joints | set(pm.PyNode(skin).influenceObjects())\n        \nchset(\"/joints\", [str(j) for j in joints])", "label": "Get From Mesh", "color": "", "default": "command"}]]></attr>
+<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import maya.cmds as cmds\nimport maya.mel as mel\n\njoints = set()\nfor mesh in cmds.ls(sl=True) or []:\n    skin = mel.eval('findRelatedSkinCluster \"{}\"'.format(mesh))\n    if skin:\n        joints.update(cmds.skinCluster(skin, query=True, influence=True) or [])\n\nchset(\"/joints\", sorted(joints))", "label": "Get From Mesh", "color": "", "default": "command"}]]></attr>
 </attributes>
 </module>

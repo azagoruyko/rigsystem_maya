@@ -41,8 +41,7 @@ The module does **not** create new nodes or data containers; it performs in‑pl
 </attributes>
 <children>
 <module name="importReferences" muted="0" uid="">
-<run><![CDATA[import pymel.core as pm
-import maya.cmds as cmds
+<run><![CDATA[import maya.cmds as cmds
 
 keepNamespaces = ch("../keepNamespaces")
 
@@ -76,23 +75,30 @@ importAllReferences()
 removeNamespaces()]]></run>
 </module>
 <module name="lockNodes" muted="0" uid="">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-pm.delete(pm.ls(type="dagPose"))
+cmds = proxy.cmds
 
-for obj in pm.ls(type="joint"):
-    obj.radius.showInChannelBox(False)
+poses = cmds.ls(type="dagPose") or []
+if poses:
+    cmds.delete(poses)
 
+for obj in proxy.nodes(cmds.ls(type="joint") or []):
+    cmds.setAttr(obj.radius, channelBox=False)
     if not obj.jointOrient.inputs():
-        obj.jointOrient.setLocked(True)
+        cmds.setAttr(obj.jointOrient, lock=True)
 
-for obj in pm.ls(type="skinCluster"):
-    for a in obj.listAttr():
-        if not a.isConnected():
-            a.setLocked(True)
+for obj in proxy.nodes(cmds.ls(type="skinCluster") or []):
+    for name in obj.listAttr():
+        attr = f"{obj}.{name}"
+        if (
+            cmds.objExists(attr)
+            and not cmds.connectionInfo(attr, isDestination=True)
+            and not cmds.connectionInfo(attr, isSource=True)
+        ):
+            cmds.setAttr(attr, lock=True)
 
-for obj in pm.ls(type="mesh"):
+for obj in proxy.nodes(cmds.ls(type="mesh") or []):
     obj.primaryVisibility.set(True)
     obj.castsShadows.set(True)
     obj.receiveShadows.set(True)
@@ -100,72 +106,78 @@ for obj in pm.ls(type="mesh"):
     obj.visibleInReflections.set(True)
     obj.visibleInRefractions.set(True)
 
-    v = pm.displaySmoothness(obj, q=True, polygonObject=True)
-    if v and v[0] > 1:
-        pm.displaySmoothness(obj, divisionsU=0, divisionsV=0, pointsWire=4, pointsShaded=1, polygonObject=1)        
+    smoothness = cmds.displaySmoothness(obj, q=True, polygonObject=True)
+    if smoothness and smoothness[0] > 1:
+        cmds.displaySmoothness(obj, divisionsU=0, divisionsV=0, pointsWire=4, pointsShaded=1, polygonObject=1)
 
-for ik in pm.ls(type="ikHandle"):
-    if type(ik.ikSolver.get()) == pm.nt.IkSplineSolver:
-        for a in ["dTwistControlEnable","dWorldUpAxis","dWorldUpType"]:
-            ik.attr(a).lock()
+for ik in proxy.nodes(cmds.ls(type="ikHandle") or []):
+    if ik.ikSolver.inputs(type="ikSplineSolver"):
+        for name in ("dTwistControlEnable", "dWorldUpAxis", "dWorldUpType"):
+            cmds.setAttr(ik.attr(name), lock=True)
 
-for n in ["skeleton", "internal", "geometry", "others"]:
-    pm.PyNode(n).overrideEnabled.set(1)
-    pm.PyNode(n).overrideDisplayType.set(2)
+for name in ("skeleton", "internal", "geometry", "others"):
+    group = proxy.node(name)
+    group.overrideEnabled.set(True)
+    group.overrideDisplayType.set(2)
 
-pm.PyNode("skeleton").v.set(False)
-pm.PyNode("internal").v.set(False)  
-    
-if pm.objExists("helpers"):
-    pm.delete("helpers")
-    
-# hide root joints
-for j in ["root", "root_joint"]:
-    if pm.objExists(j):
-        pm.PyNode(j).v.set(False)
+proxy.node("skeleton").v.set(False)
+proxy.node("internal").v.set(False)
 
-# lock pivots
-for ctrl in pm.ls("*_control"):
-    rig_utils.lockAttr(ctrl.rotatePivot,1)
-    rig_utils.lockAttr(ctrl.rotatePivotTranslate,1)
-    rig_utils.lockAttr(ctrl.scalePivotTranslate,1)
-    rig_utils.lockAttr(ctrl.scalePivot,1)
+if cmds.objExists("helpers"):
+    cmds.delete("helpers")
+
+for name in ("root", "root_joint"):
+    if cmds.objExists(name):
+        proxy.node(name).v.set(False)
+
+for ctrl in proxy.nodes(cmds.ls("*_control") or []):
+    rig_utils.lockAttr(f"{ctrl}.rotatePivot", 1)
+    rig_utils.lockAttr(f"{ctrl}.rotatePivotTranslate", 1)
+    rig_utils.lockAttr(f"{ctrl}.scalePivotTranslate", 1)
+    rig_utils.lockAttr(f"{ctrl}.scalePivot", 1)
     ]]></run>
 </module>
 <module name="removeNodeTypes" muted="0" uid="">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.cmds as cmds
 
 nodeTypes = ch("../removeNodeTypes")
 
 for nt in nodeTypes:
-    pm.delete(pm.ls(type=nt))]]></run>
+    nodes = cmds.ls(type=nt) or []
+    if nodes:
+        cmds.delete(nodes)]]></run>
 </module>
 <module name="removeAnimCurves" muted="0" uid="">
-<run><![CDATA[import pymel.core as pm
-pm.delete(pm.ls(type=["animCurveTL", "animCurveTA", "animCurveTT", "animCurveTU"]))]]></run>
+<run><![CDATA[import maya.cmds as cmds
+
+curves = cmds.ls(type=["animCurveTL", "animCurveTA", "animCurveTT", "animCurveTU"]) or []
+if curves:
+    cmds.delete(curves)]]></run>
 </module>
 <module name="findUnusedGeo" muted="0" uid="e705e52bf9284751a7ca2ce039a24722">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 out = []
 
 if @nurbs:
     for typ in ["nurbsSurface", "nurbsCurve"]:
-        for n in pm.ls(type="nurbsSurface"):
+        for n in proxy.nodes(cmds.ls(type=typ) or []):
             if not n.create.inputs() and not n.local.outputs() and not n.worldSpace.outputs() and n.intermediateObject.get():
-                out.append(n.name())
+                out.append(str(n))
 
 if @mesh:    
-    for n in pm.ls(type="mesh"):
+    for n in proxy.nodes(cmds.ls(type="mesh") or []):
         if not n.inMesh.inputs() and not n.outMesh.outputs() and not n.worldMesh.outputs() and n.intermediateObject.get():
-            out.append(n.name())
+            out.append(str(n))
 
 if out:
     print(out)
     if @remove:
-        pm.delete(out)
+        cmds.delete(out)
     else:
-        pm.select(out)    ]]></run>
+        cmds.select(out)]]></run>
 <doc><![CDATA[## Summary
 Finds and optionally removes unused geometry nodes (nurbs surfaces, curves, or meshes) that are marked as intermediate objects and have no connections to other nodes. The module reports the names of these nodes, selects them in the scene, or deletes them if the **Remove** option is enabled.
 
@@ -190,11 +202,11 @@ Finds and optionally removes unused geometry nodes (nurbs surfaces, curves, or m
 </attributes>
 </module>
 <module name="blockGPU" muted="0" uid="">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
 # prevent some nodes to be processed on GPU due to Maya 2026 crashes with Delta Mush
-for n in pm.ls(type=@nodeTypes):
-    n.blockGPU.set(True)]]></run>
+for node in proxy.nodes(proxy.cmds.ls(type=@nodeTypes) or []):
+    node.blockGPU.set(True)]]></run>
 <attributes>
 <attr name="nodeTypes" template="listBox" category="General" connect=""><![CDATA[{"items": ["deltaMush"], "default": "items"}]]></attr>
 </attributes>

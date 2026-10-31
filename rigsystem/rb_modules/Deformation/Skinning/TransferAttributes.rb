@@ -1,50 +1,62 @@
 <module name="transferAttributes" muted="0" uid="c878100bf5724b20a74098b3a9340a04">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
-sourceGeoList = [pm.PyNode(geo) for geo in @sourceGeoList]
+cmds = proxy.cmds
+
+sourceGeoList = proxy.nodes(@sourceGeoList)
 
 # sampleSpace: 0 is world space, 1 is model space, 4 is component-based, 5 is topology-based. 
 # the default is world space.
 sampleSpace = {"world": 0, "local": 1, "component": 4, "topology": 5}
 
 def findOrig(geo):
-    geo = pm.PyNode(geo)
-    origs = [sh for sh in geo.getShapes() 
-             if not (sh.inMesh.inputs() or sh.worldMesh.inputs()) and\
-             geo.numVertices() == sh.numVertices()]
+    geo = proxy.node(geo)
+    origs = [
+        shape for shape in geo.getShapes(noIntermediate=False)
+        if not (shape.inMesh.inputs() or shape.worldMesh.inputs())
+        and cmds.polyEvaluate(str(shape), vertex=True)
+        == cmds.polyEvaluate(str(geo), vertex=True)
+    ]
     if origs:
         return origs[0]
     else:
         warning(f"Cannot find orig shape for '{geo}'")
 
-def transferMeshAttributes(shape, newShape):    
-    intermediateObject = shape.intermediateObject.get()    
+def transferMeshAttributes(shape, newShape):
+    intermediateObject = shape.intermediateObject.get()
     shape.intermediateObject.set(False)
     
-    pm.transferAttributes(
-                newShape, shape, 
-                transferPositions=@positions, transferNormals=@normals, transferUVs=2 if @uv else 0, # 0, 1-current, 2-all
-                transferColors=2 if @colors else 0, sampleSpace=sampleSpace.get(@sampleSpace, 0), searchMethod=3,
-                flipUVs=0, colorBorders=0)
+    cmds.transferAttributes(
+        str(newShape), str(shape),
+        transferPositions=@positions,
+        transferNormals=@normals,
+        transferUVs=2 if @uv else 0,
+        transferColors=2 if @colors else 0,
+        sampleSpace=sampleSpace.get(@sampleSpace, 0),
+        searchMethod=3,
+        flipUVs=0,
+        colorBorders=0,
+    )
                 
     if @uv:
-        shape.currentUVSet.set(newShape.currentUVSet.get())
+        uvSet = newShape.currentUVSet.get()
+        shape.currentUVSet.set(uvSet)
                 
-    pm.delete(shape, ch=True)
+    cmds.delete(str(shape), ch=True)
     shape.intermediateObject.set(intermediateObject)                          
             
 for newMesh in sourceGeoList:
     namespace = newMesh.namespace()
     
-    localMesh = str(newMesh.stripNamespace())
-    if pm.objExists(localMesh):
-        localMesh = pm.PyNode(localMesh)
+    localMesh = str(newMesh).replace(namespace, "", 1) if namespace else str(newMesh)
+    if cmds.objExists(localMesh):
+        localMesh = proxy.node(localMesh)
         origShape = findOrig(localMesh)
         if not origShape:
             error(f"Cannot find orig shape for {localMesh}")
             continue
             
-        newShape = newMesh.getShape()
+        newShape = newMesh.getShapes(type="mesh")[0]
         
         print(f"{newShape} -> {origShape}")        
         transferMeshAttributes(origShape, newMesh)            

@@ -1,57 +1,57 @@
 <module name="copySkin" type="Tools/CopySkin" muted="0" uid="f9211b6431fe4eae97f8f06a2e7fadd9">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.mel as mel
+from rigsystem import proxy
+
+cmds = proxy.cmds
 import os
 
-source = pm.PyNode(@source_mesh)
-destination = @destination_mesh
 
 def get_influence_list(m_node):
-    pm.select(m_node)
-    pm.mel.eval("RemoveUnusedInfluences")
-    return pm.skinCluster(m_node, weightedInfluence=True, q=True)
+    cmds.select(m_node, replace=True)
+    mel.eval("RemoveUnusedInfluences")
+    skin = mel.eval('findRelatedSkinCluster "{}"'.format(m_node))
+    return cmds.skinCluster(skin, weightedInfluence=True, query=True) or []
 
-def apply_influence_list(m_node, func):
-    pm.skinCluster(m_node, func, bm=1, sm=0, tsb=True)
+def apply_influence_list(m_node, influences):
+    cmds.skinCluster(influences, m_node, bm=1, sm=0, tsb=True)
 
 def copy_skin(m_node, m_node_list):
-    lst = get_influence_list(m_node)
-    
-    sourceSkinCluster = pm.mel.eval('findRelatedSkinCluster '+m_node)
+    influences = get_influence_list(m_node)
+    sourceSkinCluster = mel.eval('findRelatedSkinCluster "{}"'.format(m_node))
     
     for n in m_node_list:
-        apply_influence_list(n, get_influence_list(m_node))
-        destSkinCluster = pm.mel.eval('findRelatedSkinCluster '+n)
+        apply_influence_list(n, influences)
+        destSkinCluster = mel.eval('findRelatedSkinCluster "{}"'.format(n))
     
         ##if @by_vertex_ID:        
-            ##set_vtx_weights(destination, get_vtx_weights_list(source)) 
+            ##set_vtx_weights(destination, get_vtx_weights_list(source))
         ##else:  
-            ##pm.copySkinWeights(ss=sourceSkinCluster, ds=destSkinCluster,  noMirror=True)
-        pm.copySkinWeights(ss=sourceSkinCluster, ds=destSkinCluster,  noMirror=True)
+            ##cmds.copySkinWeights(ss=sourceSkinCluster, ds=destSkinCluster, noMirror=True)
+        cmds.copySkinWeights(ss=sourceSkinCluster, ds=destSkinCluster, noMirror=True)
 
 def get_vtx_weights_list(m_node):
-    skinClust = pm.mel.eval('findRelatedSkinCluster '+m_node)
-    inf = pm.PyNode(skinClust)
-    joints = inf.influenceObjects()
-    list2 = []
-    dict = {}
-    for vtx in node.vtx:
-        list = pm.skinPercent(skinClust, vtx, query=True, value=True )
-        cnt = 0
-        for jnt in joints:
-            dict[jnt.name()] = list[cnt]
-            cnt += 1
-        list2.append(dict)
-    return list2
+    skin_cluster = mel.eval('findRelatedSkinCluster "{}"'.format(m_node))
+    influences = cmds.skinCluster(skin_cluster, query=True, influence=True) or []
+    vertex_count = cmds.polyEvaluate(m_node, vertex=True)
+    weights = []
+    for index in range(vertex_count):
+        vertex = "{}.vtx[{}]".format(m_node, index)
+        values = cmds.skinPercent(skin_cluster, vertex, query=True, value=True) or []
+        weights.append(dict(zip(influences, values)))
+    return weights
 
 def set_vtx_weights(m_node, weights_list):
-    skinClust = pm.mel.eval('findRelatedSkinCluster '+m_node)
-    for vtx in m_node.vtx:
-        for l in weights_list:
-            for jnt, val in l.items():
-                pm.skinPercent(skinClust, node, transformValue=[(jnt, val)])
+    skin_cluster = mel.eval('findRelatedSkinCluster "{}"'.format(m_node))
+    for index, weights in enumerate(weights_list):
+        vertex = "{}.vtx[{}]".format(m_node, index)
+        cmds.skinPercent(
+            skin_cluster,
+            vertex,
+            transformValue=list(weights.items()),
+        )
      
 
-copy_skin(source, destination)]]></run>
+copy_skin(@source_mesh, @destination_mesh)]]></run>
 <doc><![CDATA[## Summary
 Copies skin cluster influence weights from a source mesh to one or more destination meshes, ensuring that the destination geometry receives the same skinning data as the source. The module uses Maya’s `copySkinWeights` command and automatically creates or updates skin clusters on the target meshes.
 

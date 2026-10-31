@@ -1,8 +1,9 @@
 <module name="updateAverageBaseAngle" muted="0" uid="9b6ba97ecdbf4974997680e52cad5502">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
-for loc in pm.ls("*_average_*_locator"):
-    if pm.objExists(loc+".outAngle") and loc.baseAngle.isSettable():        
+cmds = proxy.cmds
+for loc in proxy.nodes(cmds.ls("*_average_*_locator") or []):
+    if loc.hasAttr("outAngle") and cmds.getAttr(str(loc.baseAngle), settable=True):
         loc.baseAngle.set(-loc.outAngle.get())
         print(loc)]]></run>
 <doc><![CDATA[## Summary  
