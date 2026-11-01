@@ -79,41 +79,10 @@ removeNamespaces()]]></run>
 
 cmds = proxy.cmds
 
-poses = cmds.ls(type="dagPose") or []
-if poses:
-    cmds.delete(poses)
-
 for obj in proxy.nodes(cmds.ls(type="joint") or []):
     cmds.setAttr(obj.radius, channelBox=False)
     if not obj.jointOrient.inputs():
         cmds.setAttr(obj.jointOrient, lock=True)
-
-for obj in proxy.nodes(cmds.ls(type="skinCluster") or []):
-    for name in obj.listAttr():
-        attr = f"{obj}.{name}"
-        if (
-            cmds.objExists(attr)
-            and not cmds.connectionInfo(attr, isDestination=True)
-            and not cmds.connectionInfo(attr, isSource=True)
-        ):
-            cmds.setAttr(attr, lock=True)
-
-for obj in proxy.nodes(cmds.ls(type="mesh") or []):
-    obj.primaryVisibility.set(True)
-    obj.castsShadows.set(True)
-    obj.receiveShadows.set(True)
-    obj.motionBlur.set(True)
-    obj.visibleInReflections.set(True)
-    obj.visibleInRefractions.set(True)
-
-    smoothness = cmds.displaySmoothness(obj, q=True, polygonObject=True)
-    if smoothness and smoothness[0] > 1:
-        cmds.displaySmoothness(obj, divisionsU=0, divisionsV=0, pointsWire=4, pointsShaded=1, polygonObject=1)
-
-for ik in proxy.nodes(cmds.ls(type="ikHandle") or []):
-    if ik.ikSolver.inputs(type="ikSplineSolver"):
-        for name in ("dTwistControlEnable", "dWorldUpAxis", "dWorldUpType"):
-            cmds.setAttr(ik.attr(name), lock=True)
 
 for name in ("skeleton", "internal", "geometry", "others"):
     group = proxy.node(name)

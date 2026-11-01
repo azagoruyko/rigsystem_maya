@@ -1,6 +1,5 @@
 <module name="GotoBindPose" muted="0" uid="b578e5408c1f4a94b6d5b528c90376c9">
 <run><![CDATA[import maya.api.OpenMaya as om
-import maya.api.OpenMayaAnim as oma
 from rigsystem import proxy
 
 cmds = proxy.cmds
@@ -16,8 +15,8 @@ for j in proxy.nodes(cmds.ls(selection=True, type="joint") or []):
     else:
         skin = proxy.node(@skin)
         try:
-            skinFn = oma.MFnSkinCluster(skin.mobject)
-            idx = skinFn.indexForInfluenceObject(j.dagPath)
+            skinFn = skin.mfn()
+            idx = skinFn.indexForInfluenceObject(j.mdagpath)
         except RuntimeError:
             continue
                         

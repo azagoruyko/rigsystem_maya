@@ -1,6 +1,5 @@
 <module name="makeSkinLocal" muted="0" uid="c3d086240a8642d5bcd762328d68df91">
 <run><![CDATA[import maya.api.OpenMaya as om
-import maya.api.OpenMayaAnim as oma
 import maya.mel as mel
 from rigsystem import proxy
 
@@ -11,7 +10,7 @@ if not skin:
     error(f"Cannot find skinCluster for {skinned}")
     
 skin = proxy.node(skin)
-skinFn = oma.MFnSkinCluster(skin.mobject)
+skinFn = skin.mfn()
 basis = []
     
 for influence in skinFn.influenceObjects():

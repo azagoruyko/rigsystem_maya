@@ -7,11 +7,6 @@ from rigsystem.rig_utils.moduleInfo import ModuleInfo
 from rigsystem.rig_utils.naming import findSymmetricName
 
 
-def _connectedNode(moduleInfo, name):
-    """Return the node connected to a ModuleInfo message attribute."""
-    return moduleInfo.getAttr(name).node
-
-
 def flipMatrix(src, center, axis=(-1, 1, 1)):
     """Flip matrix over center; axis is scale applied after (e.g. (-1,1,1) for X mirror)."""
     multList = lambda a, b: [ia * ib for ia, ib in zip(a, b)]
@@ -88,16 +83,16 @@ def mirrorSpine(moduleInfo, centerControl, exchange=False):
     controls = []
     i = 1
     while moduleInfo.hasAttr(f"fk{i}"):
-        controls.append(_connectedNode(moduleInfo, f"fk{i}"))
+        controls.append(moduleInfo.getAttr(f"fk{i}").node)
         i += 1
 
     if moduleInfo.hasAttr("hip"):
-        controls.append(_connectedNode(moduleInfo, "hip"))
+        controls.append(moduleInfo.getAttr("hip").node)
 
     for label in ["ik", "fix"]:
         i = 1
         while moduleInfo.hasAttr(f"{label}{i}"):
-            controls.append(_connectedNode(moduleInfo, f"{label}{i}"))
+            controls.append(moduleInfo.getAttr(f"{label}{i}").node)
             i += 1
 
     mirrorControls(controls, controls, centerControl, axis=(-1, 1, 1))
@@ -105,14 +100,10 @@ def mirrorSpine(moduleInfo, centerControl, exchange=False):
 
 def mirrorHead(moduleInfo, centerControl, exchange=False):
     """Mirror head seamless FK/IK controls over center."""
-    controls = []
-    i = 1
-    while moduleInfo.hasAttr(f"seamless_fk{i}"):
-        controls.append(_connectedNode(moduleInfo, f"seamless_fk{i}"))
-        i += 1
-
-    for label in ["fk", "ik"]:
-        controls.append(_connectedNode(moduleInfo, f"seamless_{label}"))
+    controls = [
+        moduleInfo.getAttr(name).node
+        for name in ("seamless_neck_fk", "seamless_head_fk", "seamless_head_ik")
+    ]
 
     mirrorControls(controls, controls, centerControl, axis=(-1, 1, 1))
 
@@ -121,14 +112,14 @@ def mirrorLimb(moduleInfo, mirrorModuleInfo, namespace, rootModuleInfoType, cent
     """Mirror limb IK, pole, FK and optional shoulder to opposite side."""
     ikAxis = [-1, 1, 1] if rootModuleInfoType in ["leg", "quadLeg"] else [-1, -1, -1]
 
-    mirrorControl(_connectedNode(moduleInfo, "ik"), _connectedNode(mirrorModuleInfo, "ik"), centerControl, ikAxis, exchange)
-    mirrorControl(_connectedNode(moduleInfo, "polevector"), _connectedNode(mirrorModuleInfo, "polevector"), centerControl, [-1, 1, 1], exchange)
+    mirrorControl(moduleInfo.getAttr("ik").node, mirrorModuleInfo.getAttr("ik").node, centerControl, ikAxis, exchange)
+    mirrorControl(moduleInfo.getAttr("polevector").node, mirrorModuleInfo.getAttr("polevector").node, centerControl, [-1, 1, 1], exchange)
 
-    srcFKControls = [_connectedNode(moduleInfo, f"fk{i}") for i in range(1, 4)]
-    destFKControls = [_connectedNode(mirrorModuleInfo, f"fk{i}") for i in range(1, 4)]
+    srcFKControls = [moduleInfo.getAttr(f"fk{i}").node for i in range(1, 4)]
+    destFKControls = [mirrorModuleInfo.getAttr(f"fk{i}").node for i in range(1, 4)]
     mirrorControls(srcFKControls, destFKControls, centerControl, (-1, -1, -1), exchange)
 
-    copyAttrs(_connectedNode(moduleInfo, "options"), _connectedNode(mirrorModuleInfo, "options"), exchange)
+    copyAttrs(moduleInfo.getAttr("options").node, mirrorModuleInfo.getAttr("options").node, exchange)
 
     side = moduleInfo.node.localName().split("_", 1)[0]
     if rootModuleInfoType == "limb" and cmds.objExists(f"{namespace}{side}_shoulder_control"):
@@ -138,23 +129,23 @@ def mirrorLimb(moduleInfo, mirrorModuleInfo, namespace, rootModuleInfoType, cent
 
 def mirrorLeg(moduleInfo, mirrorModuleInfo, exchange=False):
     """Mirror leg limb, toe controls and footroll attributes."""
-    mirrorByModuleInfo(_connectedNode(moduleInfo, "limb"), exchange)
-    copyAttrs(_connectedNode(moduleInfo, "seamless_toe_ik"), _connectedNode(mirrorModuleInfo, "seamless_toe_ik"), exchange)
-    copyAttrs(_connectedNode(moduleInfo, "seamless_toe_fk"), _connectedNode(mirrorModuleInfo, "seamless_toe_fk"), exchange)
+    mirrorByModuleInfo(moduleInfo.getAttr("limb").node, exchange)
+    copyAttrs(moduleInfo.getAttr("seamless_toe_ik").node, mirrorModuleInfo.getAttr("seamless_toe_ik").node, exchange)
+    copyAttrs(moduleInfo.getAttr("seamless_toe_fk").node, mirrorModuleInfo.getAttr("seamless_toe_fk").node, exchange)
 
-    srcFootroll = _connectedNode(moduleInfo, "footroll")
-    destFootroll = _connectedNode(mirrorModuleInfo, "footroll")
+    srcFootroll = moduleInfo.getAttr("footroll").node
+    destFootroll = mirrorModuleInfo.getAttr("footroll").node
     attrs = [("rx", 1), ("rz", -1), ("weight", 1), ("heelPivot", -1), ("footPivot", -1), ("toePivot", -1)]
     mirrorAttributesWithCoefficient(srcFootroll, destFootroll, attrs, exchange)
 
 
 def mirrorQuadLeg(moduleInfo, mirrorModuleInfo, exchange=False):
     """Mirror quad leg limb, toe FK and footroll attributes."""
-    mirrorByModuleInfo(_connectedNode(moduleInfo, "limb"), exchange)
-    copyAttrs(_connectedNode(moduleInfo, "seamless_toe_fk"), _connectedNode(mirrorModuleInfo, "seamless_toe_fk"), exchange)
+    mirrorByModuleInfo(moduleInfo.getAttr("limb").node, exchange)
+    copyAttrs(moduleInfo.getAttr("seamless_toe_fk").node, mirrorModuleInfo.getAttr("seamless_toe_fk").node, exchange)
 
-    srcFootroll = _connectedNode(moduleInfo, "footroll")
-    destFootroll = _connectedNode(mirrorModuleInfo, "footroll")
+    srcFootroll = moduleInfo.getAttr("footroll").node
+    destFootroll = mirrorModuleInfo.getAttr("footroll").node
     attrs = [("rx", 1), ("rz", -1), ("roll", 1), ("sideways", -1), ("heelPivot", -1), ("toePivot", -1)]
     mirrorAttributesWithCoefficient(srcFootroll, destFootroll, attrs, exchange)
 
@@ -163,12 +154,19 @@ def mirrorFingers(moduleInfo, mirrorModuleInfo, exchange=False):
     """Mirror finger controls and translate attributes."""
     i = 1
     while moduleInfo.hasAttr(f"control{i}"):
-        ctrl = _connectedNode(moduleInfo, f"control{i}")
-        mirrorCtrl = _connectedNode(mirrorModuleInfo, f"control{i}")
+        ctrl = moduleInfo.getAttr(f"control{i}").node
+        mirrorCtrl = mirrorModuleInfo.getAttr(f"control{i}").node
+        attrs = ("tx", "ty", "tz")
+        sourceTranslation = {attr: ctrl.attr(attr).get() for attr in attrs}
+        mirrorTranslation = {attr: mirrorCtrl.attr(attr).get() for attr in attrs}
+
         copyAttrs(ctrl, mirrorCtrl, exchange)
 
-        attrs = [("tx", -1), ("ty", -1), ("tz", -1)]
-        mirrorAttributesWithCoefficient(ctrl, mirrorCtrl, attrs, exchange)
+        for attr in attrs:
+            if exchange:
+                ctrl.attr(attr).set(-mirrorTranslation[attr])
+            mirrorCtrl.attr(attr).set(-sourceTranslation[attr])
+
         i += 1
 
 

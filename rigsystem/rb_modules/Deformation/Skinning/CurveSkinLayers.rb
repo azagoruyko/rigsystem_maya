@@ -16,7 +16,7 @@ def curveTransform(curve):
     return curve.getParent() if curve.type() == "nurbsCurve" else curve
 
 def generateJoints(curve, params, layerName):
-    curveFn = om.MFnNurbsCurve(curveShape(curve).dagPath)
+    curveFn = curveShape(curve).mfn(shape=True)
     sizes = {"major": 0.5, "minor": 0.3}
     joints = []
     for i, param in enumerate(params):
@@ -29,7 +29,7 @@ def generateJoints(curve, params, layerName):
 
 def generateControls(curve, joints, layerName, curveType, *, addTransform=False):
     sizes = {"major": 0.5, "minor": 0.3}
-    curveFn = om.MFnNurbsCurve(curveShape(curve).dagPath)
+    curveFn = curveShape(curve).mfn(shape=True)
     size = curveFn.length() / (len(joints) * 1.5) * sizes.get(layerName, 1.0)
     controls = []
     for i, joint in enumerate(joints):
@@ -106,7 +106,6 @@ cmds.wire(@edgeCurve, gw=False, ce=0.0, li=0.0, dds=[0, 100], w=str(minorCurve),
 <children>
 <module name="makeSkinLocal" muted="1" uid="c3d086240a8642d5bcd762328d68df91">
 <run><![CDATA[import maya.api.OpenMaya as om
-import maya.api.OpenMayaAnim as oma
 import maya.mel as mel
 from rigsystem import proxy
 
@@ -117,7 +116,7 @@ if not skin:
     error(f"Cannot find skinCluster for {skinned}")
     
 skin = proxy.node(skin)
-skinFn = oma.MFnSkinCluster(skin.mobject)
+skinFn = skin.mfn()
 basis = []
     
 for influence in skinFn.influenceObjects():
@@ -165,7 +164,7 @@ curve = proxy.node(@curve)
 transforms = proxy.nodes(@transforms)
 
 curveShape = curve.getShapes(type="nurbsCurve")[0] if curve.type() == "transform" else curve
-curveFn = om.MFnNurbsCurve(curveShape.dagPath)
+curveFn = curveShape.mfn(shape=True)
 
 for t in transforms:
     position = om.MPoint(cmds.xform(str(t), q=True, ws=True, t=True))

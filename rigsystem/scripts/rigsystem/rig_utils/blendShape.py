@@ -272,7 +272,7 @@ class BlendShapeHelper(object):
         weightPlug.set(1)
         cmds.sculptTarget(self.node, e=True, target=targetIndex)
         
-        meshFn = om.MFnMesh(proxy.node(outputGeom).dagPath)
+        meshFn = proxy.node(outputGeom).mfn(shape=True)
         if selectedIndices:
             currentPoints = meshFn.getPoints(om.MSpace.kObject)
             for idx in selectedIndices:
@@ -300,8 +300,9 @@ class BlendShapeHelper(object):
             destination=False,
             shapes=True,
         )[0]
-        meshDagPath = proxy.node(inputMesh).dagPath
-        meshFn = om.MFnMesh(meshDagPath)
+        inputMeshNode = proxy.node(inputMesh)
+        meshDagPath = inputMeshNode.mdagpath
+        meshFn = inputMeshNode.mfn(shape=True)
         basePoints = meshFn.getPoints(om.MSpace.kWorld)
 
         meshIntersector = om.MMeshIntersector()

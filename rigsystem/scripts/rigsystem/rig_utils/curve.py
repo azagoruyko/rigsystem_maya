@@ -51,7 +51,7 @@ def saveCurveData(curve, curveType):
     """Save NURBS curve data to JSON in the curves folder."""
     data = []
     for shape in proxy.node(curve).getShapes():
-        curveFn = om.MFnNurbsCurve(shape.dagPath)
+        curveFn = shape.mfn(shape=True)
 
         cvs = curveFn.cvPositions(om.MSpace.kObject)
         knots = curveFn.knots()

@@ -72,7 +72,7 @@ elif @mode == 1:  # run
 
     def getParamAtPoint(surface, pnt):
         shape = proxy.node(surface).getShapes(type="nurbsSurface")[0]
-        surfaceFn = om.MFnNurbsSurface(shape.dagPath)
+        surfaceFn = shape.mfn(shape=True)
         _, u, v = surfaceFn.closestPoint(om.MPoint(pnt), space=om.MSpace.kWorld)
         return u, v
 
@@ -80,7 +80,7 @@ elif @mode == 1:  # run
         if param <= 0:
             return 0
         shape = proxy.node(curve).getShapes(type="nurbsCurve")[0]
-        return om.MFnNurbsCurve(shape.dagPath).findLengthFromParam(param)
+        return shape.mfn(shape=True).findLengthFromParam(param)
 
     h_fks = proxy.nodes(@h_fks)
     h_iks = proxy.nodes(@h_iks)
@@ -326,7 +326,7 @@ elif @mode == 1:  # run
     attrsControl.addAttr(ln="stretch", min=0, max=1, dv=1, k=True)
         
     # make enlarged surface
-    surfaceFn = om.MFnNurbsSurface(fix_surface.getShapes(type="nurbsSurface")[0].dagPath)
+    surfaceFn = fix_surface.mfn(shape=True)
     L_cvs = [om.MVector(cmds.xform(f"{fix_surface}.cv[{i}][0]", q=True, ws=True, t=True)) for i in range(surfaceFn.numCVsInU)]
     R_cvs = [om.MVector(cmds.xform(f"{fix_surface}.cv[{i}][{surfaceFn.numCVsInV - 1}]", q=True, ws=True, t=True)) for i in range(surfaceFn.numCVsInU)]
     

@@ -125,7 +125,7 @@ elif @mode == 1:
     cmds.orientConstraint(rotate1, startTransform)
     cmds.orientConstraint(rotate2, endTransform, mo=True)
 
-    surfaceFn = om.MFnNurbsSurface(plane.getShapes(type="nurbsSurface")[0].dagPath)
+    surfaceFn = plane.mfn(shape=True)
     for i in range(len(@joints)):
         position = om.MPoint(cmds.xform(joints[i], q=True, ws=True, t=True))
         _, u, v = surfaceFn.closestPoint(position, space=om.MSpace.kWorld)

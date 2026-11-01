@@ -8,7 +8,7 @@ curve = proxy.node(@curve)
 transforms = proxy.nodes(@transforms)
 
 curveShape = curve.getShapes(type="nurbsCurve")[0] if curve.type() == "transform" else curve
-curveFn = om.MFnNurbsCurve(curveShape.dagPath)
+curveFn = curveShape.mfn(shape=True)
 
 for t in transforms:
     position = om.MPoint(cmds.xform(str(t), q=True, ws=True, t=True))

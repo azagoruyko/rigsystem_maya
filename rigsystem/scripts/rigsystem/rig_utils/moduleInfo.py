@@ -97,8 +97,8 @@ class ModuleInfo:
 
 
     def listAttrs(self):
-        """Return all user defined attributes of the module info node."""
-        return [self.node.attr(attr) for attr in self.node.listAttr(ud=True)]
+        """Return all user defined attributes of the module info node as Plugs."""
+        return [self.node.attr(name) for name in self.node.listAttr(ud=True)]
 
 
 def getModuleInfo(object, root=True):

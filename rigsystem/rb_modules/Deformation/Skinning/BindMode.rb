@@ -1,6 +1,5 @@
 <module name="BindMode" muted="0" uid="c7ae99e054f94721afc9256cf449e180">
-<run><![CDATA[import maya.api.OpenMayaAnim as oma
-from rigsystem import proxy
+<run><![CDATA[from rigsystem import proxy
 
 cmds = proxy.cmds
 joints = proxy.nodes(@joints)
@@ -9,7 +8,7 @@ def getJointsSkinClusters(joint):
     return {plug.node for plug in joint.worldMatrix.outputs(type="skinCluster")}
 
 def influenceIndex(skin, joint):
-    return oma.MFnSkinCluster(skin.mobject).indexForInfluenceObject(joint.dagPath)
+    return skin.mfn().indexForInfluenceObject(joint.mdagpath)
 
 if @mode == 0: # unbind
     for j in joints:

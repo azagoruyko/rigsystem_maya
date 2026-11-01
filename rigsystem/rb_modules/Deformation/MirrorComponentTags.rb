@@ -2,6 +2,7 @@
 <run><![CDATA[import maya.cmds as cmds
 import maya.mel as mel
 import maya.api.OpenMaya as om
+from rigsystem import proxy
 from rigsystem.rig_utils import naming
 
 def getShape(geo):
@@ -42,8 +43,8 @@ def mirrorComponentTag(srcMesh, srcTag, destMesh, destTag):
     srcDag = getMDagPath(srcShape)
     destDag = getMDagPath(destShape)
 
-    srcMeshFn = om.MFnMesh(srcDag)
-    destMeshFn = om.MFnMesh(destDag)
+    srcMeshFn = proxy.node(srcShape).mfn(shape=True)
+    destMeshFn = proxy.node(destShape).mfn(shape=True)
 
     meshIntersector = om.MMeshIntersector()
     meshIntersector.create(destDag.node(), destDag.inclusiveMatrix())

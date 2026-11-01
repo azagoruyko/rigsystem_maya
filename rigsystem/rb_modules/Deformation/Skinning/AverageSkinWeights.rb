@@ -1,6 +1,5 @@
 <module name="averageSkinWeights" type="Tools/AverageSkinWeights" muted="0" uid="d73db96a87244fc5bca4875396ed3dd8">
-<run><![CDATA[import maya.api.OpenMayaAnim as oma
-import maya.mel as mel
+<run><![CDATA[import maya.mel as mel
 from rigsystem import proxy
 
 cmds = proxy.cmds
@@ -10,13 +9,13 @@ if selection and len(selection) > 1:
     geom = selection[0].split(".", 1)[0]
     skinName = mel.eval('findRelatedSkinCluster "{}"'.format(geom))
     skin = proxy.node(skinName)
-    skinFn = oma.MFnSkinCluster(skin.mobject)
+    skinFn = skin.mfn()
     vertexIndices = [
         int(component.rsplit("[", 1)[1][:-1])
         for component in selection
     ]
     influenceIndices = [
-        skinFn.indexForInfluenceObject(proxy.node(influence).dagPath)
+        skinFn.indexForInfluenceObject(proxy.node(influence).mdagpath)
         for influence in cmds.skinCluster(str(skin), query=True, influence=True) or []
     ]
     

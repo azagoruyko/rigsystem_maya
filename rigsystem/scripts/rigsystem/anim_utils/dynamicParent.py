@@ -83,8 +83,8 @@ class DynamicParent:
             return -1
 
         targets = self.getTargets()
-        targetPath = proxy.node(target).dagPath.fullPathName()
-        targetPaths = [target.dagPath.fullPathName() for target in proxy.nodes(targets)]
+        targetPath = proxy.node(target).mdagpath.fullPathName()
+        targetPaths = [target.mdagpath.fullPathName() for target in proxy.nodes(targets)]
         return targetPaths.index(targetPath) if targetPath in targetPaths else -1
 
 

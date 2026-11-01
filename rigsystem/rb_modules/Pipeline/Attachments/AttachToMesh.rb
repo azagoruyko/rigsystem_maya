@@ -85,19 +85,19 @@ class Rivet():
         self.output["ptOnSurfaceIn"].caching.set(True)
 
 def findEdges(geo, p):
-    meshFn = om.MFnMesh(sourceShape.dagPath)
+    meshFn = sourceShape.mfn(shape=True)
     _, faceIndex = meshFn.getClosestPoint(om.MPoint(*p), om.MSpace.kWorld)
-    faceIt = om.MItMeshPolygon(sourceShape.dagPath)
+    faceIt = om.MItMeshPolygon(sourceShape.mdagpath)
     faceIt.setIndex(faceIndex)
     edges = faceIt.getEdges()
 
     separatedEdges = []
     for e1 in edges:
-        edge1 = om.MItMeshEdge(sourceShape.dagPath)
+        edge1 = om.MItMeshEdge(sourceShape.mdagpath)
         edge1.setIndex(e1)
         vertices1 = {edge1.vertexId(0), edge1.vertexId(1)}
         for e2 in edges:
-            edge2 = om.MItMeshEdge(sourceShape.dagPath)
+            edge2 = om.MItMeshEdge(sourceShape.mdagpath)
             edge2.setIndex(e2)
             vertices2 = {edge2.vertexId(0), edge2.vertexId(1)}
             diff = vertices1 - vertices2

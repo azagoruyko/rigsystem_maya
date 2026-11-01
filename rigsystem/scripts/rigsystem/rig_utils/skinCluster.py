@@ -1,7 +1,6 @@
 import json
 
 import maya.api.OpenMaya as om
-import maya.api.OpenMayaAnim as oma
 
 from .. import proxy
 
@@ -294,13 +293,13 @@ class SkinClusterHelper:
         """Wrap MFnSkinCluster access for a mesh or skinCluster node."""
         obj = str(obj)
         if cmds.nodeType(obj) == "skinCluster":
-            self._skinFn = oma.MFnSkinCluster(proxy.node(obj).mobject)
+            self._skinFn = proxy.node(obj).mfn()
             outGeom = cmds.skinCluster(obj, q=True, geometry=True)[0]
-            self._objDagPath = proxy.node(outGeom).dagPath
+            self._objDagPath = proxy.node(outGeom).mdagpath
         else:
-            self._objDagPath = proxy.node(obj).dagPath
+            self._objDagPath = proxy.node(obj).mdagpath
             skinClusters = cmds.ls(cmds.listHistory(obj) or [], type="skinCluster") or []
-            self._skinFn = oma.MFnSkinCluster(proxy.node(skinClusters[0]).mobject)
+            self._skinFn = proxy.node(skinClusters[0]).mfn()
 
 
     def mesh(self):
@@ -315,14 +314,14 @@ class SkinClusterHelper:
 
     def getInfluenceLogicalIndex(self, inf):
         """Return logical influence index for the given influence."""
-        infDagPath = proxy.node(inf).dagPath
+        infDagPath = proxy.node(inf).mdagpath
         if infDagPath in self._skinFn.influenceObjects():
             return self._skinFn.indexForInfluenceObject(infDagPath)
 
 
     def getInfluencePhysicalIndex(self, inf):
         """Return physical influence index for the given influence."""
-        infDagPath = proxy.node(inf).dagPath
+        infDagPath = proxy.node(inf).mdagpath
         for i, infNode in enumerate(self._skinFn.influenceObjects()):
             if infNode == infDagPath:
                 return i

@@ -5,8 +5,9 @@ from .. import proxy
 class ClosestPoint:
     def __init__(self, mesh):
         """Initialize closest-point queries for a mesh."""
-        self._meshDagPath = proxy.node(mesh).dagPath
-        self._meshFn = om.MFnMesh(self._meshDagPath)
+        meshNode = proxy.node(mesh)
+        self._meshDagPath = meshNode.mdagpath
+        self._meshFn = meshNode.mfn(shape=True)
         self._intersector = om.MMeshIntersector()
         self._intersector.create(self._meshFn.object(), self._meshDagPath.inclusiveMatrix())
 
@@ -22,8 +23,9 @@ class ClosestPoint:
 class VertexSymmetricTable:
     def __init__(self, mesh, x=-1, y=1, z=1):
         """Build a symmetry lookup table for mesh vertices."""
-        self._meshDagPath = proxy.node(mesh).dagPath
-        self._meshFn = om.MFnMesh(self._meshDagPath)
+        meshNode = proxy.node(mesh)
+        self._meshDagPath = meshNode.mdagpath
+        self._meshFn = meshNode.mfn(shape=True)
         self._closestPoint = ClosestPoint(mesh)
 
         self._table = None
@@ -57,8 +59,8 @@ class VertexSymmetricTable:
 
 def mirrorMeshPoints(meshBase, mesh):
     """Mirror mesh point offsets from base mesh across X."""
-    meshBaseFn = om.MFnMesh(proxy.node(meshBase).dagPath)
-    meshFn = om.MFnMesh(proxy.node(mesh).dagPath)
+    meshBaseFn = proxy.node(meshBase).mfn(shape=True)
+    meshFn = proxy.node(mesh).mfn(shape=True)
 
     basePoints = meshBaseFn.getPoints(om.MSpace.kWorld)
     points = meshFn.getPoints(om.MSpace.kWorld)
@@ -80,8 +82,9 @@ def mirrorMeshPoints(meshBase, mesh):
 
 def getVertexTangentSpaces(mesh, weightByUVTriangleSize=False, translation=True, rotation=True):
     """Return per-vertex tangent-space matrices."""
-    meshDagPath = proxy.node(mesh).dagPath
-    meshFn = om.MFnMesh(meshDagPath)
+    meshNode = proxy.node(mesh)
+    meshDagPath = meshNode.mdagpath
+    meshFn = meshNode.mfn(shape=True)
     points = meshFn.getPoints(om.MSpace.kWorld)
     tangents = meshFn.getTangents(om.MSpace.kWorld)
     binormals = meshFn.getBinormals(om.MSpace.kWorld)
@@ -144,8 +147,8 @@ def getVertexTangentSpaces(mesh, weightByUVTriangleSize=False, translation=True,
 
 def getVertexOffsets(mesh, target):
     """Return per-vertex world-space offsets from mesh to target."""
-    meshFn = om.MFnMesh(proxy.node(mesh).dagPath)
-    targetFn = om.MFnMesh(proxy.node(target).dagPath)
+    meshFn = proxy.node(mesh).mfn(shape=True)
+    targetFn = proxy.node(target).mfn(shape=True)
     meshPoints = meshFn.getPoints(om.MSpace.kWorld)
     targetPoints = targetFn.getPoints(om.MSpace.kWorld)
     assert len(meshPoints) == len(targetPoints), "Number of vertices must be the same"
@@ -154,7 +157,7 @@ def getVertexOffsets(mesh, target):
 
 def setVertexOffsets(mesh, offsets):
     """Apply per-vertex world-space offsets to a mesh."""
-    meshFn = om.MFnMesh(proxy.node(mesh).dagPath)
+    meshFn = proxy.node(mesh).mfn(shape=True)
     outPoints = meshFn.getPoints(om.MSpace.kWorld)
     for i in range(meshFn.numVertices):
         outPoints[i] += om.MPoint(offsets[i])
@@ -170,7 +173,7 @@ def getVertexOffsetsInTangentSpace(base, target):
 
 def setVertexOffsetsInTangentSpace(mesh, offsets):
     """Apply tangent-space offsets to a mesh in world space."""
-    meshFn = om.MFnMesh(proxy.node(mesh).dagPath)
+    meshFn = proxy.node(mesh).mfn(shape=True)
     matrices = getVertexTangentSpaces(mesh)
     outPoints = [om.MPoint(offsets[i]) * matrices[i] for i in range(len(offsets))]
     meshFn.setPoints(outPoints, om.MSpace.kWorld)

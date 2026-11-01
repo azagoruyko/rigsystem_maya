@@ -20,11 +20,12 @@ def copyAttrs(source, dest, exchange=False):
     source = proxy.node(source)
     dest = proxy.node(dest)
 
-    for attr in source.listAttr(k=True, sn=True):
-        if cmds.attributeQuery(attr, node=dest, exists=True):
-            destPlug = dest.attr(attr)
+    for attribute in source.listAttr(k=True, sn=True):
+        sourcePlug = source.attr(attribute)
+        name = sourcePlug.partialName()
+        if cmds.attributeQuery(name, node=dest, exists=True):
+            destPlug = dest.attr(name)
             if destPlug.get(settable=True):
-                sourcePlug = source.attr(attr)
                 if exchange:
                     value = destPlug.get()
                     destPlug.set(sourcePlug.get())
@@ -64,13 +65,16 @@ def freezeJoints(joints):
 def resetControl(control):
     """Reset keyable control attributes to default values."""
     control = proxy.node(control)
-    userAttrs = set(control.listAttr(userDefined=True))
-    for attr in control.listAttr(k=True, w=True, u=True, s=True, sn=True):
-        plug = control.attr(attr)
-        if plug.name in userAttrs:
+    userAttrs = {
+        control.attr(attribute).partialName()
+        for attribute in control.listAttr(userDefined=True)
+    }
+    for attribute in control.listAttr(k=True, w=True, u=True, s=True, sn=True):
+        plug = control.attr(attribute)
+        if plug.partialName() in userAttrs:
             plug.set(cmds.addAttr(plug, query=True, defaultValue=True))
         else:
-            if attr in ("sx", "sy", "sz", "v"):
+            if plug.partialName(useLongNames=False) in ("sx", "sy", "sz", "v"):
                 plug.set(1)
             else:
                 plug.set(0)
@@ -494,7 +498,10 @@ def getDeformers(shape, types=None):
 
         if nodeType == "groupParts":
             attr = node.inputGeometry
-        elif inputPlug.name == "outputGeometry" and "input.inputGeometry" in node.listAttr():
+        elif inputPlug.partialName() == "outputGeometry" and any(
+            node.attr(attribute).partialName(useFullAttributePath=True) == "input.inputGeometry"
+            for attribute in node.listAttr()
+        ):
             attr = node.attr(f"input[{inputPlug.index()}].inputGeometry")
         else:
             break
@@ -586,16 +593,17 @@ def connectFromSymmetric(node, **kwargs): # connects left node to the right one
         source = proxy.node(symNode)
         destination = proxy.node(node)
 
-        for a in destination.listAttr(k=True, s=True, se=True):
-            shortName = cmds.attributeQuery(a, node=node, shortName=True)
-            coeff = kwargs.get(a) or kwargs.get(shortName)
+        for attribute in destination.listAttr(k=True, s=True, se=True):
+            plug = destination.attr(attribute)
+            name = plug.partialName()
+            coeff = kwargs.get(name) or kwargs.get(plug.partialName(useLongNames=False))
             if coeff is None:
-                source.attr(a).connect(destination.attr(a), force=True)
+                source.attr(name).connect(plug, force=True)
             else:
-                mult = proxy.create("multDL", f"{symNode}_{a}_symmetric")
-                source.attr(a) >> mult.input1
+                mult = proxy.create("multDL", f"{symNode}_{name}_symmetric")
+                source.attr(name) >> mult.input1
                 mult.input2.set(coeff)
-                mult.output.connect(destination.attr(a), force=True)
+                mult.output.connect(plug, force=True)
 
 
 def symmetrizeJoint(srcJoint):

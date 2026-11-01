@@ -20,16 +20,11 @@ def removeUserAttributes(node):
         cmds.deleteAttr(f"{node}.{attr}")
 
 
-def _dagPath(node):
-    return proxy.node(node).dagPath
-
-
 def setWorldMatrixWithoutUndo(node, matrixValues):
     """Apply world matrix to the node without undo (API)."""
-    nodePath = _dagPath(node)
+    nodePath = proxy.node(node).mdagpath
     trm = om.MTransformationMatrix(om.MMatrix(matrixValues) * nodePath.exclusiveMatrixInverse())
-    trfn = om.MFnTransform(nodePath)
-    trfn.setTransformation(trm)
+    proxy.node(node).mfn().setTransformation(trm)
 
 
 def attributeChangeCallback(msg, plug, otherPlug, data):
@@ -124,8 +119,8 @@ def createRig(moduleInfo):
     data = [(j1, fk1), (j2, fk2), (j3, fk3)]
 
     callbacks = []
-    callbacks.append(om.MNodeMessage.addAttributeChangedCallback(_dagPath(ikctrl).node(), attributeChangeCallback, data))
-    callbacks.append(om.MNodeMessage.addAttributeChangedCallback(_dagPath(polctrl).node(), attributeChangeCallback, data))
+    callbacks.append(om.MNodeMessage.addAttributeChangedCallback(proxy.node(ikctrl).mdagpath.node(), attributeChangeCallback, data))
+    callbacks.append(om.MNodeMessage.addAttributeChangedCallback(proxy.node(polctrl).mdagpath.node(), attributeChangeCallback, data))
 
     cmds.scriptJob(e=["NewSceneOpened", lambda *args: removeRigCallbacks(callbacks)], ro=True)
     cmds.scriptJob(e=["SceneOpened", lambda *args: removeRigCallbacks(callbacks)], ro=True)

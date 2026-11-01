@@ -267,10 +267,10 @@ def keyframeAllControls(namespace):
     """Set keyframe on all keyable attributes of controls in the namespace."""
     nodes = cmds.ls(f"{namespace}*_control", type="transform") or []
     for control in proxy.nodes(nodes):
-        for attr in control.listAttr(k=True):
-            plug = control.attr(attr)
+        for attribute in control.listAttr(k=True):
+            plug = control.attr(attribute)
             if plug.get(settable=True):
-                cmds.setKeyframe(str(plug))
+                cmds.setKeyframe(plug)
 
 
 def makeMenuByModuleInfo(moduleInfo, object):

@@ -5,7 +5,7 @@ from rigsystem import proxy
 cmds = proxy.cmds
 crv = proxy.node(@curve)
 crvShape = crv.getShapes(type="nurbsCurve")[0] if crv.type() == "transform" else crv
-curveFn = om.MFnNurbsCurve(crvShape.dagPath)
+curveFn = crvShape.mfn(shape=True)
 
 start, end = curveFn.knotDomain
 

@@ -9,7 +9,7 @@ radius = @radius * @radiusMultiplier
 weightsAttrPattern = @outWeightAttr+"[%d]"
 
 geoShape = geo.getShapes(type="mesh")[0] if geo.type() == "transform" else geo
-geoFn = om.MFnMesh(geoShape.dagPath)
+geoFn = geoShape.mfn(shape=True)
 geoPoints = geoFn.getPoints(om.MSpace.kWorld)
 N = geoFn.numVertices
 

@@ -1,5 +1,21 @@
 import maya.cmds as _maya_cmds
 import maya.api.OpenMaya as om
+import maya.api.OpenMayaAnim as oma
+
+
+_API_FUNCTION_SETS = {
+    "transform": om.MFnTransform,
+    "joint": oma.MFnIkJoint,
+    "mesh": om.MFnMesh,
+    "nurbsCurve": om.MFnNurbsCurve,
+    "nurbsSurface": om.MFnNurbsSurface,
+    "camera": om.MFnCamera,
+    "skinCluster": oma.MFnSkinCluster,
+    "animCurveTA": oma.MFnAnimCurve,
+    "animCurveTL": oma.MFnAnimCurve,
+    "animCurveTT": oma.MFnAnimCurve,
+    "animCurveTU": oma.MFnAnimCurve,
+}
 
 
 def _wrapConnections(connections, kwargs):
@@ -15,22 +31,6 @@ def _wrapConnections(connections, kwargs):
     return [resultType(connection) for connection in connections]
 
 
-def _plugIdentity(mplug):
-    """Return an identity that stays stable when a node is renamed."""
-    parts = []
-    current = mplug
-    while True:
-        index = current.logicalIndex() if current.isElement else None
-        parts.append((om.MObjectHandle(current.attribute()), index))
-        if current.isChild:
-            current = current.parent()
-        elif current.isElement:
-            current = current.array()
-        else:
-            break
-    return om.MObjectHandle(mplug.node()), tuple(parts)
-
-
 class Plug:
     """A Maya attribute name with small cmds and API helpers."""
 
@@ -38,32 +38,49 @@ class Plug:
         if isinstance(value, om.MPlug):
             self._mplug = value
         else:
+            plugName = str(value)
             selection = om.MSelectionList()
-            selection.add(str(value))
-            self._mplug = selection.getPlug(0)
-            if self._mplug.isElement and "[" not in str(value).rsplit(".", 1)[-1]:
+            try:
+                selection.add(plugName)
+                self._mplug = selection.getPlug(0)
+            except RuntimeError as error:
+                raise RuntimeError(f"Could not find plug '{plugName}': {error}") from error
+            if self._mplug.isElement and "[" not in plugName:
                 self._mplug = self._mplug.array()
-        self._identity = _plugIdentity(self._mplug)
 
 
     def __str__(self):
-        obj = self._mplug.node()
-        if obj.hasFn(om.MFn.kDagNode):
-            nodeName = om.MDagPath.getAPathTo(obj).partialPathName()
-        else:
-            nodeName = om.MFnDependencyNode(obj).name()
-        attribute = self._mplug.name().partition(".")[2]
-        return f"{nodeName}.{attribute}"
+        return self._mplug.name()
+
+
+    def __getattr__(self, name):
+        if name.startswith("__"):
+            raise AttributeError(name)
+        return Plug(f"{self}.{name}")
 
 
     def __eq__(self, other):
         if not isinstance(other, Plug):
             return NotImplemented
-        return self._identity == other._identity
+        return self._mplug == other._mplug
 
 
     def __hash__(self):
-        return hash(self._identity)
+        parts = []
+        current = self._mplug
+        while True:
+            attribute = om.MObjectHandle(current.attribute())
+            index = current.logicalIndex() if current.isElement else None
+            parts.append((attribute.hashCode(), index))
+            if current.isChild:
+                current = current.parent()
+            elif current.isElement:
+                current = current.array()
+            else:
+                break
+
+        node = om.MObjectHandle(self._mplug.node())
+        return hash((node.hashCode(), tuple(parts)))
 
 
     def get(self, **kwargs):
@@ -93,6 +110,14 @@ class Plug:
     def connect(self, destination, force=False):
         """Connect this source plug to a destination plug."""
         cmds.connectAttr(str(self), str(plug(destination)), force=force)
+
+
+    def isConnected(self, destination=None):
+        """Return whether this plug has connections, or is connected to a destination plug."""
+        if destination is None:
+            return bool(self.inputs() or self.outputs())
+
+        return cmds.isConnected(str(self), str(plug(destination)))
 
 
     def disconnect(self, other=None, inputs=True, outputs=True):
@@ -136,10 +161,24 @@ class Plug:
         return Node(name)
 
 
-    @property
     def name(self):
-        """Return the name of the attribute that owns this plug."""
-        return om.MFnAttribute(self._mplug.attribute()).name
+        """Return the full plug path, including the node and parent attributes."""
+        return self._mplug.name()
+
+
+    def partialName(self, **kwargs):
+        """Return the plug's partial name using Maya API options."""
+        defaults = {
+            "includeNodeName": False,
+            "includeNonMandatoryIndices": False,
+            "includeInstancedIndices": False,
+            "useAlias": False,
+            "useFullAttributePath": False,
+            "useLongNames": True,
+        }
+        for key, value in defaults.items():
+            kwargs.setdefault(key, value)
+        return self._mplug.partialName(**kwargs)
 
 
     def listConnections(self, **kwargs):
@@ -223,6 +262,25 @@ class Node:
         return cmds.nodeType(str(self))
 
 
+    def mfn(self, shape=False):
+        """Return this node's API function set, optionally using its first non-intermediate shape."""
+        node = self
+        if shape and self.mobject.hasFn(om.MFn.kTransform):
+            shapes = self.getShapes()
+            if shapes:
+                node = shapes[0]
+
+        obj = node.mobject
+        isDagNode = obj.hasFn(om.MFn.kDagNode)
+        nodeType = cmds.objectType(str(node))
+        functionSet = _API_FUNCTION_SETS.get(nodeType)
+        if functionSet is None:
+            functionSet = om.MFnDagNode if isDagNode else om.MFnDependencyNode
+
+        target = node.mdagpath if isDagNode else obj
+        return functionSet(target)
+
+
     def __getattr__(self, name):
         if name.startswith("__"):
             raise AttributeError(name)
@@ -243,7 +301,7 @@ class Node:
 
 
     @property
-    def dagPath(self):
+    def mdagpath(self):
         """Return the Maya API MDagPath for this DAG node."""
         return om.MDagPath.getAPathTo(self.mobject)
 
@@ -290,7 +348,7 @@ class Node:
 
 
     def listAttr(self, **kwargs):
-        """List this node's attributes using Maya listAttr options."""
+        """List this node's attribute names using Maya listAttr options."""
         return cmds.listAttr(str(self), **kwargs) or []
 
 

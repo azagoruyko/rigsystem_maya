@@ -10,9 +10,9 @@ fromMeshList = proxy.nodes(@fromMeshList)
 
 class FindClosestVertexData:
     def __init__(self, mesh):
-        self.meshDagPath = proxy.node(mesh).getShapes(type="mesh")[0].dagPath
-
-        self.meshFn = om.MFnMesh(self.meshDagPath)
+        meshShape = proxy.node(mesh).getShapes(type="mesh")[0]
+        self.meshDagPath = meshShape.mdagpath
+        self.meshFn = meshShape.mfn(shape=True)
 
         self.meshIntersector = om.MMeshIntersector()
         self.meshIntersector.create(self.meshDagPath.node(), self.meshDagPath.inclusiveMatrix())
@@ -25,7 +25,7 @@ def calculateGeoIndexList(proxyGeo, fromGeoList):
         fromGeoClosestData.append(data)
 
     proxyShape = proxyGeo.getShapes(type="mesh")[0]
-    proxyFn = om.MFnMesh(proxyShape.dagPath)
+    proxyFn = proxyShape.mfn(shape=True)
     proxyPoints = proxyFn.getPoints(om.MSpace.kWorld)
 
     N = len(proxyPoints)

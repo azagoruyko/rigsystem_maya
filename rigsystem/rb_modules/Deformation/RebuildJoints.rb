@@ -23,7 +23,7 @@ cvs = [cmds.xform(str(j), q=True, ws=True, t=True) for j in inputJoints]
 crv = cmds.curve(d=1, p=cvs)
 cmds.rebuildCurve(crv, rpo=1, rt=0, end=1, kr=0, kcp=0, kep=1, kt=0, s=1, d=3, tol=0.01)
 curveShape = proxy.node(crv).getShapes(type="nurbsCurve")[0]
-curveFn = om.MFnNurbsCurve(curveShape.dagPath)
+curveFn = curveShape.mfn(shape=True)
 
 orientJoint = proxy.node(@orientFrom)
 orientCoeff = 1 if (
@@ -50,7 +50,7 @@ for i in range(@numJoints):
     j.radius.set(inputJoints[0].radius.get())
     
     q = om.MQuaternion(orientCoeff * rig_utils.matrix.xaxis(j.worldMatrix[0].get()), tg)
-    om.MFnTransform(j.dagPath).rotateBy(q, om.MSpace.kTransform)
+    j.mfn().rotateBy(q, om.MSpace.kTransform)
     
     if i == 0:
         inputJoints[0] | j

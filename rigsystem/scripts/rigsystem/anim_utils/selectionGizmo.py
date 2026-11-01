@@ -1,23 +1,23 @@
 import maya.cmds as cmds
 import maya.api.OpenMaya as om
-import maya.api.OpenMayaAnim as oma
 
 from rigsystem import proxy
    
 NAME = "selectionGizmo"
 
 def setWorldMatrixWithoutUndo(node, wm):
-    nodePath = proxy.node(node).dagPath
+    nodeNode = proxy.node(node)
+    nodePath = nodeNode.mdagpath
     lm = om.MMatrix(wm) * nodePath.exclusiveMatrixInverse() # make local matrix
     
     if cmds.nodeType(node) == "joint":
-        joInv = oma.MFnIkJoint(nodePath).orientation(asQuaternion=True).asMatrix().inverse()
+        joInv = nodeNode.mfn().orientation(asQuaternion=True).asMatrix().inverse()
         m = lm * joInv # consider jointOrient if any
         m[12], m[13], m[14] = lm[12], lm[13], lm[14]
     else:
         m = lm        
     
-    om.MFnTransform(nodePath).setTransformation(om.MTransformationMatrix(m))
+    nodeNode.mfn().setTransformation(om.MTransformationMatrix(m))
 
 
 def gizmoChange(msg, plug, otherPlug, data):
@@ -49,8 +49,9 @@ def makeGizmo():
     gizmo = cmds.createNode("transform", n=NAME)
     proxy.node(gizmo).hiddenInOutliner.set(True)
 
-    gizmoPath = proxy.node(gizmo).dagPath
-    om.MFnTransform(gizmoPath).setTranslation(center, om.MSpace.kWorld) # set pos without undo
+    gizmoNode = proxy.node(gizmo)
+    gizmoPath = gizmoNode.mdagpath
+    gizmoNode.mfn().setTranslation(center, om.MSpace.kWorld) # set pos without undo
     
     gizmoInverse = om.MMatrix(proxy.plug(f"{gizmo}.worldInverseMatrix[0]").get())
     offsets = [om.MMatrix(proxy.plug(f"{ctrl}.worldMatrix[0]").get()) * gizmoInverse for ctrl in selected]
@@ -63,4 +64,3 @@ def makeGizmo():
     
     cmds.setToolTo('moveSuperContext')
     print("Gizmo created")
-

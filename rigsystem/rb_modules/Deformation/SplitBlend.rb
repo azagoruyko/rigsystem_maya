@@ -19,8 +19,8 @@ skinWeights.normalize()
 
 skinShape = skinGeo.getShapes(type="mesh")[0]
 blendShape = blendGeo.getShapes(type="mesh")[0]
-skinPoints = om.MFnMesh(skinShape.dagPath).getPoints(om.MSpace.kObject)
-blendPoints = om.MFnMesh(blendShape.dagPath).getPoints(om.MSpace.kObject)
+skinPoints = skinShape.mfn(shape=True).getPoints(om.MSpace.kObject)
+blendPoints = blendShape.mfn(shape=True).getPoints(om.MSpace.kObject)
 
 for j in @joints:
     idx = skinHelper.getInfluencePhysicalIndex(j)
@@ -35,7 +35,7 @@ for j in @joints:
         str(skinGeo), name="{}_{}_geo".format(blendGeo, j)
     )[0]
     newBlendShape = proxy.node(newBlendGeo).getShapes(type="mesh")[0]
-    om.MFnMesh(newBlendShape.dagPath).setPoints(newPoints, om.MSpace.kObject)
+    newBlendShape.mfn(shape=True).setPoints(newPoints, om.MSpace.kObject)
 ]]></run>
 <doc><![CDATA[## Summary
 The **splitBlend** module creates joint‑based corrective blendshape targets by leveraging the skinCluster weights of a source geometry. For each selected joint, it generates a new geometry that contains only the deformation contributed by that joint, allowing localized control of blendshape influence.

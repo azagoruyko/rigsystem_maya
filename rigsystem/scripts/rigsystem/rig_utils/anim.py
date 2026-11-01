@@ -144,7 +144,7 @@ def appendMirrorMeshAnimation(mesh, bindFrame, startFrame, endFrame, insertFrame
     mesh = str(mesh)
 
     animMesh = cmds.duplicate(mesh, n=f"{mesh}_mirrored")[0]
-    meshFn = om.MFnMesh(proxy.node(mesh).dagPath)
+    meshFn = proxy.node(mesh).mfn(shape=True)
 
     framePoints = {}
     for frame in range(startFrame, endFrame + 1):
@@ -161,7 +161,7 @@ def animateMeshWithTargets(targets):
     animMesh = cmds.duplicate(targets[0], n=f"{targets[0]}_anim")[0]
     targetNodes = proxy.nodes(targets)
     framePoints = {
-        idx: om.MFnMesh(target.dagPath).getPoints(om.MSpace.kWorld)
+        idx: target.mfn(shape=True).getPoints(om.MSpace.kWorld)
         for idx, target in enumerate(targetNodes)
     }
     frameNames = {idx: targets[idx] for idx in range(len(targets))}
@@ -172,7 +172,7 @@ def animateMeshWithTargets(targets):
 def animateMeshWithBlendShape(mesh, framePoints, *, names=None):
     """Build a frame-driven blend shape from point samples."""
     blendShape = BlendShapeHelper(cmds.blendShape(mesh)[0])
-    basePoints = om.MFnMesh(proxy.node(mesh).dagPath).getPoints(om.MSpace.kWorld)
+    basePoints = proxy.node(mesh).mfn(shape=True).getPoints(om.MSpace.kWorld)
     meshInvMat = om.MMatrix(cmds.getAttr(f"{mesh}.im"))
 
     exprs = []
@@ -228,8 +228,8 @@ def computeRMSE(sourcePoints, targetPoints):
 
 def computeMeshRMSE(sourceMesh, targetMesh):
     """Compute mesh-level RMSE using world-space vertex points."""
-    sourceFn = om.MFnMesh(proxy.node(sourceMesh).dagPath)
-    targetFn = om.MFnMesh(proxy.node(targetMesh).dagPath)
+    sourceFn = proxy.node(sourceMesh).mfn(shape=True)
+    targetFn = proxy.node(targetMesh).mfn(shape=True)
     sourcePoints = sourceFn.getPoints(om.MSpace.kWorld)
     targetPoints = targetFn.getPoints(om.MSpace.kWorld)
     return computeRMSE(sourcePoints, targetPoints)
@@ -237,8 +237,8 @@ def computeMeshRMSE(sourceMesh, targetMesh):
 
 def visualizeRMSE(mesh, targetMesh, startFrame, endFrame, colorSet="rmse"):
     """Visualize per-vertex RMSE as vertex colors across a frame range."""
-    meshFn = om.MFnMesh(proxy.node(mesh).dagPath)
-    targetMeshFn = om.MFnMesh(proxy.node(targetMesh).dagPath)
+    meshFn = proxy.node(mesh).mfn(shape=True)
+    targetMeshFn = proxy.node(targetMesh).mfn(shape=True)
 
     numVertices = meshFn.numVertices
     numFrames = endFrame - startFrame + 1
@@ -260,7 +260,7 @@ def visualizeRMSE(mesh, targetMesh, startFrame, endFrame, colorSet="rmse"):
         cmds.polyColorSet(mesh, create=True, clamped=True, rpt="RGBA", colorSet=colorSet)
     cmds.polyColorSet(mesh, currentColorSet=True, colorSet=colorSet)
 
-    meshFn = om.MFnMesh(proxy.node(mesh).dagPath)
+    meshFn = proxy.node(mesh).mfn(shape=True)
     vertexColors = [om.MColor((*interpColor(weight), 1.0)) for weight in weightedRmse]
     meshFn.setVertexColors(vertexColors, range(numVertices))
 

@@ -2,7 +2,6 @@
 <run><![CDATA[# The script moves joints and use current deformer to get skin weights for each joint.
 
 import maya.api.OpenMaya as om
-import maya.api.OpenMayaAnim as oma
 import maya.mel as mel
 from rigsystem import proxy
 
@@ -18,7 +17,7 @@ geo = proxy.node(@sourceGeo)
 joints = proxy.nodes(@joints)
 
 geoShape = geo.getShapes(type="mesh")[0]
-geoFn = om.MFnMesh(geoShape.dagPath)
+geoFn = geoShape.mfn(shape=True)
 origPoints = geoFn.getPoints(om.MSpace.kWorld)
 
 skin = mel.eval('findRelatedSkinCluster "{}"'.format(@skinGeo))
@@ -26,7 +25,7 @@ if not skin:
     cmds.error("Cannot find skinCluster on " + @skinGeo)
 
 skin = proxy.node(skin)
-skinFn = oma.MFnSkinCluster(skin.mobject)
+skinFn = skin.mfn()
 
 if ngSkinToolsAvailable and @ngskin_layerName:
     ngmll = ng.mllInterface.MllInterface()
@@ -45,7 +44,7 @@ for j in joints:
 
     print(j)
     old_t = cmds.getAttr(f"{j}.translate")[0]
-    idx = skinFn.indexForInfluenceObject(j.dagPath)
+    idx = skinFn.indexForInfluenceObject(j.mdagpath)
     try:
         cmds.setAttr(f"{j}.ty", cmds.getAttr(f"{j}.ty") + 1)
 
