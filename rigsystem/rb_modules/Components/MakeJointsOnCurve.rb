@@ -1,4 +1,4 @@
-<module name="makeJointsOnCurve" muted="0" uid="edca6ffb8012413abb1b69a4fbd15f8f">
+<module name="MakeJointsOnCurve" muted="0" uid="edca6ffb8012413abb1b69a4fbd15f8f">
 <run><![CDATA[import maya.api.OpenMaya as om
 from rigsystem import proxy
 
@@ -35,7 +35,7 @@ if not @makeConnected:
 
 if @attach:
     for i in range(count):
-        poci = proxy.create("pointOnCurveInfo", f"{joints[i].localName()}_pointOnCurveInfo")
+        poci = proxy.create("pointOnCurveInfo", joints[i].localName())
         crvShape.worldSpace[0] >> poci.inputCurve
         
         if not @numAsCVs:
