@@ -224,8 +224,19 @@ class Node:
             self._handle = value._handle
             return
 
+        name = str(value)
+        matches = cmds.ls(name, long=True) or []
+        if not matches:
+            raise ValueError(f"Maya node does not exist: {name or '<empty>'}")
+        if len(matches) > 1:
+            matchList = ", ".join(matches)
+            raise ValueError(
+                f"Maya node name is ambiguous: {name}. "
+                f"Matches: {matchList}. Use a full DAG path."
+            )
+
         selection = om.MSelectionList()
-        selection.add(str(value))
+        selection.add(matches[0])
         self._handle = om.MObjectHandle(selection.getDependNode(0))
 
 
