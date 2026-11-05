@@ -1,9 +1,10 @@
 <module name="wheel" type="Others/Wheel" muted="0" uid="a691834bf052466aae538d215056b75c">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
-@start = pm.PyNode(@start)
-@end = pm.PyNode(@end)
-@center = pm.PyNode(@center)
+cmds = proxy.cmds
+start = proxy.node(@start)
+end = proxy.node(@end)
+center = proxy.node(@center)
 
 expr = '''
 float $RADIUS = %radius;
@@ -37,19 +38,19 @@ float $value = $dctrl * (( $distance / (6.2831 * $RADIUS)) * 360.0);
 %transform.prevTranslateZ = $newTranslate.z;
 '''
 
-transform = pm.createNode("transform", n=@name+"_transform")
-pm.xform(transform, ws=True, t=@center.getTranslation("world"))
+transform = proxy.create("transform", @name)
+cmds.xform(transform, ws=True, t=cmds.xform(center, q=True, ws=True, t=True))
 
-transform.addAttr("prevTranslateX",at="float",k=True)
-transform.addAttr("prevTranslateY",at="float",k=True)
-transform.addAttr("prevTranslateZ",at="float",k=True)
+transform.addAttr(ln="prevTranslateX", at="float", k=True)
+transform.addAttr(ln="prevTranslateY", at="float", k=True)
+transform.addAttr(ln="prevTranslateZ", at="float", k=True)
 
 expr = expr.replace("%radius", str(@radius))
-expr = expr.replace("%start", @start.name())
-expr = expr.replace("%end", @end.name())
-expr = expr.replace("%transform", transform.name())
+expr = expr.replace("%start", str(start))
+expr = expr.replace("%end", str(end))
+expr = expr.replace("%transform", str(transform))
 
-pm.expression(s=expr,n=@name+"_expression")]]></run>
+cmds.expression(s=expr, n=@name + "_expression")]]></run>
 <doc><![CDATA[## Summary  
 Creates a procedural wheel rig that automatically rotates a wheel transform based on the wheel’s forward direction and the distance it has moved. The module uses a start and end transform to define the wheel’s forward axis, a center transform to position the wheel, and a radius value to convert linear travel into rotational degrees. An expression node drives the wheel’s rotation and stores the previous translation to compute incremental movement.
 

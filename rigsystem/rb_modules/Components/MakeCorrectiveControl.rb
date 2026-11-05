@@ -1,37 +1,38 @@
 <module name="MakeCorrectiveControl" muted="0" uid="e8b9c7463d6f4ef99a6aee1aeddf43fb">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
+
+cmds = proxy.cmds
 
 makeHelperMod = module.child("makeHelper")
 compClusterMod = module.child("compensationCluster")
 
 compClusterMod.run()
-parentHandle = pm.PyNode(compClusterMod.attr.out_parent.get())
-handle = pm.PyNode(compClusterMod.attr.out_handle.get())
-deformer = pm.PyNode(compClusterMod.attr.out_deformer.get())
+parentHandle = proxy.node(compClusterMod.attr.out_parent.get())
+handle = proxy.node(compClusterMod.attr.out_handle.get())
+deformer = proxy.node(compClusterMod.attr.out_deformer.get())
 
 makeHelperMod.run()
 
-tranform = pm.createNode("transform", n=@name + "_control_transform")
-pm.matchTransform(tranform, handle)
+transform = proxy.create("transform", f"{@name}_control_transform", suffix=False)
+cmds.matchTransform(str(transform), str(handle))
 
-ctrl = pm.PyNode(makeHelperMod.attr.name.get())
-tranform | ctrl
-pm.matchTransform(ctrl, handle)
+ctrl = proxy.node(makeHelperMod.attr.name.get())
+transform | ctrl
+cmds.matchTransform(str(ctrl), str(handle))
 rig_utils.setToOffsetParentMatrix(ctrl)
 rig_utils.lockAttr(ctrl.v, 1)
 
 ctrl | parentHandle
 
 if @type == "softMod":
-    ctrl.addAttr("radius", min=0, dv=@deformRadius, k=True)
-    ctrl.radius >> deformer.falloffRadius
+    ctrl.addAttr(ln="radius", min=0, dv=@deformRadius, k=True)
+    ctrl.radius.connect(deformer.falloffRadius)
     
-ctrl.t >> handle.t
-ctrl.r >> handle.r
-ctrl.s >> handle.s
+ctrl.t.connect(handle.t)
+ctrl.r.connect(handle.r)
+ctrl.s.connect(handle.s)
 
-@set_out_control(ctrl.name())]]></run>
+@set_out_control(str(ctrl))]]></run>
 <doc><![CDATA[## Summary
 This module builds a compensation cluster deformer on the currently selected geometry and creates a helper control that follows the cluster handle. The helper’s transform and radius are wired to the cluster deformer, allowing the control to drive the cluster’s fall‑off and maintain mesh volume during extreme joint rotations.
 
@@ -86,38 +87,38 @@ Creates a helper curve node with a user‑defined name and shape, positioned at 
 </attributes>
 </module>
 <module name="compensationCluster" muted="1" uid="e3bfce6c327f4c16ad859bea29ba1dcb">
-<run><![CDATA[import pymel.core as pm
-import maya.cmds as cmds
-import maya.mel as mel
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 if @type == "cluster":
-    deformer, handle = pm.cluster(n=@name+"_cluster")
-    cmds.disconnectAttr(handle+".clusterTransforms[0]", deformer+".clusterXforms")
+    deformer, handle = proxy.nodes(cmds.cluster(name=f"{@name}_cluster"))
+    deformer.clusterXforms.disconnect(handle.clusterTransforms[0])
 
 elif @type == "softMod":
-    deformer, handle = pm.softMod(n=@name+"_softMod")
-    cmds.disconnectAttr(handle+".softModTransforms[0]", deformer+".softModXforms")
+    deformer, handle = proxy.nodes(cmds.softMod(name=f"{@name}_softMod"))
+    deformer.softModXforms.disconnect(handle.softModTransforms[0])
     deformer.falloffMasking.set(0)
     deformer.falloffAroundSelection.set(1)
 
 deformer.envelope.set(0.99999) # when 1 deformer doesn't work, maybe bug
-cmds.disconnectAttr(handle+".worldMatrix", deformer+".matrix")
+deformer.matrix.disconnect(handle.worldMatrix)
 
-parent = pm.createNode("transform", n=@name+"_compensation_transform")
-child = pm.createNode("transform", n=@name+"_transform", p=parent)
-parent.t.set(pm.xform(handle, q=True, ws=True, rp=True))
-pm.delete(handle)
+parent = proxy.create("transform", f"{@name}_compensation")
+child = proxy.create("transform", f"{@name}", parent=parent)
+parent.t.set(cmds.xform(str(handle), q=True, ws=True, rp=True))
+cmds.delete(str(handle))
 
 def callback():
     child.matrix >> deformer.weightedMatrix
-    parent.wim >> deformer.postMatrix
-    parent.wm >> deformer.preMatrix
+    parent.worldInverseMatrix[0] >> deformer.postMatrix
+    parent.worldMatrix[0] >> deformer.preMatrix
     
-pm.scriptJob(ro=True, e=("idle", callback))
+cmds.scriptJob(runOnce=True, event=("idle", callback))
 
-@set_out_parent(parent.name())
-@set_out_handle(child.name())
-@set_out_deformer(deformer.name())
+@set_out_parent(str(parent))
+@set_out_handle(str(child))
+@set_out_deformer(str(deformer))
 
 ]]></run>
 <doc><![CDATA[## Summary

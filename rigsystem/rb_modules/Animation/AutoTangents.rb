@@ -1,7 +1,23 @@
 <module name="autoTangent" type="Tools/AutoTangents" muted="0" uid="fe8646386e674920b0dfd829b30e6736">
-<run><![CDATA[import pymel.core as pm
-import maya.cmds as cmds
+<run><![CDATA[import maya.cmds as cmds
 import math
+
+
+def numKeys(curve):
+    return cmds.keyframe(curve, q=True, keyframeCount=True) or 0
+
+
+def getValue(curve, index):
+    return cmds.keyframe(curve, index=(index, index), q=True, valueChange=True)[0]
+
+
+def getTime(curve, index):
+    return cmds.keyframe(curve, index=(index, index), q=True, timeChange=True)[0]
+
+
+def isConstantInfinity(curve, pre):
+    attr = "preInfinity" if pre else "postInfinity"
+    return cmds.getAttr(f"{curve}.{attr}") == 0
 
 def clamp(v, mn, mx):
     if v > mx: return mx
@@ -13,40 +29,41 @@ def isEqual(a,b):
     
 def getSelectedKeys():
     selectedKeys = {}
-    for n in cmds.keyframe(q=True, name=True, sl=True):
+    for n in cmds.keyframe(q=True, name=True, sl=True) or []:
         if n not in selectedKeys:
             selectedKeys[n] = []
-        selectedKeys[n] += cmds.keyframe(n, q=True, indexValue=True, sl=True)
+        selectedKeys[n] += cmds.keyframe(n, q=True, indexValue=True, sl=True) or []
     return selectedKeys    
 
-def getCurrentAnimCurves():    
-    graphEditorCurves = cmds.animCurveEditor("graphEditor1GraphEd", q=True, cs=True)
+def getCurrentAnimCurves():
+    graphEditorCurves = []
+    if cmds.animCurveEditor("graphEditor1GraphEd", exists=True):
+        graphEditorCurves = cmds.animCurveEditor("graphEditor1GraphEd", q=True, cs=True) or []
     if graphEditorCurves:
         return graphEditorCurves
-    else:
-        return cmds.listConnections(type=["animCurveTA", "animCurveTU", "animCurveTL"])
+    return cmds.ls(type=["animCurveTA", "animCurveTU", "animCurveTL"]) or []
                 
 def getPrevIndex(animCurve, index):
-    numKeys = animCurve.numKeys()
-    current = animCurve.getValue(index)
+    count = numKeys(animCurve)
+    current = getValue(animCurve, index)
     
     if index == 0: # first
-        if animCurve.getPreInfinityType() != "constant":
-            if isEqual(animCurve.getValue(numKeys-1), current):
-                return numKeys-2 # before last        
-            return numKeys-1
+        if not isConstantInfinity(animCurve, pre=True):
+            if isEqual(getValue(animCurve, count - 1), current):
+                return count - 2 # before last
+            return count - 1
         return index          
         
     else:    
         return index-1
     
 def getNextIndex(animCurve, index):
-    numKeys = animCurve.numKeys()
-    current = animCurve.getValue(index)
+    count = numKeys(animCurve)
+    current = getValue(animCurve, index)
     
-    if index == numKeys-1: # last       
-        if animCurve.getPostInfinityType() != "constant":
-            if isEqual(animCurve.getValue(0), current):
+    if index == count - 1: # last
+        if not isConstantInfinity(animCurve, pre=False):
+            if isEqual(getValue(animCurve, 0), current):
                 return 1
             return 0
         else:
@@ -55,49 +72,47 @@ def getNextIndex(animCurve, index):
         return index+1
                     
 def isExtremumKey(animCurve, index):
-    if index == 0 and animCurve.getPreInfinityType() == "constant":
+    if index == 0 and isConstantInfinity(animCurve, pre=True):
         return True
 
-    if index == animCurve.numKeys()-1 and animCurve.getPostInfinityType() == "constant":
+    if index == numKeys(animCurve) - 1 and isConstantInfinity(animCurve, pre=False):
         return True
         
-    if animCurve.numKeys() > 2:             
-        current = animCurve.getValue(index)
-        prev = animCurve.getValue(getPrevIndex(animCurve, index))
-        next = animCurve.getValue(getNextIndex(animCurve, index))
+    if numKeys(animCurve) > 2:
+        current = getValue(animCurve, index)
+        prev = getValue(animCurve, getPrevIndex(animCurve, index))
+        next = getValue(animCurve, getNextIndex(animCurve, index))
         return (current > prev and current > next) or (current < prev and current < next)
 
 def autoTangents(animCurve, keyIndices=None):
-    for index in range(animCurve.numKeys()):
+    for index in range(numKeys(animCurve)):
         if keyIndices is not None and index not in keyIndices:
             continue
             
         if isExtremumKey(animCurve, index):
-            if (index == 0 and animCurve.getPreInfinityType() == "constant" or\
-                index == animCurve.numKeys()-1 and animCurve.getPostInfinityType() == "constant") and not @flatten:
-                cmds.keyTangent(animCurve.name(), index=[(index, index)], e=True, itt="spline", ott="spline")
+            if (index == 0 and isConstantInfinity(animCurve, pre=True) or\
+                index == numKeys(animCurve) - 1 and isConstantInfinity(animCurve, pre=False)) and not @flatten:
+                cmds.keyTangent(animCurve, index=[(index, index)], e=True, itt="spline", ott="spline")
     
             else:
-                cmds.keyTangent(animCurve.name(), index=[(index, index)], e=True, itt="flat", ott="flat")
+                cmds.keyTangent(animCurve, index=[(index, index)], e=True, itt="flat", ott="flat")
         else:
-            evalAtIndex = lambda idx: cmds.keyframe(animCurve.name(), index=[(idx, idx)], q=True, eval=True)[0]
-            
             prevIndex = getPrevIndex(animCurve, index)
             nextIndex = getNextIndex(animCurve, index)
 
-            valuePrevChange = animCurve.getValue(index) - animCurve.getValue(prevIndex)
-            valueNextChange = animCurve.getValue(nextIndex) - animCurve.getValue(index)
+            valuePrevChange = getValue(animCurve, index) - getValue(animCurve, prevIndex)
+            valueNextChange = getValue(animCurve, nextIndex) - getValue(animCurve, index)
             
-            prevTime = animCurve.getTime(prevIndex)
-            nextTime = animCurve.getTime(nextIndex)
+            prevTime = getTime(animCurve, prevIndex)
+            nextTime = getTime(animCurve, nextIndex)
             
             if index == 0:
-                prevTime = -(animCurve.getTime(animCurve.numKeys()-1)-animCurve.getTime(prevIndex))
-            elif index == animCurve.numKeys()-1:
-                nextTime = animCurve.getTime(index) + animCurve.getTime(1)-animCurve.getTime(0)
+                prevTime = -(getTime(animCurve, numKeys(animCurve) - 1) - getTime(animCurve, prevIndex))
+            elif index == numKeys(animCurve) - 1:
+                nextTime = getTime(animCurve, index) + getTime(animCurve, 1) - getTime(animCurve, 0)
 
-            timePrevChange = animCurve.getTime(index) - prevTime
-            timeNextChange = nextTime - animCurve.getTime(index)
+            timePrevChange = getTime(animCurve, index) - prevTime
+            timeNextChange = nextTime - getTime(animCurve, index)
                 
             slopeIn = valuePrevChange / timePrevChange if timePrevChange != 0 else 0 
             slopeOut = valueNextChange / timeNextChange if timeNextChange != 0 else 0 
@@ -113,8 +128,8 @@ def autoTangents(animCurve, keyIndices=None):
             prevAngleWeight = 1.0/prevAngle / sumAngleWeight
             angle = nextAngle*nextAngleWeight + prevAngle*prevAngleWeight
                         
-            cmds.keyTangent(animCurve.name(), index=[(index, index)], e=True, itt="spline", ott="spline")
-            cmds.keyTangent(animCurve.name(), index=[(index,index)], e=True, oa=angle)            
+            cmds.keyTangent(animCurve, index=[(index, index)], e=True, itt="spline", ott="spline")
+            cmds.keyTangent(animCurve, index=[(index,index)], e=True, oa=angle)
             
             # soft
             powIn = 0.5
@@ -130,16 +145,16 @@ def autoTangents(animCurve, keyIndices=None):
             	
             newSlope = powIn * slopeIn + powOut * slopeOut
             smoothAngle = math.atan(newSlope) * 180.0 / math.pi
-            cmds.keyTangent(animCurve.name(), index=[(index, index)], e=True, oa=smoothAngle*@soft + angle*(1-@soft))
+            cmds.keyTangent(animCurve, index=[(index, index)], e=True, oa=smoothAngle*@soft + angle*(1-@soft))
 
 if @selected==0:
     selectedKeys = getSelectedKeys()
     for animCurve in selectedKeys:
-        autoTangents(pm.PyNode(animCurve), selectedKeys[animCurve])
+        autoTangents(animCurve, selectedKeys[animCurve])
 
 elif @selected==1:
     for animCurve in getCurrentAnimCurves():
-        autoTangents(pm.PyNode(animCurve))
+        autoTangents(animCurve)
 
     ]]></run>
 <doc><![CDATA[## Summary

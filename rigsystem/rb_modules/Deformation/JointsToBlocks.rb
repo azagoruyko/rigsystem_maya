@@ -1,29 +1,31 @@
 <module name="JointsToBlocks" muted="0" uid="2682dff45ad54c1cb4ce095b568f4fba">
 <run><![CDATA[import fnmatch
-import pymel.core as pm
+import maya.api.OpenMaya as om
+from rigsystem import proxy
+
+cmds = proxy.cmds
 
 root_name = @rootJoint
 if not root_name:
-    selected = pm.ls(sl=True, type="joint")
+    selected = cmds.ls(sl=True, type="joint") or []
     if not selected:
         error("Set rootJoint or select a root joint in Maya.")
     root_name = selected[0]
 
-root = pm.PyNode(root_name)
+root = proxy.node(root_name)
 if root.type() != "joint":
     error("rootJoint must be a Maya joint.")
 
 diameter = float(@diameter)
 ratio = float(@diameterRatio)
 skip_pattern = @skipPattern.strip()
-attach = @attach
 if diameter < 0 or ratio <= 0:
     error("diameter must be nonnegative and diameterRatio must be positive.")
 
 def is_skipped(joint):
     """Match a joint name against the case-sensitive skip glob."""
     return bool(skip_pattern) and fnmatch.fnmatchcase(
-        joint.nodeName(), "*{}*".format(skip_pattern)
+        str(joint).rsplit("|", 1)[-1], "*{}*".format(skip_pattern)
     )
 
 
@@ -43,12 +45,12 @@ blocks = []
 
 def joint_position(joint):
     """Return the joint's world-space position."""
-    return pm.dt.Vector(pm.xform(joint, q=True, ws=True, t=True))
+    return om.MVector(cmds.xform(str(joint), q=True, ws=True, t=True))
 
 
 def make_block(start, end, joint):
     """Create one block and optionally drive it with the joint matrix."""
-    name = joint.nodeName()
+    name = str(joint).rsplit("|", 1)[-1]
     direction = end - start
     length = direction.length()
     if length < 1e-6:
@@ -57,27 +59,27 @@ def make_block(start, end, joint):
 
     width = diameter or length * ratio
     y_axis = direction.normal()
-    guide = pm.dt.Vector(0, 0, 1) if abs(y_axis.z) < 0.99 else pm.dt.Vector(1, 0, 0)
+    guide = om.MVector(0, 0, 1) if abs(y_axis.z) < 0.99 else om.MVector(1, 0, 0)
     x_axis = y_axis.cross(guide).normal()
     z_axis = x_axis.cross(y_axis).normal()
     center = (start + end) * 0.5
 
-    block = pm.polyCube(w=width, h=length, d=width, ch=True, name="{}_block".format(name))[0]
+    block = cmds.polyCube(w=width, h=length, d=width, ch=True, name="{}_block".format(name))[0]
     blocks.append(block)
 
-    world_matrix = pm.dt.Matrix([
+    world_matrix = om.MMatrix([
         x_axis.x, x_axis.y, x_axis.z, 0,
         y_axis.x, y_axis.y, y_axis.z, 0,
         z_axis.x, z_axis.y, z_axis.z, 0,
         center.x, center.y, center.z, 1,
     ])
-    if attach:
-        local_matrix = world_matrix * joint.worldInverseMatrix[0].get()
-        pm.xform(block, matrix=local_matrix)
-        joint.worldMatrix[0] >> block.offsetParentMatrix
+    if @attach:
+        local_matrix = world_matrix * om.MMatrix(joint.worldInverseMatrix[0].get())
+        cmds.xform(block, matrix=list(local_matrix))
+        joint.worldMatrix[0] >> proxy.node(block).offsetParentMatrix
 
     else:
-        pm.xform(block, matrix=world_matrix)
+        cmds.xform(block, matrix=list(world_matrix))
 
 
 def walk(joint):
@@ -90,7 +92,7 @@ def walk(joint):
     start = joint_position(joint)
 
     if not continuing:
-        end = sum((joint_position(child) for child in children), pm.dt.Vector()) / len(children)
+        end = sum((joint_position(child) for child in children), om.MVector()) / len(children)
         make_block(start, end, joint)
         return
 
@@ -106,7 +108,7 @@ def walk(joint):
 
 
 walk(root)
-@set_out_blocks([block.name() for block in blocks])
+@set_out_blocks(blocks)
 ]]></run>
 <doc><![CDATA[## Summary
 Creates separate rectangular polygon blocks along a Maya joint hierarchy. Only children with their own children start or continue branches; terminal leaf joints define the end of an existing branch.

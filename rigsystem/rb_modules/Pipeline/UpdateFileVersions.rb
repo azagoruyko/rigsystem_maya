@@ -1,10 +1,10 @@
 <module name="UpdateFileVersions" muted="0" uid="8fcc38bea4c04a68aa0119896f4572c2">
 <run><![CDATA[import os
 import re
-import pymel.core as pm
+from rigsystem import proxy
 
 updated_count = 0
-for node in pm.ls(type="file"):
+for node in proxy.nodes(proxy.cmds.ls(type="file") or []):
     path = node.fileTextureName.get()
     filename = os.path.basename(path)
     stem = os.path.splitext(filename)[0]
@@ -19,9 +19,9 @@ for node in pm.ls(type="file"):
     latest_name = filename
 
     expanded_path = os.path.expanduser(os.path.expandvars(path))
-    directory = os.path.dirname(pm.workspace(expandName=expanded_path))
+    directory = os.path.dirname(proxy.cmds.workspace(expandName=expanded_path))
     if not os.path.isdir(directory):
-        warning("{}: directory does not exist: {}".format(node, directory))
+        proxy.cmds.warning(f"{node}: directory does not exist: {directory}")
         continue
 
     candidate_pattern = re.compile(re.escape(prefix) + r"(\d+)" + re.escape(suffix))
@@ -38,10 +38,10 @@ for node in pm.ls(type="file"):
     if latest_name != filename:
         new_path = path[:-len(filename)] + latest_name
         node.fileTextureName.set(new_path)
-        print("{}: {} -> {}".format(node, path, new_path))
+        print(f"{node}: {path} -> {new_path}")
         updated_count += 1
 
-print("Updated {} file node(s).".format(updated_count))]]></run>
+print(f"Updated {updated_count} file node(s).")]]></run>
 <doc><![CDATA[## Summary
 Updates Maya `file` nodes to the highest numbered matching file in each node's current directory. It finds the last group of digits before the file extension automatically.
 

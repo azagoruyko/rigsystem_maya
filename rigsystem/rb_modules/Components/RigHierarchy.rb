@@ -1,44 +1,44 @@
 <module name="RigHierarchy" muted="0" uid="54888fff338a4a049762cbeb3377f929">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
-from rigsystem import anim_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils, anim_utils
 
-rigt = pm.createNode("transform", n="rig")
+cmds = proxy.cmds
+
+rigt = proxy.create("transform", "rig", suffix=False)
 rig_utils.lockTRS(rigt, v=0.5)
 
-transform = pm.createNode("transform", n="transform", p=rigt)
+transform = proxy.create("transform", "transform", parent=rigt, suffix=False)
 
-internal = pm.createNode("transform", n="internal", p=transform)
+internal = proxy.create("transform", "internal", parent=transform, suffix=False)
 rig_utils.lockTRS(internal, v=0.5)
 
-controls = pm.createNode("transform", n="controls", p=transform)
+controls = proxy.create("transform", "controls", parent=transform, suffix=False)
 rig_utils.lockTRS(controls, v=0.5)
 
-skeleton = pm.createNode("transform", n="skeleton", p=transform)
+skeleton = proxy.create("transform", "skeleton", parent=transform, suffix=False)
 rig_utils.lockTRS(skeleton, v=0.5)
 
-geometry = pm.createNode("transform", n="geometry", p=rigt)
+geometry = proxy.create("transform", "geometry", parent=rigt, suffix=False)
 rig_utils.lockTRS(geometry, v=0.5)
 
-others = pm.createNode("transform", n="others", p=rigt)
+others = proxy.create("transform", "others", parent=rigt, suffix=False)
 rig_utils.lockTRS(others, v=0.5)
 
-helpers = pm.createNode("transform", n="helpers", p=rigt)
+helpers = proxy.create("transform", "helpers", parent=rigt, suffix=False)
 rig_utils.lockTRS(helpers, v=0.5)
 
-main_control = pm.createNode("transform", n="main_control", p=rigt)
-helper = rig_utils.curve.makeCurve(main_control, "circle")
+main_control = proxy.create("transform", "main_control", parent=rigt, suffix=False)
+helper = rig_utils.curve.makeCurve(str(main_control), "circle")
 helper.s.set([5,5,5])
 rig_utils.curve.makeFromCurve(main_control, helper)
-pm.delete(helper)
+cmds.delete(helper)
 
-main_control.addAttr("scaleFactor", min=0.01, dv=1, k=True)
+main_control.addAttr(ln="scaleFactor", min=0.01, dv=1, k=True)
 
 main_control.scaleFactor >> main_control.sx
 main_control.scaleFactor >> main_control.sy
 main_control.scaleFactor >> main_control.sz
 
-pm.parentConstraint(main_control, transform, mo=True)
+cmds.parentConstraint(main_control, transform, mo=True)
 main_control.s >> transform.s
 
 rig_utils.lockTRS(transform, v=0.5)
@@ -47,9 +47,9 @@ rig_utils.lockTRS(main_control, [], [], [1, 1, 1], 1)
 anim_utils.dynamicParent.makeDynamicParent(main_control, main_control)
 
 # root joint
-rootJoint = pm.createNode("joint", n="root", p=skeleton)
-pm.parentConstraint(main_control, rootJoint)
-pm.scaleConstraint(main_control, rootJoint)
+rootJoint = proxy.create("joint", "root", parent=skeleton, suffix=False)
+cmds.parentConstraint(main_control, rootJoint)
+cmds.scaleConstraint(main_control, rootJoint)
 
 moduleInfo = rig_utils.moduleInfo.ModuleInfo("rig")
 moduleInfo.setAttr("type", "rig")

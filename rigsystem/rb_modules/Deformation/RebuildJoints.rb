@@ -1,8 +1,9 @@
 <module name="rebuildJoints" muted="0" uid="31428debb222403b9b8e1d7308d3f8a1">
-<run><![CDATA[import pymel.core as pm
-import pymel.api as api
+<run><![CDATA[import maya.api.OpenMaya as om
 import re
-from rigsystem import rig_utils
+from rigsystem import proxy, rig_utils
+
+cmds = proxy.cmds
 
 def getIncrementedName(name):
     lastNumRegex = "(\\d+)([a-zA-Z_]*$)"
@@ -14,36 +15,42 @@ def getIncrementedName(name):
     else:
         return name
 
-inputJoints = [pm.PyNode(j) for j in @inputJoints]
-orientation = pm.xform(@orientFrom, q=True, ws=True, ro=True)
+inputJoints = proxy.nodes(@inputJoints)
+orientation = cmds.xform(@orientFrom, q=True, ws=True, ro=True)
 
-cvs = [j.getTranslation("world") for j in inputJoints]
+cvs = [cmds.xform(str(j), q=True, ws=True, t=True) for j in inputJoints]
 
-crv = pm.curve(d=1, p=cvs)
-pm.rebuildCurve(crv, rpo=1, rt=0, end=1, kr=0, kcp=0, kep=1, kt=0, s=1, d=3, tol=0.01)
+crv = cmds.curve(d=1, p=cvs)
+cmds.rebuildCurve(crv, rpo=1, rt=0, end=1, kr=0, kcp=0, kep=1, kt=0, s=1, d=3, tol=0.01)
+curveShape = proxy.node(crv).getShapes(type="nurbsCurve")[0]
+curveFn = curveShape.mfn(shape=True)
 
-orientCoeff = 1 if rig_utils.xaxis(pm.PyNode(@orientFrom).worldMatrix.get()) * crv.tangent(0) > 0 else -1
+orientJoint = proxy.node(@orientFrom)
+orientCoeff = 1 if (
+    rig_utils.matrix.xaxis(orientJoint.worldMatrix[0].get())
+    * curveFn.tangent(0, om.MSpace.kWorld)
+) > 0 else -1
 
 for j in inputJoints[1:-1]: # keep start/end
-    j.ungroup()
+    cmds.ungroup(str(j))
 
-jointName = getIncrementedName(inputJoints[0].name())
+jointName = getIncrementedName(str(inputJoints[0]))
 
 joints = []
 for i in range(@numJoints):
     param = (i+1) / float(@numJoints+1)
-    p = crv.getPointAtParam(param)
-    tg = crv.tangent(param)
+    p = curveFn.getPointAtParam(param, om.MSpace.kWorld)
+    tg = curveFn.tangent(param, om.MSpace.kWorld)
     
     name = jointName
     
-    j = pm.createNode("joint", n=name)
-    j.t.set(p)
-    j.r.set(orientation)
+    j = proxy.create("joint", name, suffix=False)
+    cmds.setAttr(f"{j}.translate", p.x, p.y, p.z, type="double3")
+    cmds.setAttr(f"{j}.rotate", *orientation, type="double3")
     j.radius.set(inputJoints[0].radius.get())
     
-    q = api.MQuaternion(orientCoeff*rig_utils.xaxis(j.worldMatrix.get()), tg)
-    j.rotateBy(q)        
+    q = om.MQuaternion(orientCoeff * rig_utils.matrix.xaxis(j.worldMatrix[0].get()), tg)
+    j.mfn().rotateBy(q, om.MSpace.kTransform)
     
     if i == 0:
         inputJoints[0] | j
@@ -58,7 +65,7 @@ for i in range(@numJoints):
 
 inputJoints[-1].rename(jointName)
     
-pm.delete(crv)
+cmds.delete(crv)
 
 rig_utils.freezeJoints(joints)
 rig_utils.freezeJoints([inputJoints[0], inputJoints[-1]])

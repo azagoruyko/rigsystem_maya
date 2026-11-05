@@ -1,25 +1,25 @@
 <module name="mirrorCurves" muted="0" uid="c1f83e2098ab4b32a1290f845a7698bd">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
+cmds = proxy.cmds
 if @useSelected:
-    selection = pm.ls(sl=True, type="transform")
+    selection = proxy.nodes(cmds.ls(sl=True, type="transform") or [])
     if not selection:
-        shapeSel = pm.ls(sl=True, type="nurbsCurve")
-        selection = [s.getParent() for s in shapeSel]
+        shapeSel = proxy.nodes(cmds.ls(sl=True, type="nurbsCurve") or [])
+        selection = [shape.getParent() for shape in shapeSel]
 else:
-    selection = pm.ls(type="transform")
+    selection = proxy.nodes(cmds.ls(type="transform") or [])
 
 if not selection:
     warning("mirrorCurves: No curve transforms selected or found.")
 
 processed = set()
 for item in selection:
-    shapes = [s for s in item.getShapes() if not s.isIntermediate() and isinstance(s, pm.nt.NurbsCurve)]
+    shapes = item.getShapes(type="nurbsCurve")
     if not shapes:
         continue
 
-    name = item.name()
+    name = str(item)
     if name in processed:
         continue
 
@@ -30,8 +30,8 @@ for item in selection:
 
     dest = rig_utils.curve.mirrorCurveShape(item)
     if dest:
-        processed.add(item.name())
-        processed.add(dest.name())
+        processed.add(str(item))
+        processed.add(str(dest))
 ]]></run>
 <doc><![CDATA[## Summary
 Mirrors the shape of selected NURBS curve transforms across a chosen axis, optionally filtering by side (left/right) and direction. The module updates the CV positions of the target curves in place, ensuring symmetric topology and geometry.

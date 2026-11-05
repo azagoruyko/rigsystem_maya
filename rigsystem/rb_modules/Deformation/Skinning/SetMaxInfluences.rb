@@ -1,26 +1,26 @@
 <module name="SetMaxInfluences" muted="0" uid="ba683572a8564671832cbe81d0fc0b8c">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.mel as mel
+from rigsystem import proxy
 from rigsystem.rig_utils import skinCluster
 
-geo = @mesh
+cmds = proxy.cmds
 maxInf = int(@maxInf)
 
-if not pm.objExists(geo):
-    error("Cannot find geometry '{0}'.".format(geo))
+if not cmds.objExists(@mesh):
+    error(f"Cannot find geometry '{@mesh}'.")
 if maxInf < 1:
     error("Maximum influences must be at least 1.")
 
-skinNode = pm.mel.eval("findRelatedSkinCluster " + geo)
+skinNode = mel.eval(f'findRelatedSkinCluster "{@mesh}"')
 if not skinNode:
-    error("Cannot find a skinCluster on '{0}'.".format(geo))
+    error(f"Cannot find a skinCluster on '{@mesh}'.")
 
-skinHelper = skinCluster.SkinClusterHelper(geo)
+skinHelper = skinCluster.SkinClusterHelper(@mesh)
 skinWeights = skinHelper.getSkinWeights()
 skinWeights.setMaxInfluence(maxInf)
 skinHelper.setSkinWeights(skinWeights)
 
-print("Processed {0} vertices on '{1}' with a limit of {2} influences.".format(
-    skinWeights.numVertices(), geo, maxInf))
+print(f"Processed {skinWeights.numVertices()} vertices on '{@mesh}' with a limit of {maxInf} influences.")
 ]]></run>
 <doc><![CDATA[## Summary
 Limits the number of bone influences per vertex on a selected mesh’s skin cluster to a user‑defined maximum, updating the skin weights in place.

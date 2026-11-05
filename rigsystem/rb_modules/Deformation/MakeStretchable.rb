@@ -1,17 +1,15 @@
 <module name="makeStretchable" muted="0" uid="e2d5e2c2f71b41078b86f36600ef2af7">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[
 from rigsystem import rig_utils
 
-control = pm.PyNode(@control)
-jnt = pm.PyNode(@joint)
 
 # Measure distance between control and joint
-d = rig_utils.createDistance(@joint + "_distance", jnt, control)
+d = rig_utils.createDistance(f"{@joint}_distance", @joint, @control)
 
 # Build stretchable setup
 rig_utils.makeStretchable(
-    @joint+"_stretch",
-    [jnt],
+    f"{@joint}_stretch",
+    [@joint],
     d,
     squash=0.01,
     saveVolume=0,

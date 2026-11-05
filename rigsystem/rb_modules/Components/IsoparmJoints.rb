@@ -1,17 +1,17 @@
 <module name="isoparmJoints" muted="0" uid="a7c82e914f6b4d32a9018e472bc194d3">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-isoparm = pm.PyNode(@isoparm.strip())
+cmds = proxy.cmds
+isoparm = @isoparm.strip()
 
-surface = isoparm.node()
-uRange = surface.minMaxRangeU.get()
-vRange = surface.minMaxRangeV.get()
+surface = proxy.node(cmds.ls(isoparm, objectsOnly=True, long=True)[0])
+uRange = surface.minMaxRangeU.get()[0]
+vRange = surface.minMaxRangeV.get()[0]
 
 # 1. Create curve from selected isoparm with construction history
-curve = pm.PyNode(pm.duplicateCurve(isoparm, ch=True, n=@name + "_curve")[0])
+curve, isoNodeName = cmds.duplicateCurve(isoparm, ch=True, n=@name + "_curve")
 
-isoNode = curve.getShape().create.inputs(type="curveFromSurfaceIso")[0]
+isoNode = proxy.node(isoNodeName)
 isoNode.rename(@name + "_curveFromSurfaceIso")
 
 isoDir = isoNode.isoparmDirection.get() # 0 = U isoparm (V varies), 1 = V isoparm (U varies)
@@ -29,19 +29,19 @@ if @inverted:
     vStart, vEnd = vEnd, vStart
 
 # 2. Position transforms on surface at start (A) and end (B) rotated by surface normal
-surfLocA = pm.PyNode(rig_utils.makeSurfaceTransform(@name + "_a_transform", surface, uStart, vStart))
-surfLocB = pm.PyNode(rig_utils.makeSurfaceTransform(@name + "_b_transform", surface, uEnd, vEnd))
+surfLocA = proxy.node(rig_utils.makeSurfaceTransform(@name + "_a_transform", surface, uStart, vStart))
+surfLocB = proxy.node(rig_utils.makeSurfaceTransform(@name + "_b_transform", surface, uEnd, vEnd))
 
 # 3. Create two joint chain (Bone A and Bone B)
-jointA = rig_utils.matchJoint(surfLocA, @name + "_a_joint")
-jointB = rig_utils.matchJoint(surfLocB, @name + "_b_joint")
+jointA = proxy.node(rig_utils.matchJoint(surfLocA, @name + "_a_joint"))
+jointB = proxy.node(rig_utils.matchJoint(surfLocB, @name + "_b_joint"))
 jointA | jointB
 
 # Start of curve/isoparm controls Bone A
-pm.pointConstraint(surfLocA, jointA)
+cmds.pointConstraint(surfLocA, jointA)
 
 # 4. Use SC handle to control A, B bones (end of curve/isoparm controls Bone B)
-ikHandle = pm.ikHandle(sj=jointA, ee=jointB, sol="ikSCsolver", n=@name + "_ikHandle")[0]
+ikHandle = proxy.node(cmds.ikHandle(sj=jointA, ee=jointB, sol="ikSCsolver", n=@name + "_ikHandle")[0])
 ikHandle.v.set(False)
 surfLocB | ikHandle
 ]]></run>

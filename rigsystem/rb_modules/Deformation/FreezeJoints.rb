@@ -1,8 +1,8 @@
 <module name="freezeJoints" type="Tools/FreezeJoints" muted="0" uid="e13ecd930d9943d69299094249a7e31e">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[
 from rigsystem import rig_utils
 
-rig_utils.freezeJoints([pm.PyNode(j) for j in @joints])]]></run>
+rig_utils.freezeJoints(@joints)]]></run>
 <doc><![CDATA[## Summary
 The **freezeJoints** tool standardizes joint orientations by freezing rotations and zeroing joint orient values while keeping the skeleton in world space. It is useful for preparing custom skeletons for IK setups or for ensuring consistent joint orientation conventions.
 

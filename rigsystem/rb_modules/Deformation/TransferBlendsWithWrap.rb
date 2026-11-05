@@ -1,42 +1,42 @@
 <module name="transferBlendsWithWrap" muted="0" uid="5772ef3bbe374b19bbfa620fa562cab5">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-srcGeo = pm.PyNode(@srcGeoWithBlends)
-destGeo = pm.PyNode(@destGeo)
+cmds = proxy.cmds
+srcGeo = proxy.node(@srcGeoWithBlends)
+destGeo = proxy.node(@destGeo)
 
 # 1. Create wrap deformer on destGeo driven by srcGeo
 wrapNode = rig_utils.createWrap(srcGeo, destGeo)
 
 # 2. Find blendShape on srcGeo
-blendShapeNode = pm.listHistory(srcGeo, type="blendShape")[0]
+blendShapeNode = proxy.node(cmds.ls(cmds.listHistory(str(srcGeo)) or [], type="blendShape")[0])
 
 # 3. Walk through each blend target
 created_geos = []
-for w in blendShapeNode.w:
-    name = pm.aliasAttr(w, q=True)
+for w in blendShapeNode.weight:
+    name = cmds.aliasAttr(str(w), q=True)
     if not name:
         continue
 
     orig_val = w.get()
     w.set(1.0)
 
-    dup = pm.duplicate(destGeo, name=name)[0]
+    dup = proxy.node(cmds.duplicate(str(destGeo), name=name)[0])
     if dup.getParent():
-        pm.parent(dup, world=True)
+        cmds.parent(str(dup), world=True)
     dup.v.set(True)
     created_geos.append(dup)
 
     w.set(orig_val)
 
 # 4. Clean up wrap
-if pm.objExists(wrapNode):
-    pm.delete(wrapNode)
+if cmds.objExists(str(wrapNode)):
+    cmds.delete(str(wrapNode))
 base_name = str(srcGeo) + "Base"
-if pm.objExists(base_name):
-    pm.delete(base_name)
+if cmds.objExists(base_name):
+    cmds.delete(base_name)
 
-print("Successfully transferred %d blend shapes to '%s'" % (len(created_geos), destGeo))
+print(f"Successfully transferred {len(created_geos)} blend shapes to '{destGeo}'")
 ]]></run>
 <doc><![CDATA[## Summary  
 This module copies all blend‑shape targets from a source mesh (`srcGeoWithBlends`) to a destination mesh (`destGeo`). It does so by creating a temporary wrap deformer, duplicating the destination mesh for each blend target, and then cleaning up the wrap and any temporary base node. The result is a set of new geometry nodes, one per blend target, named after the original blend‑shape names.

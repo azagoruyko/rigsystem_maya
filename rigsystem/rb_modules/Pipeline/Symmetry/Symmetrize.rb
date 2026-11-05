@@ -1,14 +1,14 @@
 <module name="symmetrize" muted="0" uid="62f2ec7d17484555ac960a629f02463f">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 from rigsystem.rig_utils.general import symmetrizeJoint
 
-for j in pm.selected(type=["transform", "joint"]):
+for j in proxy.nodes(proxy.cmds.ls(selection=True, type=["transform", "joint"]) or []):
     symmetrizeJoint(j)]]></run>
 <doc><![CDATA[## Summary  
 This module mirrors or symmetrizes the currently selected joints or transform nodes in the scene, creating or updating the corresponding opposite-side counterparts.
 
 ## Inputs  
-- **Selection (`pm.selected`)**: Any number of transform or joint nodes that the user has selected in the viewport before executing the module.
+- **Selection**: Any number of transform or joint nodes selected in the viewport before executing the module.
 
 ## Outputs  
 - **Symmetrized Joints**: For each selected node, a mirrored joint (or transform) is created or updated on the opposite side of the character, preserving hierarchy and attributes as defined by `symmetrizeJoint`.

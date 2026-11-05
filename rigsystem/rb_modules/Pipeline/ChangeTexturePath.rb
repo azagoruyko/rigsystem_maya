@@ -1,9 +1,8 @@
 <module name="changeTexturePath" type="Tools/ChangeTexturePath" muted="0" uid="459062f123f343adb2d73d0a5787865d">
-<run><![CDATA[import pymel.core as pm
-import re
+<run><![CDATA[from rigsystem import proxy
 import os
 
-for node in pm.ls(type="file"):
+for node in proxy.nodes(proxy.cmds.ls(type="file") or []):
     fileName = os.path.realpath(os.path.expandvars(node.fileTextureName.get()))
     
     newFileName = fileName
@@ -14,7 +13,7 @@ for node in pm.ls(type="file"):
                 newFileName = fileName.replace(envPath, "$"+var)       
     
     if fileName != newFileName:
-        print(node + " => " + newFileName)
+        print(f"{node} => {newFileName}")
         node.fileTextureName.set(newFileName)
 ]]></run>
 <doc><![CDATA[## Summary

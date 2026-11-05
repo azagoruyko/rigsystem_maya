@@ -1,12 +1,11 @@
 """RigSystem's viewport menu for selected controls."""
 from functools import partial
 import os
-import re
 
-import maya.cmds as cmds
+import maya.api.OpenMaya as om
 import maya.mel as mel
-import pymel.core as pm
 
+from rigsystem import proxy
 from .menu import Menu
 from .switcher import (
     kinematicSwitchMulti,
@@ -33,15 +32,18 @@ from rigsystem.rig_utils.general import (
     selectControls,
     toggleVisible,
 )
+from rigsystem.rig_utils.matrix import mirrorBehaviourMatrix
 from rigsystem.rig_utils.moduleInfo import ModuleInfo, getModuleInfo
 from rigsystem.rig_utils.naming import findSymmetricName, isLeftSide, isRightSide
+
+cmds = proxy.cmds
 
 _originalPostCommands = {}
 
 
 def buildViewportMenu(parent, object):
     """Build RigSystem's menu for the selected object when it has actions."""
-    object = pm.PyNode(object)
+    object = str(object)
 
     menu = Menu()
 
@@ -53,11 +55,13 @@ def buildViewportMenu(parent, object):
 
     # Embed menu
     if not menu.isEmpty():
-        ls = pm.ls(sl=True, type="transform") + [object]
-        postfix = "... [multi selection]" if len(set(ls)) > 1 else ""
+        selected = cmds.ls(sl=True, type="transform", long=True) or []
+        objectPath = (cmds.ls(object, long=True) or [object])[0]
+        postfix = "... [multi selection]" if len(set(selected + [objectPath])) > 1 else ""
+        displayName = str(object).rsplit("|", 1)[-1]
 
-        pm.menuItem(parent=parent, l=object + postfix, bld=True, en=True)
-        pm.menuItem(parent=parent, divider=True)
+        cmds.menuItem(parent=parent, l=f"{displayName}{postfix}", bld=True, en=True)
+        cmds.menuItem(parent=parent, divider=True)
 
         menu.buildIn(parent)
 
@@ -104,17 +108,27 @@ def uninstallViewportMenu():
 
 def simpleMirror(object):
     """Mirror selected controls (left/right sided) including the given object."""
-    selected = pm.ls(sl=True, type="transform") + [object]
+    selected = (cmds.ls(sl=True, type="transform") or []) + [object]
 
-    for ctrl in selected:
-        ctrl = pm.PyNode(ctrl)
-
+    for ctrl in proxy.nodes(selected):
         namespace = ctrl.namespace()
-        ctrl_local = ctrl.stripNamespace()
+        ctrl_local = ctrl.localName()
         ctrl_mirrored_local = findSymmetricName(ctrl_local)
 
         if ctrl_local != ctrl_mirrored_local:
-            copyAttrs(ctrl, namespace + ctrl_mirrored_local)
+            mirroredCtrl = proxy.node(f"{namespace}{ctrl_mirrored_local}")
+            copyAttrs(ctrl, mirroredCtrl)
+
+            parentMatrix = mirroredCtrl.parentMatrix[0].get()
+            parentScale = om.MTransformationMatrix(om.MMatrix(parentMatrix)).scale(om.MSpace.kTransform)
+            hasMirroredParent = parentScale[0] * parentScale[1] * parentScale[2] < 0
+            if not hasMirroredParent:
+                mirroredWorld = mirrorBehaviourMatrix(
+                    ctrl.worldMatrix[0].get(),
+                    translate=True,
+                    rotate=True,
+                )
+                cmds.xform(mirroredCtrl, ws=True, m=list(mirroredWorld))
 
 
 def addDefaultMenu(menu, object):
@@ -122,40 +136,47 @@ def addDefaultMenu(menu, object):
     if object.endswith("_control"):  # menu for controls only
 
         if not menu.find("Mirror"):
-            localName = object.stripNamespace()
+            localName = proxy.node(object).localName()
             if isLeftSide(localName) or isRightSide(localName):
-                menu.addChild("Mirror", pm.Callback(simpleMirror, object), icon="polyMirrorGeometry.png")
+                menu.addChild("Mirror", partial(simpleMirror, object), icon="polyMirrorGeometry.png")
 
         for a in ["follow", "followBody", "followNeck"]:
             title = a[0].upper() + a[1:] + " Switch"
-            if object.hasAttr(a) and not menu.find(title):                
-                attr = object.attr(a)
-                if attr.type() == "enum":
+            control = proxy.node(object)
+            if control.hasAttr(a) and not menu.find(title):
+                attr = control.attr(a)
+                if attr.get(type=True) == "enum":
                     followMenu = menu.addChild(title, icon="polyAlignUVLinear.png")
-                    for field, v in attr.getEnums().items():
-                        followMenu.addChild(field, pm.Callback(switchAttributeSeamlessly, object, a, v))
+                    labels = cmds.attributeQuery(a, node=control, listEnum=True)[0].split(":")
+                    for value, field in enumerate(labels):
+                        followMenu.addChild(field, partial(switchAttributeSeamlessly, object, a, value))
                 else:
-                    menu.addChild(title, pm.Callback(switchAttributeSeamlessly, object, a), icon="polyAlignUVLinear.png")
+                    menu.addChild(title, partial(switchAttributeSeamlessly, object, a), icon="polyAlignUVLinear.png")
 
-        f = lambda node: (resetControl(node), [resetControl(n) for n in pm.ls(sl=True)])
-        menu.addChild("Reset", pm.Callback(f, object), icon="refresh.png")
+        def resetSelected(node):
+            resetControl(node)
+            for selected in cmds.ls(sl=True) or []:
+                resetControl(selected)
 
-        if object.r.isSettable():
+        menu.addChild("Reset", partial(resetSelected, object), icon="refresh.png")
+
+        control = proxy.node(object)
+        if control.rotate.get(settable=True):
             rotateOrderSwitchMenu = menu.addChild("Rotate Order Switch", icon="srt.png")
 
             RotateOrders = ["xyz", "yzx", "zxy", "xzy", "yxz", "zyx"]
             for i, ro in enumerate(RotateOrders):
-                ico = "play_S.png" if object.ro.get() == i else ""
-                rotateOrderSwitchMenu.addChild(ro, pm.Callback(rotateOrderSwitchMulti, object, i), icon=ico)
+                ico = "play_S.png" if control.ro.get() == i else ""
+                rotateOrderSwitchMenu.addChild(ro, partial(rotateOrderSwitchMulti, object, i), icon=ico)
 
         menu.addChild("Selection gizmo", makeGizmo, icon="lattice.png")
 
         # save/load animation
         clipMenu = menu.addChild("Animation Clip", icon="camera.svg")
-        clipMenu.addChild("Save temp", pm.Callback(saveAnimationClip, object), icon="fileSave.png")
-        clipMenu.addChild("Load temp", pm.Callback(loadAnimationClip, object, choosePath=False), icon="openScript.png")
-        clipMenu.addChild("Save As...", pm.Callback(saveAnimationClip, object, choosePath=True), icon="fileSave.png")
-        clipMenu.addChild("Load...", pm.Callback(loadAnimationClip, object), icon="openScript.png")
+        clipMenu.addChild("Save temp", partial(saveAnimationClip, object), icon="fileSave.png")
+        clipMenu.addChild("Load temp", partial(loadAnimationClip, object, choosePath=False), icon="openScript.png")
+        clipMenu.addChild("Save As...", partial(saveAnimationClip, object, choosePath=True), icon="fileSave.png")
+        clipMenu.addChild("Load...", partial(loadAnimationClip, object), icon="openScript.png")
 
     dynamicParentMenu = makeDynamicParentMenu(object)
     if not dynamicParentMenu.isEmpty():
@@ -178,12 +199,12 @@ def saveAnimationClip(object, choosePath=False):
 
         filePath = paths[0]
 
-    ls = pm.ls(sl=True)
+    selected = cmds.ls(sl=True) or []
     try:
-        pm.select(object, add=True)
-        pm.saveAnimClip(f=filePath)
+        cmds.select(object, add=True)
+        cmds.saveAnimClip(f=filePath)
     finally:
-        pm.select(ls)
+        cmds.select(selected, replace=True)
 
 
 def loadAnimationClip(object, choosePath=True):
@@ -202,15 +223,15 @@ def loadAnimationClip(object, choosePath=True):
         filePath = paths[0]
 
     if not os.path.exists(filePath):
-        pm.warning("No animation clip found at: " + filePath)
+        cmds.warning(f"No animation clip found at: {filePath}")
         return
 
-    ls = pm.ls(sl=True)
+    selected = cmds.ls(sl=True) or []
     try:
-        pm.select(object, add=True)
-        pm.loadAnimClip(f=filePath)
+        cmds.select(object, add=True)
+        cmds.loadAnimClip(f=filePath)
     finally:
-        pm.select(ls)
+        cmds.select(selected, replace=True)
 
 
 def makeGizmo():
@@ -220,51 +241,36 @@ def makeGizmo():
 
 
 def toggleSetVisibility(namespace, currentSetNode, setType, restPattern, currentVisible=1, restVisible=-1):
-    """Toggle visibility of sets by type (1=show, 0=hide, -1=ignore); run on/off scripts as needed."""
+    """Toggle visibility of sets by type (1=show, 0=hide, -1=ignore)."""
     def setVisibility(node, value):
-        convertPyNodes = lambda x: re.sub(r"@\b(\w+)\b", "pm.PyNode('{}\\1')".format(node.namespace()), x)
-
-        onScript = ""
-        offScript = ""
-        if node.hasAttr("onScript"):
-            onScript = convertPyNodes(node.onScript.get())
-        if node.hasAttr("offScript"):
-            offScript = convertPyNodes(node.offScript.get())
-
-        script = ""
         if value == 0:
-            pm.hide(node)
-            script = offScript
+            cmds.hide(node)
         elif value == 1:
-            pm.showHidden(node)
-            script = onScript
+            cmds.showHidden(node)
         elif value == 2:
-            if toggleVisible(node):
-                script = onScript
-            else:
-                script = offScript
+            toggleVisible(node)
 
-        if script:
-            exec(script, {"pm":pm, "cmds":cmds})
-
-    for s in pm.ls(namespace + restPattern, type="objectSet"):
+    for s in cmds.ls(f"{namespace}{restPattern}", type="objectSet") or []:
         stype = ""
-        if s.hasAttr("type"):
-            stype = s.attr("type").get() or ""
+        setNode = proxy.node(s)
+        if setNode.hasAttr("type"):
+            stype = setNode.type.get() or ""
 
         if setType == stype and restVisible != -1:
             setVisibility(s, restVisible)
 
     if currentVisible != -1 and currentSetNode:
-        setVisibility(pm.PyNode(currentSetNode), currentVisible)
+        setVisibility(str(currentSetNode), currentVisible)
 
 
 def keyframeAllControls(namespace):
     """Set keyframe on all keyable attributes of controls in the namespace."""
-    for n in pm.ls(namespace + "*_control", type="transform"):
-        for a in n.listAttr(k=True):
-            if a.isSettable():
-                pm.setKeyframe(a)
+    nodes = cmds.ls(f"{namespace}*_control", type="transform") or []
+    for control in proxy.nodes(nodes):
+        for attribute in control.listAttr(k=True):
+            plug = control.attr(attribute)
+            if plug.get(settable=True):
+                cmds.setKeyframe(plug)
 
 
 def makeMenuByModuleInfo(moduleInfo, object):
@@ -273,45 +279,46 @@ def makeMenuByModuleInfo(moduleInfo, object):
     moduleType = moduleInfo.getAttr("type")
 
     if moduleType == "rig":
-        namespace = object.namespace()
-        menu.addChild("Reset controls", pm.Callback(resetControls, namespace), icon="refresh.png")
-        menu.addChild("Select controls", pm.Callback(selectControls, namespace), icon="QR_QuickRigTool.png")
-        menu.addChild("Keyframe controls", pm.Callback(keyframeAllControls, namespace), icon="insertKeySmall.png")
+        namespace = proxy.node(object).namespace()
+        menu.addChild("Reset controls", partial(resetControls, namespace), icon="refresh.png")
+        menu.addChild("Select controls", partial(selectControls, namespace), icon="QR_QuickRigTool.png")
+        menu.addChild("Keyframe controls", partial(keyframeAllControls, namespace), icon="insertKeySmall.png")
 
     elif moduleType == "limb":
-        menu.addChild("IK/FK Switch", pm.Callback(kinematicSwitchMulti, object), icon="kinJoint.png")
+        menu.addChild("IK/FK Switch", partial(kinematicSwitchMulti, object), icon="kinJoint.png")
 
-        ik = moduleInfo.getAttr("ik").node()
-        polevec = moduleInfo.getAttr("polevector").node()
+        ik = moduleInfo.getAttr("ik").node
+        polevec = moduleInfo.getAttr("polevector").node
 
-        fk1 = moduleInfo.getAttr("fk1").node()
-        fk2 = moduleInfo.getAttr("fk2").node()
-        fk3 = moduleInfo.getAttr("fk3").node()
+        fk1 = moduleInfo.getAttr("fk1").node
+        fk2 = moduleInfo.getAttr("fk2").node
+        fk3 = moduleInfo.getAttr("fk3").node
 
-        if object in [fk1, fk2, fk3]:
-            menu.addChild("Edit FK with IK", pm.Callback(editFKwithIK.createRig, getModuleInfo(object, root=False)), icon="ikSCsolver.svg")
+        objectMObject = proxy.node(object).mobject
+        if objectMObject in [node.mobject for node in (fk1, fk2, fk3)]:
+            menu.addChild("Edit FK with IK", partial(editFKwithIK.createRig, getModuleInfo(object, root=False)), icon="ikSCsolver.svg")
 
-        if object in [ik, polevec]:
-            menu.addChild("Snap Switch", pm.Callback(snapSwitch, object), icon="snapPoint.png")
+        if objectMObject in [node.mobject for node in (ik, polevec)]:
+            menu.addChild("Snap Switch", partial(snapSwitch, object), icon="snapPoint.png")
 
-        menu.addChild("Mirror", pm.Callback(mirrorByModuleInfo, getModuleInfo(object)), icon="polyMirrorGeometry.png")
-        menu.addChild("Flip", pm.Callback(mirrorByModuleInfo, getModuleInfo(object), exchange=True), icon="polyFlip.png")
+        menu.addChild("Mirror", partial(mirrorByModuleInfo, getModuleInfo(object)), icon="polyMirrorGeometry.png")
+        menu.addChild("Flip", partial(mirrorByModuleInfo, getModuleInfo(object), exchange=True), icon="polyFlip.png")
 
     elif moduleType in ["leg", "quadLeg"]:
-        limb_moduleInfo = ModuleInfo(moduleInfo.getAttr("limb").node())
+        limb_moduleInfo = ModuleInfo(moduleInfo.getAttr("limb").node)
         limbMenu = makeMenuByModuleInfo(limb_moduleInfo, object)
         menu.mergeMenu(limbMenu)
 
     elif moduleType == "spine":
-        menu.addChild("Flip", pm.Callback(mirrorByModuleInfo, getModuleInfo(object)), icon="polyFlip.png")
+        menu.addChild("Flip", partial(mirrorByModuleInfo, getModuleInfo(object)), icon="polyFlip.png")
 
     elif moduleType == "head":
-        menu.addChild("IK/FK Switch", pm.Callback(kinematicSwitchMulti, object), icon="kinJoint.png")
-        menu.addChild("Flip", pm.Callback(mirrorByModuleInfo, getModuleInfo(object)), icon="polyFlip.png")
+        menu.addChild("IK/FK Switch", partial(kinematicSwitchMulti, object), icon="kinJoint.png")
+        menu.addChild("Flip", partial(mirrorByModuleInfo, getModuleInfo(object)), icon="polyFlip.png")
 
     elif moduleType == "fingers":
-        menu.addChild("Mirror all", pm.Callback(mirrorByModuleInfo, getModuleInfo(object)), icon="HIKmirror.png")
-        menu.addChild("Flip all", pm.Callback(mirrorByModuleInfo, getModuleInfo(object), exchange=True), icon="polyFlipUVs.png")
+        menu.addChild("Mirror all", partial(mirrorByModuleInfo, getModuleInfo(object)), icon="HIKmirror.png")
+        menu.addChild("Flip all", partial(mirrorByModuleInfo, getModuleInfo(object), exchange=True), icon="polyFlipUVs.png")
 
     return menu
 
@@ -321,22 +328,23 @@ def makeDynamicParentMenu(object):
     menu = Menu()
 
     if hasDynamicParent(object):
-        menu.addChild("Dynamic parent Bake", pm.Callback(dynamicParentBake, object), icon="appendCache.png")
+        menu.addChild("Dynamic parent Bake", partial(dynamicParentBake, object), icon="appendCache.png")
         dynamicParentMenu = menu.addChild("Dynamic parents", icon="selectByHierarchy.png")
 
-        icon = "teRightArrow.png" if object.hasAttr("parent") and object.attr("parent").get() == 0 else ""
-        dynamicParentMenu.addChild("(no parent)", pm.Callback(dynamicParentSwitch, object, ''), icon=icon)
+        control = proxy.node(object)
+        icon = "teRightArrow.png" if control.hasAttr("parent") and control.parent.get() == 0 else ""
+        dynamicParentMenu.addChild("(no parent)", partial(dynamicParentSwitch, object, ""), icon=icon)
 
         dyn = DynamicParent(object)
         for tar in dyn.getTargets():
             icon = "teRightArrow.png" if tar == dyn.getCurrentTarget() else ""
-            dynamicParentMenu.addChild(tar.name(), 
-                                       pm.Callback(dynamicParentSwitch, object, tar), 
-                                       pm.Callback(deleteFromDynamicParent, object, tar), 
+            dynamicParentMenu.addChild(tar,
+                                       partial(dynamicParentSwitch, object, tar),
+                                       partial(deleteFromDynamicParent, object, tar),
                                        icon)
 
-        if pm.ls(sl=True, type="transform"):
+        if cmds.ls(sl=True, type="transform"):
             dynamicParentMenu.addChild("-")
-            dynamicParentMenu.addChild("Add selected", pm.Callback(addSelectedToDynamicParent, object), icon="addClip.png")
+            dynamicParentMenu.addChild("Add selected", partial(addSelectedToDynamicParent, object), icon="addClip.png")
 
     return menu

@@ -1,6 +1,5 @@
 <module name="getSkinClusterWeights" muted="0" uid="7604f4f6db0d419b9461bba2ecc80459">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import rig_utils
 
 if @mode == 0: # get
     @set_data(rig_utils.skinCluster.SkinClusterHelper(@skinCluster).toJson())

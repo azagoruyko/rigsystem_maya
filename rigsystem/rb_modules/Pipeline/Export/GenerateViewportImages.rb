@@ -1,8 +1,10 @@
 <module name="generateViewportImages" type="Tools/GenerateViewportImages" muted="0" uid="d82543088d8446c18efeecf3efe90747">
 <run><![CDATA[import os
 
-import pymel.core as pm
+from rigsystem import proxy
 from PySide6.QtGui import QImage, QColor
+
+cmds = proxy.cmds
 
 def clamp(v, min, max):
     if v > max:
@@ -49,30 +51,30 @@ def trimImage(path, margin):
                     clamp(bottomOffset-topOffset+margin*2, 0, img.height())) # height
 
 if not os.path.isdir(@path):
-    pm.error("Select an existing image folder")
+    error("Select an existing image folder")
 
 beginProgress("Generating images", len(@sets))
-for i, set in enumerate(@sets):
+for i, setName in enumerate(@sets):
     stepProgress(i)
     
-    set = pm.PyNode(set)
-    objects = pm.sets(set, q=True)
-    pm.showHidden(objects)
+    setNode = proxy.node(setName)
+    objects = cmds.sets(str(setNode), q=True) or []
+    cmds.showHidden(objects)
     
-    pm.isolateSelect(@panel, state=True)
-    if pm.objExists(@panel+"ViewSelectedSet"):
-        pm.select(pm.sets(@panel+"ViewSelectedSet", q=True)) # remove previous objects
-        pm.isolateSelect(@panel, rs=True)
+    cmds.isolateSelect(@panel, state=True)
+    if cmds.objExists(f"{@panel}ViewSelectedSet"):
+        cmds.select(cmds.sets(f"{@panel}ViewSelectedSet", q=True) or []) # remove previous objects
+        cmds.isolateSelect(@panel, rs=True)
     
-    pm.select(objects)    
-    pm.isolateSelect(@panel, addSelected=True)
-    pm.viewFit(fitFactor=1)
-    pm.select(cl=True)
+    cmds.select(objects)
+    cmds.isolateSelect(@panel, addSelected=True)
+    cmds.viewFit(fitFactor=1)
+    cmds.select(cl=True)
     
-    fname = set.name().replace("_skin_set", "").replace("_visible_set", "")
-    fpath = os.path.join(@path, "{}.jpg".format(fname))
+    fname = str(setNode).replace("_skin_set", "").replace("_visible_set", "")
+    fpath = os.path.join(@path, f"{fname}.jpg")
     print(fpath)
-    pm.playblast(frame=[1], format="image", c="jpg",
+    cmds.playblast(frame=[1], format="image", c="jpg",
                  fo=True, cf=fpath, 
                  qlt=100, p=100, orn=False, v=False)
     
@@ -80,7 +82,7 @@ for i, set in enumerate(@sets):
     
 endProgress()
 
-pm.isolateSelect("modelPanel4", state=False)    ]]></run>
+cmds.isolateSelect(@panel, state=False)]]></run>
 <doc><![CDATA[## Summary
 Generates viewport preview thumbnails for a list of Maya sets, capturing each set in the current viewport and saving the resulting images to a specified folder. The tool trims excess background and supports custom margin and panel selection.
 

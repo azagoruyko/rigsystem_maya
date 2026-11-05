@@ -1,14 +1,18 @@
 <module name="attachToMesh" type="Tools/AttachToMesh" muted="0" uid="4d2ae87b98374c2db77440111d83a5a0">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy
 
-sourceGeo = pm.PyNode(@sourceGeo)
-objects = [pm.PyNode(o) for o in @objects]
+cmds = proxy.cmds
+
+sourceGeo = proxy.node(@sourceGeo)
+sourceShape = sourceGeo.getShapes(type="mesh")[0]
+objects = proxy.nodes(@objects)
 
 class Rivet():
     def create(self, name, mesh, edge1, edge2, parent):
         self.input = {
             "name": name,
-            "oMesh": mesh,
+            "oMesh": proxy.node(mesh),
             "edgeIndex1": edge1,
             "edgeIndex2": edge2}
 
@@ -17,43 +21,52 @@ class Rivet():
         self.setAttributes()
         
         if parent:
-            pm.parent(self.output["locator"].getParent(), parent)
+            cmds.parent(
+                str(self.output["locator"].getParent()), str(parent)
+            )
             
-        pm.rename(self.output["locator"].getParent(), self.input["name"]+"_locator")
+        self.output["locator"].getParent().rename(
+            self.input["name"] + "_locator"
+        )
 
         return self.output["locator"].getParent()
 
     def createNodes(self, *args):
         self.output = {
-            "meshEdgeNode1": pm.createNode("curveFromMeshEdge", n=self.input["name"]+"_edge1_curveFromMeshEdge"),
-            "meshEdgeNode2": pm.createNode("curveFromMeshEdge", n=self.input["name"]+"_edge2_curveFromMeshEdge"),
-            "ptOnSurfaceIn": pm.createNode("pointOnSurfaceInfo", n=self.input["name"]+"_pointOnSurfaceInfo"),
-            "matrixNode": pm.createNode("fourByFourMatrix", n=self.input["name"]+"_fourByFourMatrix"),
-            "decomposeMatrix": pm.createNode("decomposeMatrix", n=self.input["name"]+"_decomposeMatrix"),
-            "loftNode": pm.createNode("loft", n=self.input["name"]+"_loft"),
-            "locator": pm.createNode("locator")}
+            "meshEdgeNode1": proxy.create("curveFromMeshEdge", self.input["name"] + "_edge1"),
+            "meshEdgeNode2": proxy.create("curveFromMeshEdge", self.input["name"] + "_edge2"),
+            "ptOnSurfaceIn": proxy.create("pointOnSurfaceInfo", self.input["name"] + ""),
+            "matrixNode": proxy.create("fourByFourMatrix", self.input["name"] + ""),
+            "decomposeMatrix": proxy.create("decomposeMatrix", self.input["name"] + ""),
+            "loftNode": proxy.create("loft", self.input["name"] + ""),
+            "locator": proxy.create("locator")}
 
     def createConnections(self, *args):
-        self.input["oMesh"].worldMesh.connect(self.output["meshEdgeNode1"].inputMesh)
-        self.input["oMesh"].worldMesh.connect(self.output["meshEdgeNode2"].inputMesh)
-        self.output["meshEdgeNode1"].outputCurve.connect(self.output["loftNode"].inputCurve[0])
-        self.output["meshEdgeNode2"].outputCurve.connect(self.output["loftNode"].inputCurve[1])
-        self.output["loftNode"].outputSurface.connect(self.output["ptOnSurfaceIn"].inputSurface)
-        self.output["ptOnSurfaceIn"].normalizedNormalX.connect(self.output["matrixNode"].in00)
-        self.output["ptOnSurfaceIn"].normalizedNormalY.connect(self.output["matrixNode"].in01)
-        self.output["ptOnSurfaceIn"].normalizedNormalZ.connect(self.output["matrixNode"].in02)
-        self.output["ptOnSurfaceIn"].normalizedTangentUX.connect(self.output["matrixNode"].in10)
-        self.output["ptOnSurfaceIn"].normalizedTangentUY.connect(self.output["matrixNode"].in11)
-        self.output["ptOnSurfaceIn"].normalizedTangentUZ.connect(self.output["matrixNode"].in12)
-        self.output["ptOnSurfaceIn"].normalizedTangentVX.connect(self.output["matrixNode"].in20)
-        self.output["ptOnSurfaceIn"].normalizedTangentVY.connect(self.output["matrixNode"].in21)
-        self.output["ptOnSurfaceIn"].normalizedTangentVZ.connect(self.output["matrixNode"].in22)
-        self.output["ptOnSurfaceIn"].positionX.connect(self.output["matrixNode"].in30)
-        self.output["ptOnSurfaceIn"].positionY.connect(self.output["matrixNode"].in31)
-        self.output["ptOnSurfaceIn"].positionZ.connect(self.output["matrixNode"].in32)
-        self.output["matrixNode"].output.connect(self.output["decomposeMatrix"].inputMatrix)
-        self.output["decomposeMatrix"].outputTranslate.connect(self.output["locator"].getParent().translate)
-        self.output["decomposeMatrix"].outputRotate.connect(self.output["locator"].getParent().rotate)
+        meshWorld = self.input["oMesh"].worldMesh[0]
+        meshWorld >> self.output["meshEdgeNode1"].inputMesh
+        meshWorld >> self.output["meshEdgeNode2"].inputMesh
+        self.output["meshEdgeNode1"].outputCurve >> self.output["loftNode"].inputCurve[0]
+        self.output["meshEdgeNode2"].outputCurve >> self.output["loftNode"].inputCurve[1]
+        self.output["loftNode"].outputSurface >> self.output["ptOnSurfaceIn"].inputSurface
+        for source, target in (
+            ("normalizedNormalX", "in00"),
+            ("normalizedNormalY", "in01"),
+            ("normalizedNormalZ", "in02"),
+            ("normalizedTangentUX", "in10"),
+            ("normalizedTangentUY", "in11"),
+            ("normalizedTangentUZ", "in12"),
+            ("normalizedTangentVX", "in20"),
+            ("normalizedTangentVY", "in21"),
+            ("normalizedTangentVZ", "in22"),
+            ("positionX", "in30"),
+            ("positionY", "in31"),
+            ("positionZ", "in32"),
+        ):
+            self.output["ptOnSurfaceIn"].attr(source) >> self.output["matrixNode"].attr(target)
+        self.output["matrixNode"].output >> self.output["decomposeMatrix"].inputMatrix
+        locatorTransform = self.output["locator"].getParent()
+        self.output["decomposeMatrix"].outputTranslate >> locatorTransform.translate
+        self.output["decomposeMatrix"].outputRotate >> locatorTransform.rotate
         self.output["locator"].attr("visibility").set(False)
 
     def setAttributes(self):
@@ -61,7 +74,7 @@ class Rivet():
         self.output["meshEdgeNode2"].edgeIndex[0].set(self.input["edgeIndex2"])
 
         self.output["loftNode"].reverseSurfaceNormals.set(1)
-        self.output["loftNode"].inputCurve.set(size=2)
+        cmds.setAttr(str(self.output["loftNode"].inputCurve), size=2)
         self.output["loftNode"].uniform.set(True)
         self.output["loftNode"].sectionSpans.set(3)
         self.output["loftNode"].caching.set(True)
@@ -72,13 +85,22 @@ class Rivet():
         self.output["ptOnSurfaceIn"].caching.set(True)
 
 def findEdges(geo, p):
-    _, f = geo.getClosestPoint(p)
-    edges = geo.f[f].getEdges()
+    meshFn = sourceShape.mfn(shape=True)
+    _, faceIndex = meshFn.getClosestPoint(om.MPoint(*p), om.MSpace.kWorld)
+    faceIt = om.MItMeshPolygon(sourceShape.mdagpath)
+    faceIt.setIndex(faceIndex)
+    edges = faceIt.getEdges()
 
     separatedEdges = []
     for e1 in edges:
+        edge1 = om.MItMeshEdge(sourceShape.mdagpath)
+        edge1.setIndex(e1)
+        vertices1 = {edge1.vertexId(0), edge1.vertexId(1)}
         for e2 in edges:
-            diff = set(geo.e[e1].connectedVertices()) - set(geo.e[e2].connectedVertices())
+            edge2 = om.MItMeshEdge(sourceShape.mdagpath)
+            edge2.setIndex(e2)
+            vertices2 = {edge2.vertexId(0), edge2.vertexId(1)}
+            diff = vertices1 - vertices2
             if len(diff)==2:
                 separatedEdges.append((e1, e2))
 
@@ -86,11 +108,13 @@ def findEdges(geo, p):
 
 for obj in objects:     
     print(obj)               
-    p = pm.xform(obj, q=True, ws=True, t=True)
+    p = cmds.xform(str(obj), q=True, ws=True, t=True)
     e1, e2 = findEdges(sourceGeo, p)
     rivet = Rivet()
-    rivet.create(obj.name(), sourceGeo, e1, e2, None)
-    pm.parentConstraint(rivet.output["locator"].getParent(), obj, mo=True)
+    rivet.create(str(obj).rsplit("|", 1)[-1], sourceShape, e1, e2, None)
+    cmds.parentConstraint(
+        str(rivet.output["locator"].getParent()), str(obj), mo=True
+    )
 ]]></run>
 <doc><![CDATA[## Summary
 Creates a rivet system that attaches each selected object to a specified mesh surface. For every object, a hidden locator is generated at the nearest mesh edge and a parent constraint is applied so the object follows the mesh deformation.

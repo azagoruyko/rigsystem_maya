@@ -1,9 +1,11 @@
 <module name="convertSkinTool" type="Tools/ConvertSkinTool" muted="0" uid="c7568f79334f48238ef02aacbae45fbe">
 <run><![CDATA[# The script moves joints and use current deformer to get skin weights for each joint.
 
-import pymel.core as pm
-import pymel.api as api
-import maya.cmds as cmds
+import maya.api.OpenMaya as om
+import maya.mel as mel
+from rigsystem import proxy
+
+cmds = proxy.cmds
 
 try:
     import ngSkinTools as ng
@@ -11,18 +13,19 @@ try:
 except ImportError:    
     ngSkinToolsAvailable = False
 
-geo = pm.PyNode(@sourceGeo)
-joints = [pm.PyNode(j) for j in @joints]
+geo = proxy.node(@sourceGeo)
+joints = proxy.nodes(@joints)
 
-geoFn = api.MFnMesh(geo.__apimdagpath__())
-origPoints = api.MPointArray()
-geoFn.getPoints(origPoints, api.MSpace.kWorld)
+geoShape = geo.getShapes(type="mesh")[0]
+geoFn = geoShape.mfn(shape=True)
+origPoints = geoFn.getPoints(om.MSpace.kWorld)
 
-skin = pm.mel.eval("findRelatedSkinCluster \"%s\""%@skinGeo)
+skin = mel.eval('findRelatedSkinCluster "{}"'.format(@skinGeo))
 if not skin:
-    pm.error("Cannot find skinCluster on "+@skinGeo)
+    cmds.error("Cannot find skinCluster on " + @skinGeo)
 
-skin = pm.PyNode(skin)
+skin = proxy.node(skin)
+skinFn = skin.mfn()
 
 if ngSkinToolsAvailable and @ngskin_layerName:
     ngmll = ng.mllInterface.MllInterface()
@@ -32,39 +35,42 @@ if ngSkinToolsAvailable and @ngskin_layerName:
         print("Init ngSkinTools layers")
         ngmll.initLayers()    
 
-influenceObjects = skin.influenceObjects()
+influenceObjects = cmds.skinCluster(str(skin), query=True, influence=True) or []
 
 for j in joints:
-    if j not in influenceObjects:
+    if str(j) not in influenceObjects:
         error("Cannot find {} in {}".format(j, skin))
         continue
 
     print(j)
-    old_t = j.t.get()    
-    j.ty.set(j.ty.get()+1)
-                
-    idx = skin.indexForInfluenceObject(j)
-    
-    points = api.MPointArray()
-    geoFn.getPoints(points, api.MSpace.kWorld)
-    
-    beginProgress("Converting %s"%j, points.length(), 0.10)
-    
-    weights = [0.0] * points.length()    
-    for i in range(points.length()):
-        w = (origPoints[i] - points[i]).length()
-        cmds.setAttr("%s.weightList[%d].weights[%d]"%(skin, i, idx), w)
-        weights[i] = w
-        stepProgress(i)
-    
-    if ngSkinToolsAvailable and @ngskin_layerName:
-        getLayerIds = lambda layerName: [l[0] for l in ngmll.listLayers() if l[1] == layerName]
-        layerIds = getLayerIds(@ngskin_layerName)
-        layerId = layerIds[0] if layerIds else ngmll.createLayer(@ngskin_layerName)
-        ngmll.setInfluenceWeights(layerId, idx, weights)
-        
-    endProgress()
-    j.t.set(old_t)
+    old_t = cmds.getAttr(f"{j}.translate")[0]
+    idx = skinFn.indexForInfluenceObject(j.mdagpath)
+    try:
+        cmds.setAttr(f"{j}.ty", cmds.getAttr(f"{j}.ty") + 1)
+
+        points = geoFn.getPoints(om.MSpace.kWorld)
+        beginProgress("Converting %s" % j, points.length(), 0.10)
+
+        weights = [0.0] * points.length()
+        for i in range(points.length()):
+            weight = (origPoints[i] - points[i]).length()
+            cmds.setAttr(
+                f"{skin}.weightList[{i}].weights[{idx}]", weight
+            )
+            weights[i] = weight
+            stepProgress(i)
+
+        if ngSkinToolsAvailable and @ngskin_layerName:
+            getLayerIds = lambda layerName: [
+                layer[0] for layer in ngmll.listLayers() if layer[1] == layerName
+            ]
+            layerIds = getLayerIds(@ngskin_layerName)
+            layerId = layerIds[0] if layerIds else ngmll.createLayer(@ngskin_layerName)
+            ngmll.setInfluenceWeights(layerId, idx, weights)
+    finally:
+        cmds.setAttr(f"{j}.translate", *old_t, type="double3")
+        if 'points' in locals():
+            endProgress()
 ]]></run>
 <doc><![CDATA[## Summary  
 The **ConvertSkinTool** module re‑weights a Maya skinCluster by temporarily moving each influence joint, measuring the change in vertex positions, and assigning those distances as new weights. It can optionally write the resulting weights into an ngSkinTools layer for use in real‑time engines or modular rigs.

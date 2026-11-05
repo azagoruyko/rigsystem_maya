@@ -1,168 +1,198 @@
-import pymel.core as pm
 import maya.api.OpenMaya as om
-import maya.cmds as cmds
 import json
 import re
+
+from .. import proxy
+
+cmds = proxy.cmds
 
 def getSelectedIndices():
     vtxExpr = re.compile(r"\[(\d+)]")
     indices = set()
-    for v in cmds.ls(sl=True, fl=True, type="float3"):
+    for v in cmds.ls(sl=True, fl=True, type="float3") or []:
         r = re.search(vtxExpr, v)
         if r:
             indices.add(int(r.group(1)))
     return indices
 
-def getMDagPath(nodeName):
-    """Return an MDagPath for the given DAG node name."""
-    sel = om.MSelectionList()
-    sel.add(nodeName)
-    return sel.getDagPath(0)
-
 class BlendShapeHelper(object):
     def __init__(self, blendShape):
         """Initialize helper around an existing blendShape node."""
-        self.node = pm.PyNode(blendShape)
+        self.node = proxy.node(blendShape)
+
 
     @staticmethod
     def create(geo, name=None):
         """Create a blendShape on geometry and return helper instance."""
-        blend = pm.blendShape(geo)[0]
+        blend = cmds.blendShape(geo)[0]
         if name:
-            blend.rename(name)
+            blend = cmds.rename(blend, name)
         return BlendShapeHelper(blend)
+
 
     def findAvailableBlendTargetIndex(self):
         """Return first free target index in the blendShape weights."""
         idx = 0
-        while self.node.w[idx].exists():
+        used = set(cmds.getAttr(self.node.weight, multiIndices=True) or [])
+        while idx in used:
             idx += 1
         return idx
 
+
     def getTargetName(self, targetIndex):
         """Return alias name for a target index."""
-        return pm.aliasAttr(self.node.w[targetIndex], q=True)
+        return cmds.aliasAttr(self.node.weight[targetIndex], q=True)
+
     
     def setTargetName(self, targetIndex, name):
         """Set alias name for a target index."""
-        pm.aliasAttr(self.node.w[targetIndex], name)
+        cmds.aliasAttr(name, self.node.weight[targetIndex])
+
+
+    def getGeometry(self):
+        """Return the first geometry affected by this blendShape."""
+        geometry = cmds.blendShape(self.node, query=True, geometry=True)[0]
+        return proxy.node(geometry)
+
 
     def getTargets(self):
         """Return mapping of target index to alias name."""
-        return {aw.index(): pm.aliasAttr(aw, q=True) for aw in self.node.w}
+        aliases = cmds.aliasAttr(self.node, q=True) or []
+        return {int(plug.split("[")[1].split("]")[0]): alias for alias, plug in zip(aliases[::2], aliases[1::2])}
+
 
     def findTarget(self, name):
         """Return target index for alias name, if found."""
-        for aw in self.node.w:
-            if pm.aliasAttr(aw, q=True) == name:
-                return aw.index()
+        for index, alias in self.getTargets().items():
+            if alias == name:
+                return index
+
 
     def addTarget(self, targetName):
         """Add an internal target and return its index."""
-        geo = self.node.getOutputGeometry()[0]
+        geo = self.getGeometry()
         newIdx = self.findAvailableBlendTargetIndex()
 
         # Add internal target via temporary physical mesh.
-        tmp = pm.duplicate(geo, n=targetName)[0]
-        pm.blendShape(self.node, e=True, target=(geo, newIdx, targetName, 1.0))
-        pm.delete(tmp)
+        tmp = cmds.duplicate(geo, n=targetName)[0]
+        cmds.blendShape(self.node, e=True, target=(geo, newIdx, targetName, 1.0))
+        cmds.delete(tmp)
         return newIdx
+
 
     def setTargetValue(self, targetIndexOrName, value):
         """Set target channel value by index or alias."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
-        self.node.w[targetIndex].set(value)
+            raise ValueError(f"Target not found: {targetIndexOrName}")
+        self.node.weight[targetIndex].set(value)
+
 
     def getTargetValue(self, targetIndexOrName):
         """Get target channel value by index or alias."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
-        return self.node.w[targetIndex].get()
+            raise ValueError(f"Target not found: {targetIndexOrName}")
+        return self.node.weight[targetIndex].get()
+
 
     def getWeights(self):
         """Return base per-vertex blendShape weights."""
-        numVertices = self.node.getOutputGeometry()[0].numVertices()
+        numVertices = cmds.polyEvaluate(self.getGeometry(), v=True)
         weights = [0] * numVertices
+        baseWeights = self.node.attr("inputTarget[0].baseWeights")
         for i in range(numVertices):
-            weights[i] = cmds.getAttr("{}.inputTarget[0].baseWeights[{}]".format(self.node, i))
+            weights[i] = baseWeights[i].get()
         return weights
+
 
     def setWeights(self, weights):
         """Set base per-vertex blendShape weights."""
-        numVertices = self.node.getOutputGeometry()[0].numVertices()
+        numVertices = cmds.polyEvaluate(self.getGeometry(), v=True)
         assert len(weights) == numVertices, "Number of weights must match number of vertices"
+        baseWeights = self.node.attr("inputTarget[0].baseWeights")
         for i in range(numVertices):
             if weights[i] == 1.0: # by defaults weights = 1
-                cmds.removeMultiInstance("{}.inputTarget[0].baseWeights[{}]".format(self.node, i), b=True)
+                cmds.removeMultiInstance(baseWeights[i], b=True)
             else:
-                cmds.setAttr("{}.inputTarget[0].baseWeights[{}]".format(self.node, i), weights[i])
+                baseWeights[i].set(weights[i])
+
 
     def resetWeights(self):
         """Clear base per-vertex blendShape weights."""        
-        numVertices = self.node.getOutputGeometry()[0].numVertices()
+        numVertices = cmds.polyEvaluate(self.getGeometry(), v=True)
+        baseWeights = self.node.attr("inputTarget[0].baseWeights")
         for i in range(numVertices):
-            cmds.removeMultiInstance("{}.inputTarget[0].baseWeights[{}]".format(self.node, i), b=True)            
+            cmds.removeMultiInstance(baseWeights[i], b=True)
+
 
     def getTargetWeights(self, targetIndexOrName):
         """Return per-vertex weights for a target."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
+            raise ValueError(f"Target not found: {targetIndexOrName}")
 
-        numVertices = self.node.getOutputGeometry()[0].numVertices()
+        numVertices = cmds.polyEvaluate(self.getGeometry(), v=True)
         weights = [0] * numVertices
+        targetWeights = self.node.attr(f"inputTarget[0].inputTargetGroup[{targetIndex}].targetWeights")
         for i in range(numVertices):
-            weights[i] = cmds.getAttr("{}.inputTarget[0].inputTargetGroup[{}].targetWeights[{}]".format(self.node, targetIndex, i))
+            weights[i] = targetWeights[i].get()
         return weights
+
 
     def setTargetWeights(self, targetIndexOrName, weights):
         """Set per-vertex weights for a target."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
+            raise ValueError(f"Target not found: {targetIndexOrName}")
 
-        numVertices = self.node.getOutputGeometry()[0].numVertices()
+        numVertices = cmds.polyEvaluate(self.getGeometry(), v=True)
         assert len(weights) == numVertices, "Number of weights must match number of vertices"
+        targetWeights = self.node.attr(f"inputTarget[0].inputTargetGroup[{targetIndex}].targetWeights")
         for i in range(numVertices):
             if weights[i] == 1.0: # by defaults weights = 1
-                cmds.removeMultiInstance("{}.inputTarget[0].inputTargetGroup[{}].targetWeights[{}]".format(self.node, targetIndex, i), b=True)
+                cmds.removeMultiInstance(targetWeights[i], b=True)
             else:
-                cmds.setAttr("{}.inputTarget[0].inputTargetGroup[{}].targetWeights[{}]".format(self.node, targetIndex, i), weights[i])
+                targetWeights[i].set(weights[i])
+
 
     def resetTargetWeights(self, targetIndexOrName):
         """Clear target per-vertex blendShape weights."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
-        numVertices = self.node.getOutputGeometry()[0].numVertices()
+        numVertices = cmds.polyEvaluate(self.getGeometry(), v=True)
+        targetWeights = self.node.attr(f"inputTarget[0].inputTargetGroup[{targetIndex}].targetWeights")
         for i in range(numVertices):
-            cmds.removeMultiInstance("{}.inputTarget[0].inputTargetGroup[{}].targetWeights[{}]".format(self.node, targetIndex, i), b=True)            
+            cmds.removeMultiInstance(targetWeights[i], b=True)
+
 
     def getTargetDelta(self, targetIndexOrName):
         """Return target delta vertex indices and point deltas."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
+            raise ValueError(f"Target not found: {targetIndexOrName}")
 
-        targetDeltas = self.node.inputTarget[0].inputTargetGroup[targetIndex].inputTargetItem[6000].inputPointsTarget.get()
-        targetComponentsPlug = self.node.inputTarget[0].inputTargetGroup[targetIndex].inputTargetItem[6000].inputComponentsTarget.__apimplug__()
+        item = f"inputTarget[0].inputTargetGroup[{targetIndex}].inputTargetItem[6000]"
+        targetDeltas = cmds.getAttr(self.node.attr(f"{item}.inputPointsTarget")) or []
+        components = cmds.getAttr(self.node.attr(f"{item}.inputComponentsTarget")) or []
 
         targetIndices = []
-        componentList = pm.api.MFnComponentListData(targetComponentsPlug.asMObject())
-        compTargetIndices = pm.api.MIntArray()
-        for i in range(componentList.length()):
-            singleIndexFn = pm.api.MFnSingleIndexedComponent(componentList[i])
-            singleIndexFn.getElements(compTargetIndices)
-            targetIndices.extend(compTargetIndices)
+        for component in components:
+            match = re.fullmatch(r"[^[]+\[(\d+)(?::(\d+))?]", component)
+            if not match:
+                raise ValueError(f"Unsupported blendShape component: {component}")
+
+            start = int(match.group(1))
+            end = int(match.group(2)) if match.group(2) else start
+            targetIndices.extend(range(start, end + 1))
 
         return targetIndices, [list(p) for p in targetDeltas]
+
 
     def setTargetDelta(self, targetIndexOrName, indices, deltas, useSelection=True):
         """Set sparse target deltas from vertex indices and vectors."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
+            raise ValueError(f"Target not found: {targetIndexOrName}")
 
         data = dict(zip(indices, deltas))
 
@@ -177,71 +207,85 @@ class BlendShapeHelper(object):
 
         # optimize deltas
         data = {
-            idx: delta 
-            for idx, delta in data.items() 
-            if om.MVector(delta).length() >= 1e-3
+            idx: delta
+            for idx, delta in data.items()
+            if om.MVector(delta[0], delta[1], delta[2]).length() >= 1e-3
         }
 
-        targetComponents = ["vtx[%d]" % v for v in data.keys()]
-        newDeltas = list(data.values())
-        self.node.inputTarget[0].inputTargetGroup[targetIndex].inputTargetItem[6000].inputPointsTarget.set(len(newDeltas), *newDeltas, type="pointArray")
-        self.node.inputTarget[0].inputTargetGroup[targetIndex].inputTargetItem[6000].inputComponentsTarget.set(len(targetComponents), *targetComponents, type="componentList")
+        geometryFn = self.getGeometry().mfn(shape=True)
+        if isinstance(geometryFn, om.MFnMesh):
+            componentType = "vtx"
+        elif isinstance(geometryFn, om.MFnNurbsCurve):
+            componentType = "cv"
+        else:
+            raise TypeError("Target delta is supported only for meshes and NURBS curves")
+
+        targetComponents = [f"{componentType}[{v}]" for v in data]
+        newDeltas = [tuple(delta) if len(delta) == 4 else (*delta, 1.0) for delta in data.values()]
+        item = f"inputTarget[0].inputTargetGroup[{targetIndex}].inputTargetItem[6000]"
+        cmds.setAttr(self.node.attr(f"{item}.inputPointsTarget"), len(newDeltas), *newDeltas, type="pointArray")
+        cmds.setAttr(self.node.attr(f"{item}.inputComponentsTarget"), len(targetComponents), *targetComponents, type="componentList")
+
 
     def resetTargetDelta(self, targetIndexOrName):
         """Reset target deltas to a zeroed default entry."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
+            raise ValueError(f"Target not found: {targetIndexOrName}")
 
         indices, _ = self.getTargetDelta(targetIndex)
         deltas = [[0, 0, 0] for _ in indices]
         self.setTargetDelta(targetIndex, indices, deltas)
 
+
     def copyTargetDelta(self, sourceTargetIndexOrName, destTargetIndexOrName):
         """Copy target delta data from one target to another."""
         sourceTargetIndex = self.findTarget(sourceTargetIndexOrName) if isinstance(sourceTargetIndexOrName, str) else sourceTargetIndexOrName
         if sourceTargetIndex is None:
-            raise ValueError("Source target not found: %s" % sourceTargetIndexOrName)
+            raise ValueError(f"Source target not found: {sourceTargetIndexOrName}")
 
         destTargetIndex = self.findTarget(destTargetIndexOrName) if isinstance(destTargetIndexOrName, str) else destTargetIndexOrName
         if sourceTargetIndex is None:
-            raise ValueError("Destination target not found: %s" % destTargetIndexOrName)
+            raise ValueError(f"Destination target not found: {destTargetIndexOrName}")
 
         sourceIndices, sourceDeltas = self.getTargetDelta(sourceTargetIndex)
         self.setTargetDelta(destTargetIndex, sourceIndices, sourceDeltas)
+
 
     def scaleTargetDelta(self, targetIndexOrName, scaleFactor):
         """Scale all target deltas by a factor."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
+            raise ValueError(f"Target not found: {targetIndexOrName}")
 
         indices, deltas = self.getTargetDelta(targetIndex)
         deltas = [[x * scaleFactor, y * scaleFactor, z * scaleFactor] for x, y, z in deltas]
         self.setTargetDelta(targetIndex, indices, deltas)
 
+
     def editTarget(self, targetIndexOrName, points):
         """Edit target by applying full point positions."""
-        outputGeom = self.node.getOutputGeometry()[0]
-        numVertices = outputGeom.numVertices()
+        outputGeom = self.getGeometry()
+        numVertices = cmds.polyEvaluate(outputGeom, v=True)
         assert len(points) == numVertices, "Number of weights must match number of vertices"
 
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
+            raise ValueError(f"Target not found: {targetIndexOrName}")
 
         selectedIndices = getSelectedIndices()
 
-        inp = self.node.w[targetIndex].inputs(p=True)
-        if inp:
-            inp[0] // self.node.w[targetIndex]
+        weightPlug = self.node.weight[targetIndex]
+        inputs = weightPlug.inputs()
+        if inputs:
+            cmds.disconnectAttr(inputs[0], weightPlug)
         else:
-            inp = self.node.w[targetIndex].get()
+            previousValue = weightPlug.get()
 
-        self.node.w[targetIndex].set(1)
-        pm.sculptTarget(self.node, e=True, target=targetIndex)
+        weightPlug.set(1)
+        cmds.sculptTarget(self.node, e=True, target=targetIndex)
         
-        meshFn = om.MFnMesh(getMDagPath(outputGeom.name()))
+        meshFn = proxy.node(outputGeom).mfn(shape=True)
         if selectedIndices:
             currentPoints = meshFn.getPoints(om.MSpace.kObject)
             for idx in selectedIndices:
@@ -250,26 +294,36 @@ class BlendShapeHelper(object):
         else:
             meshFn.setPoints([om.MPoint(*p) for p in points])
             
-        pm.sculptTarget(self.node, e=True, target=targetIndex)
+        cmds.sculptTarget(self.node, e=True, target=targetIndex)
 
-        if pm.objExists(inp):
-            self.node.w[targetIndex] >> inp
+        if inputs:
+            cmds.connectAttr(inputs[0], weightPlug, force=True)
         else:
-            self.node.w[targetIndex].set(inp)
+            weightPlug.set(previousValue)
+
 
     def mirrorTarget(self, targetIndexOrName, flip=False, tolerance=1e-3):
         """Mirror target deltas across X with optional flip behavior."""
         targetIndex = self.findTarget(targetIndexOrName) if isinstance(targetIndexOrName, str) else targetIndexOrName
         if targetIndex is None:
-            raise ValueError("Target not found: %s" % targetIndexOrName)
+            raise ValueError(f"Target not found: {targetIndexOrName}")
 
-        inputMesh = str(self.node.inputShapeAtIndex(0))
-        meshDagPath = getMDagPath(inputMesh)
-        meshFn = om.MFnMesh(meshDagPath)
-        basePoints = meshFn.getPoints(om.MSpace.kWorld)
-
-        meshIntersector = om.MMeshIntersector()
-        meshIntersector.create(meshDagPath.node(), meshDagPath.inclusiveMatrix())
+        inputMesh = self.node.attr("input[0].inputGeometry").listConnections(
+            source=True,
+            destination=False,
+            shapes=True,
+        )[0]
+        inputMeshNode = proxy.node(inputMesh)
+        geometryFn = inputMeshNode.mfn(shape=True)
+        meshIntersector = None
+        if isinstance(geometryFn, om.MFnMesh):
+            basePoints = geometryFn.getPoints(om.MSpace.kObject)
+            meshIntersector = om.MMeshIntersector()
+            meshIntersector.create(inputMeshNode.mdagpath.node())
+        elif isinstance(geometryFn, om.MFnNurbsCurve):
+            basePoints = geometryFn.cvPositions(om.MSpace.kObject)
+        else:
+            raise TypeError("Mirror is supported only for meshes and NURBS curves")
 
         targetIndices, targetDeltas = self.getTargetDelta(targetIndex)
         oldDeltas = {}
@@ -280,15 +334,24 @@ class BlendShapeHelper(object):
         for i in range(len(basePoints)):
             mirroredP = om.MPoint(basePoints[i])
             mirroredP.x *= -1
-            pom = meshIntersector.getClosestPoint(mirroredP)
+            if meshIntersector is None:
+                nearest = min(
+                    range(len(basePoints)),
+                    key=lambda index: (basePoints[index] - mirroredP).length(),
+                )
+                if (basePoints[nearest] - mirroredP).length() > tolerance:
+                    raise ValueError("NURBS curve CVs are not symmetric across local X")
+                wp = om.MPoint(oldDeltas.get(nearest, om.MPoint(0, 0, 0)))
+            else:
+                pom = meshIntersector.getClosestPoint(mirroredP)
+                vertices3 = geometryFn.getPolygonTriangleVertices(pom.face, pom.triangle)
+                u, v = pom.barycentricCoords
+                w = 1 - u - v
 
-            vertices3 = meshFn.getPolygonTriangleVertices(pom.face, pom.triangle)
-            u, v = pom.barycentricCoords
-            w = 1 - u - v
+                wp = om.MPoint()
+                for wt, vtx in zip([u, v, w], vertices3):
+                    wp += oldDeltas.get(vtx, om.MPoint(0, 0, 0)) * wt
 
-            wp = om.MPoint()
-            for wt, vtx in zip([u, v, w], vertices3):
-                wp += oldDeltas.get(vtx, om.MPoint(0, 0, 0)) * wt
             wp.x *= -1
 
             if (wp - om.MPoint()).length() > tolerance:
@@ -298,7 +361,8 @@ class BlendShapeHelper(object):
             for i in oldDeltas:
                 newDeltas[i] = oldDeltas[i] if i not in newDeltas else [a + b for a, b in zip(oldDeltas[i], newDeltas[i])]
 
-        self.setTargetDelta(targetIndex, list(newDeltas.keys()), list(newDeltas.values()))
+        self.setTargetDelta(targetIndex, list(newDeltas.keys()), list(newDeltas.values()), useSelection=False)
+
 
     def saveToFile(self, filename):
         """Save blend shape weights and targets to file."""
@@ -316,6 +380,7 @@ class BlendShapeHelper(object):
         with open(filename, "w") as f:
             json.dump(data, f)
 
+
     def loadFromFile(self, filename):
         """Load blend shape weights and targets from file."""
         with open(filename, "r") as f:
@@ -324,12 +389,10 @@ class BlendShapeHelper(object):
         self.setWeights(data["baseWeights"])
         targets = data["targets"]
 
-        for idx in targets:
-            item = targets[idx]
+        for item in targets.values():
+            targetIndex = self.findTarget(item["name"])
+            if targetIndex is None:
+                targetIndex = self.addTarget(item["name"])
 
-            tgt = self.findTarget(item["name"])
-            if tgt is None:
-                idx = self.addTarget(item["name"])
-
-            self.setTargetDelta(idx, *item["delta"])
-            self.setTargetWeights(idx, item["weights"])
+            self.setTargetDelta(targetIndex, *item["delta"])
+            self.setTargetWeights(targetIndex, item["weights"])

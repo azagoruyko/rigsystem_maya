@@ -1,18 +1,16 @@
 <module name="makeSurfaceTransforms" muted="0" uid="4f767e9fccee4ad495c3ae0f8cf33d25">
-<run><![CDATA[import pymel.core as pm
-import maya.cmds as cmds
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-surface = pm.PyNode(@surface)
-surface_shape = surface.getShape()
-prefix = @name
+cmds = proxy.cmds
+
+surface = proxy.node(@surface)
+surface_shape = surface.getShapes()[0]
 number = int(@number)
-along = @along
 
 if number < 1:
     error("Number of transforms must be at least 1.")
 
-if along not in ("u", "v"):
+if @along not in ("u", "v"):
     error("Along must be either 'u' or 'v'.")
 
 u_min = cmds.getAttr(surface_shape + ".minValueU")
@@ -24,7 +22,7 @@ transforms = []
 for index in range(number):
     fraction = float(index) / max(number - 1, 1)
 
-    if along == "u":
+    if @along == "u":
         u = u_min + (u_max - u_min) * fraction
         v = (v_min + v_max) * 0.5
     else:
@@ -32,12 +30,12 @@ for index in range(number):
         v = v_min + (v_max - v_min) * fraction
 
     transform = rig_utils.makeSurfaceTransform(
-        "{}_{}".format(prefix, index + 1),
+        "{}_{}".format(@name, index + 1),
         surface,
         u,
         v,
     )
-    transforms.append(transform.name())
+    transforms.append(str(transform))
 
 @set_out_transforms(transforms)
 ]]></run>

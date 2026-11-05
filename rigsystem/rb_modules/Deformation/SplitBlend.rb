@@ -1,10 +1,13 @@
 <module name="splitBlend" muted="0" uid="909adcb7aa7c4d9eaedc54c95ddf9165">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[import maya.api.OpenMaya as om
+import maya.mel as mel
+from rigsystem import proxy, rig_utils
 
-skinGeo = pm.PyNode(@skinGeo)
-blendGeo = pm.PyNode(@blendGeo)
-skin = pm.mel.eval("findRelatedSkinCluster " + skinGeo)
+cmds = proxy.cmds
+
+skinGeo = proxy.node(@skinGeo)
+blendGeo = proxy.node(@blendGeo)
+skin = mel.eval('findRelatedSkinCluster "{}"'.format(skinGeo))
 
 if not skin:
     error("Cannot find skinCluster on '%s'" % skinGeo)
@@ -14,8 +17,10 @@ skinHelper = rig_utils.skinCluster.SkinClusterHelper(skin)
 skinWeights = skinHelper.getSkinWeights()
 skinWeights.normalize()
 
-skinPoints = skinGeo.getPoints()
-blendPoints = blendGeo.getPoints()
+skinShape = skinGeo.getShapes(type="mesh")[0]
+blendShape = blendGeo.getShapes(type="mesh")[0]
+skinPoints = skinShape.mfn(shape=True).getPoints(om.MSpace.kObject)
+blendPoints = blendShape.mfn(shape=True).getPoints(om.MSpace.kObject)
 
 for j in @joints:
     idx = skinHelper.getInfluencePhysicalIndex(j)
@@ -26,8 +31,11 @@ for j in @joints:
     weights = skinWeights.getInfluenceWeights(idx)
     newPoints = [s + (b - s) * w for s, b, w in zip(skinPoints, blendPoints, weights)]
 
-    newBlendGeo = skinGeo.duplicate(name="%s_%s_geo" % (blendGeo, j))[0]
-    newBlendGeo.setPoints(newPoints)
+    newBlendGeo = cmds.duplicate(
+        str(skinGeo), name="{}_{}_geo".format(blendGeo, j)
+    )[0]
+    newBlendShape = proxy.node(newBlendGeo).getShapes(type="mesh")[0]
+    newBlendShape.mfn(shape=True).setPoints(newPoints, om.MSpace.kObject)
 ]]></run>
 <doc><![CDATA[## Summary
 The **splitBlend** module creates joint‑based corrective blendshape targets by leveraging the skinCluster weights of a source geometry. For each selected joint, it generates a new geometry that contains only the deformation contributed by that joint, allowing localized control of blendshape influence.

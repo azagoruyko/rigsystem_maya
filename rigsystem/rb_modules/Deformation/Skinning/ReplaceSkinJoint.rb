@@ -1,19 +1,19 @@
 <module name="replaceSkinJoint" type="Tools/ReplaceSkinJoint" muted="0" uid="b7606eb6a4484ca2a9131f7f9290d458">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
-sourceJoint = pm.PyNode(@sourceJoint)
-destinationJoint = pm.PyNode(@destinationJoint)
+sourceJoint = proxy.node(@sourceJoint)
+destinationJoint = proxy.node(@destinationJoint)
 
-for p in sourceJoint.wm.outputs(p=True, type="skinCluster"):
-    destinationJoint.wm >> p
+for p in sourceJoint.wm.outputs(plugs=True, type="skinCluster"):
+    destinationJoint.worldMatrix[0].connect(p, force=True)
     
     if not destinationJoint.hasAttr("lockInfluenceWeights"):
-        destinationJoint.addAttr("lockInfluenceWeights", at="bool", dv=False)
+        destinationJoint.addAttr(ln="lockInfluenceWeights", at="bool", dv=False)
     
-    destinationJoint.lockInfluenceWeights >> p.node().lockWeights[p.index()]
+    destinationJoint.lockInfluenceWeights.connect(p.node.lockWeights[p.index()], force=True)
     
     if @updatePreMatrix:
-        p.node().bindPreMatrix[p.index()].set(destinationJoint.wim.get())
+        p.node.bindPreMatrix[p.index()].set(destinationJoint.wim.get())
         
     print(p)        ]]></run>
 <doc><![CDATA[## Summary  

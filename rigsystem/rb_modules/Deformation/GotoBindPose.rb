@@ -1,27 +1,29 @@
 <module name="GotoBindPose" muted="0" uid="b578e5408c1f4a94b6d5b528c90376c9">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy
 
-for j in pm.selected(type="joint"):
-    if not pm.objExists(@skin):
-        conn = j.worldMatrix.outputs(type="skinCluster", p=True)
+cmds = proxy.cmds
+for j in proxy.nodes(cmds.ls(selection=True, type="joint") or []):
+    if not cmds.objExists(@skin):
+        conn = j.worldMatrix.outputs(type="skinCluster", plugs=True)
         if not conn:
             continue
         
         plug = conn[0]
-        skin = plug.node()
-                
+        skin = plug.node
         idx = plug.index()
     else:
-        skin = pm.PyNode(@skin)
+        skin = proxy.node(@skin)
         try:
-            idx = skin.indexForInfluenceObject(j)
-        except:
+            skinFn = skin.mfn()
+            idx = skinFn.indexForInfluenceObject(j.mdagpath)
+        except RuntimeError:
             continue
                         
     m = skin.bindPreMatrix[idx].get()
     
     print(f"Reset {j}")
-    pm.xform(j, ws=True, m=m.inverse())]]></run>
+    cmds.xform(str(j), ws=True, matrix=list(om.MMatrix(m).inverse()))]]></run>
 <doc><![CDATA[## Summary
 Resets the world-space transforms of selected joints to their bind pose by applying the inverse of the skinCluster’s bindPreMatrix. If a skinCluster is not explicitly provided, the module automatically detects the skinCluster connected to each joint.
 
@@ -38,6 +40,6 @@ Resets the world-space transforms of selected joints to their bind pose by apply
 3. Run the module.  
 4. The console will display “Reset \<joint_name\>” for each joint, and the joint’s transform will be set to its bind pose.]]></doc>
 <attributes>
-<attr name="skin" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "", "placeholder": "Maya node", "buttonCommand": "import pymel.core as pm\n\nls = pm.selected(type=\"transform\")\nif not ls:\n    value = \"\"\nelse:    \n    skin = pm.mel.eval(f\"findRelatedSkinCluster {ls[0]}\")\n    if not skin:\n        value = \"\"\n    else:        \n        value = skin", "buttonLabel": "Get from mesh", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="skin" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "", "placeholder": "Maya node", "buttonCommand": "import maya.cmds as cmds\nimport maya.mel as mel\n\nls = cmds.ls(sl=True, type=\"transform\") or []\nif not ls:\n    value = \"\"\nelse:\n    value = mel.eval('findRelatedSkinCluster \"{}\"'.format(ls[0])) or \"\"", "buttonLabel": "Get from mesh", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 </attributes>
 </module>

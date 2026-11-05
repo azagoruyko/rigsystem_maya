@@ -1,30 +1,31 @@
 <module name="CreateFKControls" muted="0" uid="2583b3b8a41a4ee6b2235c66a1acfd28">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
+
+cmds = proxy.cmds
 
 controlPerJoint = []
 
 for j in @joints:
-    j = pm.PyNode(j)
-    name = j.name().replace("_joint", "")
+    j = proxy.node(j)
+    name = f"{j.namespace()}{j.localName().replace('_joint', '')}"
     
-    ctrl = pm.createNode("transform", n=name+"_control")
-    h = rig_utils.curve.makeCurve(ctrl, @helper)
+    ctrl = proxy.create("transform", f"{name}_control", suffix=False)
+    h = rig_utils.curve.makeCurve(str(ctrl), @helper)
     h.r.set([0,0,90])
     rig_utils.curve.makeFromCurve(ctrl, h)
-    pm.delete(h)
+    cmds.delete(h)
    
     if @orientation == 0: # world
-        pm.matchTransform(ctrl, j, position=True, rotation=False)
+        cmds.matchTransform(ctrl, j, position=True, rotation=False)
     elif @orientation == 1: # joint
-        pm.matchTransform(ctrl, j)
+        cmds.matchTransform(ctrl, j)
         
     rig_utils.setToOffsetParentMatrix(ctrl)        
 
     if @connectScale:
         ctrl.s >> j.s
         
-    pm.parentConstraint(ctrl, j, mo=True)
+    cmds.parentConstraint(ctrl, j, mo=True)
     rig_utils.lockTRS(ctrl, [], [], [], 1)
     controlPerJoint.append(ctrl)
     

@@ -1,20 +1,20 @@
 <module name="skinCombinedMesh" type="Tools/SkinCombinedMesh" muted="0" uid="37735561d9e24f75844d02b30031a38d">
-<run><![CDATA[import pymel.core as pm
-import pymel.api as api
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy
 import time
 
-geo = pm.PyNode(@geo)
-fromMeshList = [pm.PyNode(g) for g in @fromMeshList]
+cmds = proxy.cmds
+
+geo = proxy.node(@geo)
+fromMeshList = proxy.nodes(@fromMeshList)
 
 class FindClosestVertexData:
     def __init__(self, mesh):
-        self.meshDagPath = pm.PyNode(mesh).__apimdagpath__()
+        meshShape = proxy.node(mesh).getShapes(type="mesh")[0]
+        self.meshDagPath = meshShape.mdagpath
+        self.meshFn = meshShape.mfn(shape=True)
 
-        self.meshFn = api.MFnMesh(self.meshDagPath)
-
-        self.meshDagPath.extendToShape()
-
-        self.meshIntersector = api.MMeshIntersector()
+        self.meshIntersector = om.MMeshIntersector()
         self.meshIntersector.create(self.meshDagPath.node(), self.meshDagPath.inclusiveMatrix())
 
 def calculateGeoIndexList(proxyGeo, fromGeoList):
@@ -24,15 +24,13 @@ def calculateGeoIndexList(proxyGeo, fromGeoList):
         data = FindClosestVertexData(m)
         fromGeoClosestData.append(data)
 
-    proxyFn = api.MFnMesh(proxyGeo.__apimdagpath__())
-    proxyPoints = api.MPointArray()
-    proxyFn.getPoints(proxyPoints, api.MSpace.kWorld)
+    proxyShape = proxyGeo.getShapes(type="mesh")[0]
+    proxyFn = proxyShape.mfn(shape=True)
+    proxyPoints = proxyFn.getPoints(om.MSpace.kWorld)
 
-    N = proxyPoints.length()
+    N = len(proxyPoints)
 
     geoIndexList = [[] for i in range(len(fromGeoList))]
-    pom = api.MPointOnMesh()
-    
     beginProgress("Calculating mesh indices", N, 0.05)
     for i in range(N):
         stepProgress(i)
@@ -41,8 +39,10 @@ def calculateGeoIndexList(proxyGeo, fromGeoList):
         geoIndex = -1
         dist = 99999
         for k in range(len(fromGeoList)):
-            fromGeoClosestData[k].meshIntersector.getClosestPoint(proxyPoints[i], pom)
-            d = (api.MPoint(pom.getPoint()) - proxyPoints[i]).length()
+            pointOnMesh = fromGeoClosestData[k].meshIntersector.getClosestPoint(
+                proxyPoints[i]
+            )
+            d = (om.MPoint(pointOnMesh.point) - proxyPoints[i]).length()
             if d < dist:
                 dist  = d
                 geoIndex = k
@@ -54,11 +54,18 @@ def calculateGeoIndexList(proxyGeo, fromGeoList):
                 
 geoIndexList = calculateGeoIndexList(geo, fromMeshList)
 for geoIdx, verticesList in enumerate(geoIndexList):
-    pm.select(fromMeshList[geoIdx])
-    pm.select(["%s.vtx[%d]"%(geo, i) for i in verticesList], add=True)    
-    pm.copySkinWeights(nm=True, sa="closestPoint", ia=["oneToOne", "closestJoint"])
+    cmds.select(str(fromMeshList[geoIdx]))
+    cmds.select(
+        ["{}.vtx[{}]".format(geo, index) for index in verticesList],
+        add=True,
+    )
+    cmds.copySkinWeights(
+        noMirror=True,
+        surfaceAssociation="closestPoint",
+        influenceAssociation=["oneToOne", "closestJoint"],
+    )
     
-pm.select(cl=True)]]></run>
+cmds.select(clear=True)]]></run>
 <doc><![CDATA[## Summary  
 The **skinCombinedMesh** tool merges skin weight data from several source meshes onto a single target geometry. It calculates the closest vertex mapping between each source mesh and the target, then copies skin weights using Maya’s `copySkinWeights` command, preserving joint influences and weight distribution.
 

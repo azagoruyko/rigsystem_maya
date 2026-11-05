@@ -1,23 +1,19 @@
 <module name="mirrorMesh" muted="0" uid="f2e87a91b4c34d9eb8a71234567890ab">
 <run><![CDATA[import maya.cmds as cmds
 import maya.api.OpenMaya as om
-import pymel.core as pm
 from rigsystem import rig_utils
 
-baseMesh = @baseMesh
-mesh = @mesh
-destMesh = @destMesh
 
-if not baseMesh or not cmds.objExists(baseMesh):
+if not @baseMesh or not cmds.objExists(@baseMesh):
     warning("mirrorMesh: Please specify a valid Base Mesh.")
-elif not mesh or not cmds.objExists(mesh):
+elif not @mesh or not cmds.objExists(@mesh):
     warning("mirrorMesh: Please specify a valid Source Mesh.")
 else:
     rig_utils.mesh.mirrorMesh(
-        meshBase=baseMesh,
-        mesh=mesh,
+        meshBase=@baseMesh,
+        mesh=@mesh,
     )
-    print(f"mirrorMesh: Successfully mirrored '{mesh}' across X-axis (Left to Right) using base mesh '{baseMesh}'.")
+    print(f"mirrorMesh: Successfully mirrored '{@mesh}' across X-axis (Left to Right) using base mesh '{@baseMesh}'.")
 ]]></run>
 <doc><![CDATA[## Summary
 The **mirrorMesh** module mirrors geometry deformations and vertex offsets from a source mesh across the X‑axis (Left +X → Right –X) onto a destination mesh or the source itself. It uses barycentric coordinates via closest‑point surface projection on a neutral base mesh, allowing accurate symmetry even for non‑symmetric topologies.

@@ -1,26 +1,26 @@
 <module name="createCurveSpreadBones" muted="0" uid="71ceb8cb55bb4b3bb800035e3a578fd4">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
-curvesList = @curves
+cmds = proxy.cmds
+
 numBones = int(@numBones)
-name = @name
 
-if len(curvesList) < 2:
+if len(@curves) < 2:
     error("Need at least 2 curves to create spread bones")
 
 if numBones < 1:
     error("Need at least 1 bone set")
 
-curves = [pm.PyNode(c) for c in curvesList]
+curves = proxy.nodes(@curves)
 curveShapes = []
 for crv in curves:
-    shape = crv.getShape() if crv.type() == "transform" else crv
+    shape = crv.getShapes(type="nurbsCurve")[0] if crv.type() == "transform" else crv
     curveShapes.append(shape)
 
 numCurves = len(curveShapes)
 
 # Organization groups at origin
-bonesGrp = pm.createNode("transform", n=name + "_spreadBones_group")
+bonesGrp = proxy.create("transform", f"{@name}_spreadBones_group", suffix=False)
 
 allRootJoints = []
 allIkHandles = []
@@ -32,53 +32,56 @@ for i in range(numBones):
     # Sample positions on each curve at this parameter
     positions = []
     for crvShape in curveShapes:
-        poci = pm.createNode("pointOnCurveInfo")
-        crvShape.worldSpace[0] >> poci.inputCurve
+        poci = proxy.create("pointOnCurveInfo")
+        crvShape.worldSpace[0].connect(poci.inputCurve)
         poci.parameter.set(param)
         poci.turnOnPercentage.set(True)
-        positions.append(poci.position.get())
-        pm.delete(poci)
+        positions.append(poci.position.get()[0])
+        cmds.delete(str(poci))
 
     # Build joint chain across curves
-    pm.select(clear=True)
     chainJoints = []
     for j, pos in enumerate(positions):
-        jnt = pm.joint(n="{}_spread{}_{}_joint".format(name, i + 1, j + 1), p=pos)
+        jnt = proxy.create("joint", f"{@name}_spread{i + 1}_{j + 1}", skipSelection=True)
+        cmds.xform(str(jnt), worldSpace=True, translation=pos)
+        if chainJoints:
+            cmds.parent(str(jnt), str(chainJoints[-1]))
         chainJoints.append(jnt)
 
     # Orient joint chain
     if len(chainJoints) > 1:
-        pm.joint(chainJoints[0], e=True, oj="xyz", secondaryAxisOrient="yup", ch=True, zso=True)
-        chainJoints[-1].jointOrient.set(0, 0, 0)
+        cmds.joint(str(chainJoints[0]), e=True, oj="xyz", secondaryAxisOrient="yup", ch=True, zso=True)
+        chainJoints[-1].jointOrient.set((0, 0, 0))
 
-    pm.parent(chainJoints[0], bonesGrp)
+    cmds.parent(str(chainJoints[0]), str(bonesGrp))
 
     # Pin root joint translate to curve 0
-    rootPoci = pm.createNode("pointOnCurveInfo", n="{}_spread{}_root_poci".format(name, i + 1))
-    curveShapes[0].worldSpace[0] >> rootPoci.inputCurve
+    rootPoci = proxy.create("pointOnCurveInfo", f"{@name}_spread{i + 1}_root_poci", suffix=False)
+    curveShapes[0].worldSpace[0].connect(rootPoci.inputCurve)
     rootPoci.parameter.set(param)
     rootPoci.turnOnPercentage.set(True)
-    rootPoci.position >> chainJoints[0].translate
+    rootPoci.position.connect(chainJoints[0].translate)
 
     # SC IK for each consecutive joint pair, handle pinned to next curve
     for j in range(numCurves - 1):
-        ikH, _ = pm.ikHandle(
-            sj=chainJoints[j], ee=chainJoints[j + 1],
+        ikHName, _ = cmds.ikHandle(
+            sj=str(chainJoints[j]), ee=str(chainJoints[j + 1]),
             sol="ikSCsolver",
-            n="{}_spread{}_{}_ikHandle".format(name, i + 1, j + 1)
+            n=f"{@name}_spread{i + 1}_{j + 1}_ikHandle"
         )
+        ikH = proxy.node(ikHName)
         bonesGrp | ikH
 
-        poci = pm.createNode("pointOnCurveInfo", n="{}_spread{}_{}_ik_poci".format(name, i + 1, j + 1))
-        curveShapes[j + 1].worldSpace[0] >> poci.inputCurve
+        poci = proxy.create("pointOnCurveInfo", f"{@name}_spread{i + 1}_{j + 1}_ik_poci", suffix=False)
+        curveShapes[j + 1].worldSpace[0].connect(poci.inputCurve)
         poci.parameter.set(param)
         poci.turnOnPercentage.set(True)
-        poci.position >> ikH.translate
+        poci.position.connect(ikH.translate)
 
-        allIkHandles.append(ikH.name())
+        allIkHandles.append(str(ikH))
 
-    allRootJoints.append(chainJoints[0].name())
-    allJoints.extend([j.name() for j in chainJoints])
+    allRootJoints.append(str(chainJoints[0]))
+    allJoints.extend(str(j) for j in chainJoints)
 
 @set_output(allJoints)
 @set_ikHandles(allIkHandles)

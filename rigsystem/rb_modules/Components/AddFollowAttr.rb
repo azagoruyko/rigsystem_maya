@@ -1,10 +1,10 @@
 <module name="addFollowAttr" muted="0" uid="ae9878fd05af41f49e42a3fe90540743">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 from rigsystem.anim_utils import switcher
 
-control = pm.PyNode(@control)
+control = proxy.node(@control)
 
-follow = pm.PyNode(@transform).getParent() if @transform else control.getParent()
+follow = proxy.node(@transform).getParent() if @transform else control.getParent()
 
 switcher.addFollow(
     control, 

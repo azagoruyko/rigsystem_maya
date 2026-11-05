@@ -1,10 +1,10 @@
 <module name="setModuleInfo" type="" muted="0" uid="6a834ba65ca34113a1d3c2c75d85f000">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy
+from rigsystem.rig_utils.moduleInfo import ModuleInfo
 
-moduleInfo = rig_utils.ModuleInfo(@moduleInfo)
+moduleInfo = ModuleInfo(@moduleInfo)
 moduleInfo.setAttr("type", @moduleType)
-moduleInfo.setAttr(@control, pm.PyNode(@control).message)]]></run>
+moduleInfo.setAttr(@control, proxy.node(@control).message)]]></run>
 <doc><![CDATA[## Summary
 Writes module metadata attributes (type, control references, and other optional data) into a `ModuleInfo` network node so that rig modules can be tracked and queried by downstream pipeline tools.
 

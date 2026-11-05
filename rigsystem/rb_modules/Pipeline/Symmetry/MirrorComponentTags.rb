@@ -1,7 +1,7 @@
 <module name="mirrorComponentTags" muted="0" uid="52d9a9a2cf4043e6a43708dd4e4fb98b">
 <run><![CDATA[import maya.cmds as cmds
 import maya.api.OpenMaya as om
-from rigsystem import rig_utils
+from rigsystem import proxy, rig_utils
 
 def getShape(geo):
     if not geo or not cmds.objExists(geo):
@@ -14,13 +14,13 @@ def getMDagPath(node):
     sel.add(node)
     return sel.getDagPath(0)
 
-def mirrorComponentTag(srcMesh, srcTag, destMesh, destTag):
-    srcShape = getShape(srcMesh)
+def mirrorComponentTag(@srcMesh, srcTag, destMesh, destTag):
+    srcShape = getShape(@srcMesh)
     if not srcShape:
-        warning(f"mirrorComponentTags: Source mesh '{srcMesh}' or its shape does not exist.")
+        warning(f"mirrorComponentTags: Source mesh '{@srcMesh}' or its shape does not exist.")
         return False
 
-    destMesh = destMesh or srcMesh
+    destMesh = destMesh or @srcMesh
     destShape = getShape(destMesh)
     if not destShape:
         warning(f"mirrorComponentTags: Destination mesh '{destMesh}' or its shape does not exist.")
@@ -48,8 +48,8 @@ def mirrorComponentTag(srcMesh, srcTag, destMesh, destTag):
     srcDag = getMDagPath(srcShape)
     destDag = getMDagPath(destShape)
 
-    srcMeshFn = om.MFnMesh(srcDag)
-    destMeshFn = om.MFnMesh(destDag)
+    srcMeshFn = proxy.node(srcShape).mfn(shape=True)
+    destMeshFn = proxy.node(destShape).mfn(shape=True)
 
     meshIntersector = om.MMeshIntersector()
     meshIntersector.create(destDag.node(), destDag.inclusiveMatrix())
@@ -92,26 +92,25 @@ def mirrorComponentTag(srcMesh, srcTag, destMesh, destTag):
     print(f"Successfully mirrored component tag '{srcTag}' -> '{destTag}' on '{destShape}'.")
     return True
 
-srcMesh = @srcMesh
-if @useSelected and not srcMesh:
+if @useSelected and not @srcMesh:
     sel = cmds.ls(sl=True)
     if sel:
         srcMesh = sel[0]
 
-if not srcMesh:
+if not @srcMesh:
     warning("mirrorComponentTags: Source Mesh is not specified.")
 else:
     if @allTags or not @srcTag:
-        srcShape = getShape(srcMesh)
+        srcShape = getShape(@srcMesh)
         if srcShape:
             tags = cmds.geometryAttrInfo(f"{srcShape}.outMesh", componentTagNames=True) or []
             if not tags:
-                warning(f"mirrorComponentTags: No component tags found on '{srcMesh}'.")
+                warning(f"mirrorComponentTags: No component tags found on '{@srcMesh}'.")
             for tag in tags:
                 dTag = rig_utils.naming.findSymmetricName(tag) if not @destTag else @destTag
-                mirrorComponentTag(srcMesh, tag, @destMesh, dTag)
+                mirrorComponentTag(@srcMesh, tag, @destMesh, dTag)
     else:
-        mirrorComponentTag(srcMesh, @srcTag, @destMesh, @destTag)
+        mirrorComponentTag(@srcMesh, @srcTag, @destMesh, @destTag)
 ]]></run>
 <doc><![CDATA[## Summary
 Mirrors geometry component tags from a source mesh to a destination mesh, optionally across the X‑axis on the same mesh or between symmetric meshes. It can copy a single tag or all tags, automatically resolving symmetric tag names when the destination tag is omitted.

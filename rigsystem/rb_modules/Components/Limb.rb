@@ -1,16 +1,16 @@
 <module name="Limb" muted="0" uid="d2e886c7fa894a018b74d0f9b00c62e5">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 from rigsystem.anim_utils import dynamicParent, switcher
 
-joint1 = pm.PyNode(@joint1)
-joint2 = pm.PyNode(@joint2)
-joint3 = pm.PyNode(@joint3)
+cmds = proxy.cmds
+joint1 = proxy.node(@joint1)
+joint2 = proxy.node(@joint2)
+joint3 = proxy.node(@joint3)
 
-controlsParent = pm.PyNode("controls")
-internalParent = pm.PyNode("internal")
-othersParent = pm.PyNode("others")
-helpersParent = pm.PyNode("helpers")
+controlsParent = proxy.node("controls")
+internalParent = proxy.node("internal")
+othersParent = proxy.node("others")
+helpersParent = proxy.node("helpers")
 
 if @mode == 0:  # helpers
     scale = rig_utils.getDistance(joint1, joint3) / 10
@@ -19,118 +19,119 @@ if @mode == 0:  # helpers
     p2 = rig_utils.matrix.taxis(joint2.wm.get())
     p3 = rig_utils.matrix.taxis(joint3.wm.get())
         
-    planeTransform = pm.createNode("transform", n=@name + "_ik_plane_helper_transform", p=helpersParent)
-    pm.pointConstraint(joint2, planeTransform)
-    oc = pm.orientConstraint(joint1, joint2, planeTransform)
+    planeTransform = proxy.create("transform", f"{@name}_ik_plane_helper", parent=helpersParent)
+    cmds.pointConstraint(joint2, planeTransform)
+    oc = proxy.node(cmds.orientConstraint(joint1, joint2, planeTransform)[0])
     oc.interpType.set(2) # shortest
 
     #polevector
-    h_polevector = rig_utils.curve.makeCurve(@name + "_ik_polevector_control_helper", "sphere")    
+    h_polevector = rig_utils.curve.makeCurve(f"{@name}_ik_polevector_control_helper", "sphere")
     h_polevector.s.set([scale/2, scale/2, scale/2])
     planeTransform | h_polevector
     
     avg = (p1 - p2).normal() + (p3 - p2).normal()
-    pm.xform(h_polevector, ws=True, t=p2 - avg.normal() * scale*3)
+    polePosition = p2 - avg.normal() * scale * 3
+    cmds.xform(h_polevector, ws=True, t=(polePosition.x, polePosition.y, polePosition.z))
     rig_utils.lockTRS(h_polevector, [1,0,1], [1,1,1], [], 1)
     rig_utils.connectFromSymmetric(h_polevector, ty=-1)
-    @set_h_polevector(h_polevector.name())
+    @set_h_polevector(str(h_polevector))
 
     # IK Control
-    h_ik = rig_utils.curve.makeCurve(@name + "_ik_control_helper", @ikHelperType)    
+    h_ik = rig_utils.curve.makeCurve(f"{@name}_ik_control_helper", @ikHelperType)
     
-    isLeg = any(map(lambda x:x in ["leg", "frontLeg", "backLeg", "leg_front", "leg_back"], @name.split("_")))    
+    isLeg = any(part in {"leg", "frontLeg", "backLeg", "leg_front", "leg_back"} for part in @name.split("_"))
     if isLeg:     
-        h_ik_transform = pm.createNode("transform", n=@name + "_ik_control_helper_transform", p=helpersParent)
-        pm.pointConstraint(joint3, h_ik_transform, sk=["y"])
-        pm.orientConstraint(joint3, h_ik_transform, sk=["x", "z"], mo=True)
+        h_ik_transform = proxy.create("transform", f"{@name}_ik_control_helper", parent=helpersParent)
+        cmds.pointConstraint(joint3, h_ik_transform, sk=["y"])
+        cmds.orientConstraint(joint3, h_ik_transform, sk=["x", "z"], mo=True)
         h_ik_transform | h_ik
-        pm.xform(h_ik, ws=True, t=[p3[0], 0, p3[2]]) # place on ground
+        cmds.xform(h_ik, ws=True, t=(p3.x, 0, p3.z)) # place on ground
         h_ik.s.set([scale, scale/5, scale*2])
         rig_utils.lockTRS(h_ik, [0,1,0], [1,0,1], [], 1)
         rig_utils.connectFromSymmetric(h_ik, tx=-1, ry=-1)
     else:
         helpersParent | h_ik
-        pm.parentConstraint(@placeIkAt or joint3, h_ik)
+        cmds.parentConstraint(@placeIkAt or joint3, h_ik)
         h_ik.s.set([scale, scale, scale])
         rig_utils.lockTRS(h_ik, [1,1,1], [1,1,1], [], 1)
         rig_utils.connectFromSymmetric(h_ik)
-    @set_h_ik(h_ik.name())
+    @set_h_ik(str(h_ik))
     
     #options
-    h_options = rig_utils.curve.makeCurve(@name + "_options_control_helper", "flag")
+    h_options = rig_utils.curve.makeCurve(f"{@name}_options_control_helper", "flag")
     h_options.s.set([scale, scale, scale])
     planeTransform | h_options
     h_options.t.set([0,0,0])
-    pm.orientConstraint(helpersParent, h_options, mo=True)
+    cmds.orientConstraint(helpersParent, h_options, mo=True)
     rig_utils.lockTRS(h_options, [0,1,0], [1,1,1], [], 1)
     rig_utils.connectFromSymmetric(h_options, tx=-1, tz=-1)
-    @set_h_options(h_options.name()) 
+    @set_h_options(str(h_options))
     
     # position
-    h_position = rig_utils.curve.makeCurve(@name + "_position_control_helper", "axis")
+    h_position = rig_utils.curve.makeCurve(f"{@name}_position_control_helper", "axis")
     helpersParent | h_position
     h_position.s.set([scale/2.0, scale/2.0, scale/2.0])
-    pm.pointConstraint(joint1, h_position)
+    cmds.pointConstraint(joint1, h_position)
     rig_utils.lockTRS(h_position, [1,1,1], [], [])
     rig_utils.connectFromSymmetric(h_options, tx=-1, tz=-1)
-    @set_h_position(h_position.name())     
+    @set_h_position(str(h_position))
 
     # FK
-    h_fk1 = rig_utils.curve.makeCurve(@name + "_fk_1_control_helper", "circle")
-    h_fk2 = rig_utils.curve.makeCurve(@name + "_fk_2_control_helper", "circle")
-    h_fk3 = rig_utils.curve.makeCurve(@name + "_fk_3_control_helper", "circle")
+    h_fk1 = rig_utils.curve.makeCurve(f"{@name}_fk_1_control_helper", "circle")
+    h_fk2 = rig_utils.curve.makeCurve(f"{@name}_fk_2_control_helper", "circle")
+    h_fk3 = rig_utils.curve.makeCurve(f"{@name}_fk_3_control_helper", "circle")
 
     for j, h in [(joint1, h_fk1), (joint2, h_fk2), (joint3, h_fk3)]:
         helpersParent | h
         h.s.set([scale, scale, scale])
         
-        pc = pm.parentConstraint(j, h)
-        pc.target[0].targetOffsetRotate.set([0,0,90])
+        pc = proxy.node(cmds.parentConstraint(j, h)[0])
+        pc.attr("target[0].targetOffsetRotate").set((0, 0, 90))
         rig_utils.lockTRS(h, [1,1,1], [1,1,1], [], 1)
         rig_utils.connectFromSymmetric(h)
 
-    @set_h_fk1(h_fk1.name())
-    @set_h_fk2(h_fk2.name())
-    @set_h_fk3(h_fk3.name())
+    @set_h_fk1(str(h_fk1))
+    @set_h_fk2(str(h_fk2))
+    @set_h_fk3(str(h_fk3))
 
 if @mode == 1:  # run
     jointsParent = joint1.getParent()
 
-    h_fk1 = pm.PyNode(@h_fk1)
-    h_fk2 = pm.PyNode(@h_fk2)
-    h_fk3 = pm.PyNode(@h_fk3)
-    h_ik = pm.PyNode(@h_ik)
-    h_polevector = pm.PyNode(@h_polevector)
-    h_options = pm.PyNode(@h_options)
-    h_position = pm.PyNode(@h_position) if pm.objExists(@h_position) else None
+    h_fk1 = proxy.node(@h_fk1)
+    h_fk2 = proxy.node(@h_fk2)
+    h_fk3 = proxy.node(@h_fk3)
+    h_ik = proxy.node(@h_ik)
+    h_polevector = proxy.node(@h_polevector)
+    h_options = proxy.node(@h_options)
+    h_position = proxy.node(@h_position) if cmds.objExists(@h_position) else None
 
     # controls and joints groups
-    controls_grp = pm.createNode("transform", n=@name + "_controls_group", p=controlsParent)
+    controls_grp = proxy.create("transform", f"{@name}_controls_group", parent=controlsParent, suffix=False)
 
-    internal_grp = pm.createNode("transform", n=@name + "_internal_group", p=internalParent)
+    internal_grp = proxy.create("transform", f"{@name}_internal_group", parent=internalParent, suffix=False)
     internal_grp.v.set(False)
     
     rig_utils.lockTRS(controls_grp, [1,1,1], [1,1,1], [1, 1, 1], 0.5)
     rig_utils.lockTRS(internal_grp, [1,1,1], [1,1,1], [1, 1, 1], 0.5)
 
-    others_grp = pm.createNode("transform", n=@name + "_others_group", p=othersParent)
+    others_grp = proxy.create("transform", f"{@name}_others_group", parent=othersParent, suffix=False)
 
     # options control
-    options_ctrl = pm.createNode("transform", n=@name + "_options_control", p=controls_grp)
-    pm.parentConstraint(joint1, options_ctrl)
+    options_ctrl = proxy.create("transform", f"{@name}_options_control", parent=controls_grp, suffix=False)
+    cmds.parentConstraint(joint1, options_ctrl)
 
     rig_utils.curve.makeFromCurve(options_ctrl, h_options)
 
-    options_ctrl.addAttr("ikfk", at="float", min=0, max=1, k=True)
-    options_ctrl.addAttr("scaleFactor1x", at="float", min=0.1, dv=1, k=True)
-    options_ctrl.addAttr("scaleFactor2x", at="float", min=0.1, dv=1, k=True)
-    options_ctrl.addAttr("scaleFactor3x", at="float", min=0.1, dv=1, k=True)
+    options_ctrl.addAttr(ln="ikfk", at="float", min=0, max=1, k=True)
+    options_ctrl.addAttr(ln="scaleFactor1x", at="float", min=0.1, dv=1, k=True)
+    options_ctrl.addAttr(ln="scaleFactor2x", at="float", min=0.1, dv=1, k=True)
+    options_ctrl.addAttr(ln="scaleFactor3x", at="float", min=0.1, dv=1, k=True)
     
     for i, j in enumerate([joint1, joint2, joint3]):
         a = f"scaleFactor{i+1}"
-        options_ctrl.addAttr(a, min=0.01, dv=1.0, k=True)
+        options_ctrl.addAttr(ln=a, min=0.01, dv=1.0, k=True)
         if i == 2:
-            md = pm.createNode("multiplyDivide", n=j+"_scaleFactor_multiplyDivide")
+            md = proxy.create("multiplyDivide", f"{j.localName()}_scaleFactor")
             options_ctrl.attr(a) >> md.input1X
             options_ctrl.attr(a) >> md.input1Y
             options_ctrl.attr(a) >> md.input1Z
@@ -144,54 +145,54 @@ if @mode == 1:  # run
     rig_utils.lockTRS(options_ctrl, [1, 1, 1], [1, 1, 1], [1, 1, 1], 1)
     
     # ikfk switch
-    ikfk_rev = pm.createNode("reverse", n=@name + "_ikfk_reverse")
+    ikfk_rev = proxy.create("reverse", f"{@name}_ikfk")
     options_ctrl.ikfk >> ikfk_rev.inputX
 
     # bones start position control
     positionCtrl = None
     if h_position:
-        positionTransform = pm.createNode("transform", n=@name + "_1_position_control_transform", p=controls_grp)
-        pm.matchTransform(positionTransform, jointsParent)
-        pm.matchTransform(positionTransform, joint1, position=True, rotation=False)
+        positionTransform = proxy.create("transform", f"{@name}_1_position_control", parent=controls_grp)
+        cmds.matchTransform(positionTransform, jointsParent)
+        cmds.matchTransform(positionTransform, joint1, position=True, rotation=False)
         
         if jointsParent:
-            pm.parentConstraint(jointsParent, positionTransform, mo=True)
+            cmds.parentConstraint(jointsParent, positionTransform, mo=True)
         
-        positionCtrl = pm.createNode("transform", n=@name + "_1_position_control", p=positionTransform)
-        pm.matchTransform(positionCtrl, joint1, position=True, rotation=False)        
+        positionCtrl = proxy.create("transform", f"{@name}_1_position_control", parent=positionTransform, suffix=False)
+        cmds.matchTransform(positionCtrl, joint1, position=True, rotation=False)
         
         rig_utils.curve.makeFromCurve(positionCtrl, h_position)
         rig_utils.lockTRS(positionCtrl, [])
         
     # IK chain
-    ik1 = rig_utils.matchJoint(joint1, @name + "_ik_1_joint")
-    ik2 = rig_utils.matchJoint(joint2, @name + "_ik_2_joint")
-    ik3 = rig_utils.matchJoint(joint3, @name + "_ik_3_joint")
+    ik1 = proxy.node(rig_utils.matchJoint(joint1, f"{@name}_ik_1_joint"))
+    ik2 = proxy.node(rig_utils.matchJoint(joint2, f"{@name}_ik_2_joint"))
+    ik3 = proxy.node(rig_utils.matchJoint(joint3, f"{@name}_ik_3_joint"))
     internal_grp | ik1 | ik2 | ik3
     
-    pm.parentConstraint(positionCtrl or jointsParent, ik1, mo=True, skipRotate=["x", "y", "z"]) # pointConstraint
+    cmds.parentConstraint(positionCtrl or jointsParent, ik1, mo=True, skipRotate=["x", "y", "z"]) # pointConstraint
 
     # FIX
-    fix1 = rig_utils.matchJoint(joint1, @name + "_fix_1_joint")
-    fix2 = rig_utils.matchJoint(joint2, @name + "_fix_2_joint")
-    fix3 = rig_utils.matchJoint(joint3, @name + "_fix_3_joint")
+    fix1 = proxy.node(rig_utils.matchJoint(joint1, f"{@name}_fix_1_joint"))
+    fix2 = proxy.node(rig_utils.matchJoint(joint2, f"{@name}_fix_2_joint"))
+    fix3 = proxy.node(rig_utils.matchJoint(joint3, f"{@name}_fix_3_joint"))
 
     internal_grp | fix1 | fix2 | fix3
 
-    pm.pointConstraint(ik1, fix1)
+    cmds.pointConstraint(ik1, fix1)
 
     # FK
-    fk1 = rig_utils.matchJoint(joint1, @name + "_fk_1_joint")
-    fk2 = rig_utils.matchJoint(joint2, @name + "_fk_2_joint")
-    fk3 = rig_utils.matchJoint(joint3, @name + "_fk_3_joint")
+    fk1 = proxy.node(rig_utils.matchJoint(joint1, f"{@name}_fk_1_joint"))
+    fk2 = proxy.node(rig_utils.matchJoint(joint2, f"{@name}_fk_2_joint"))
+    fk3 = proxy.node(rig_utils.matchJoint(joint3, f"{@name}_fk_3_joint"))
     internal_grp | fk1 | fk2 | fk3
 
     # FK controls
     # fk1
-    fk1_ctrl = pm.createNode("transform", n=@name + "_fk_1_control", p=controls_grp)  
-    pm.matchTransform(fk1_ctrl, joint1)
+    fk1_ctrl = proxy.create("transform", f"{@name}_fk_1_control", parent=controls_grp, suffix=False)
+    cmds.matchTransform(fk1_ctrl, joint1)
     rig_utils.curve.makeFromCurve(fk1_ctrl, h_fk1)
-    pm.parentConstraint(positionCtrl or jointsParent, fk1_ctrl, sr=["x","y","z"], mo=True)
+    cmds.parentConstraint(positionCtrl or jointsParent, fk1_ctrl, sr=["x","y","z"], mo=True)
 
     switcher.addFollow(fk1_ctrl, controls_grp, jointsParent, attr="followBody", default=0.0, type="orient")
     
@@ -199,59 +200,59 @@ if @mode == 1:  # run
     options_ctrl.ikfk >> fk1_ctrl.v
     rig_utils.lockTRS(fk1_ctrl, [1, 1, 1], [], [1, 1, 1], 1)
     
-    pm.parentConstraint(fk1_ctrl, fk1)
+    cmds.parentConstraint(fk1_ctrl, fk1)
     
     # fk2
-    fk2_ctrl = pm.createNode("transform", n=@name + "_fk_2_control", p=fk1_ctrl)
-    pm.matchTransform(fk2_ctrl, joint2)
-    pm.pointConstraint(fk2, fk2_ctrl)
+    fk2_ctrl = proxy.create("transform", f"{@name}_fk_2_control", parent=fk1_ctrl, suffix=False)
+    cmds.matchTransform(fk2_ctrl, joint2)
+    cmds.pointConstraint(fk2, fk2_ctrl)
     rig_utils.setToOffsetParentMatrix(fk2_ctrl)
 
     rig_utils.curve.makeFromCurve(fk2_ctrl, h_fk2)    
     rig_utils.lockTRS(fk2_ctrl, [1, 1, 1], [1, 1, 0], [1, 1, 1], 1)
     
-    pm.orientConstraint(fk2_ctrl, fk2)
+    cmds.orientConstraint(fk2_ctrl, fk2)
     
     # fk3
-    fk3_ctrl = pm.createNode("transform", n=@name + "_fk_3_control", p=fk2_ctrl)
-    pm.matchTransform(fk3_ctrl, joint3)
-    pm.pointConstraint(fk3, fk3_ctrl)
+    fk3_ctrl = proxy.create("transform", f"{@name}_fk_3_control", parent=fk2_ctrl, suffix=False)
+    cmds.matchTransform(fk3_ctrl, joint3)
+    cmds.pointConstraint(fk3, fk3_ctrl)
     rig_utils.setToOffsetParentMatrix(fk3_ctrl)
 
     rig_utils.curve.makeFromCurve(fk3_ctrl, h_fk3)
     rig_utils.lockTRS(fk3_ctrl, [1, 1, 1], [], [1, 1, 1], 1)
 
-    pm.orientConstraint(fk3_ctrl, fk3)
+    cmds.orientConstraint(fk3_ctrl, fk3)
     
     # FIX IK handles
-    fix_ikHandle1 = pm.ikHandle(startJoint=fix1,
+    fix_ikHandle1 = proxy.node(cmds.ikHandle(startJoint=fix1,
                                 endEffector=fix2,
                                 solver="ikSCsolver",
-                                n=@name + "_fix_1_ikHandle")[0]
+                                n=f"{@name}_fix_1_ikHandle")[0])
     internal_grp | fix_ikHandle1
 
-    fix_ikHandle2 = pm.ikHandle(startJoint=fix2,
+    fix_ikHandle2 = proxy.node(cmds.ikHandle(startJoint=fix2,
                                 endEffector=fix3,
                                 solver="ikSCsolver",
-                                n=@name + "_fix_2_ikHandle")[0]
+                                n=f"{@name}_fix_2_ikHandle")[0])
     internal_grp | fix_ikHandle2    
     
     # IK handle
-    ikHandle = pm.ikHandle(startJoint=ik1, endEffector=ik3, solver="ikRPsolver", n=@name + "_ikHandle")[0]
+    ikHandle = proxy.node(cmds.ikHandle(startJoint=ik1, endEffector=ik3, solver="ikRPsolver", n=f"{@name}_ikHandle")[0])
     internal_grp | ikHandle
 
     # IK control
-    ik_ctrl = pm.createNode("joint", n=@name + "_ik_control", p=controls_grp)
+    ik_ctrl = proxy.create("joint", f"{@name}_ik_control", parent=controls_grp, suffix=False)
 
     ik_ctrl.radius.set(0)
     rig_utils.lockAttr(ik_ctrl.radius, 1)
     
-    pm.matchTransform(ik_ctrl, @placeIkAt or ik3, position=True, rotation=False)
+    cmds.matchTransform(ik_ctrl, @placeIkAt or ik3, position=True, rotation=False)
 
     rig_utils.setToOffsetParentMatrix(ik_ctrl)
     
-    if pm.objExists(@lastCtrlOrient):
-        pm.matchTransform(ik_ctrl, @lastCtrlOrient, position=False, rotation=True)    
+    if cmds.objExists(@lastCtrlOrient):
+        cmds.matchTransform(ik_ctrl, @lastCtrlOrient, position=False, rotation=True)
         rig_utils.freezeJoints([ik_ctrl])
 
     rig_utils.curve.makeFromCurve(ik_ctrl, h_ik)
@@ -262,25 +263,25 @@ if @mode == 1:  # run
     rig_utils.lockTRS(ik_ctrl, [], [], [1, 1, 1], 1)
 
     # IK polevector control
-    polevec_follow_j1 = rig_utils.matchJoint(joint1, @name + "_ik_polevector_follow_1_joint")
-    polevec_follow_j2 = rig_utils.matchJoint(joint3, @name + "_ik_polevector_follow_2_joint")
+    polevec_follow_j1 = proxy.node(rig_utils.matchJoint(joint1, f"{@name}_ik_polevector_follow_1_joint"))
+    polevec_follow_j2 = proxy.node(rig_utils.matchJoint(joint3, f"{@name}_ik_polevector_follow_2_joint"))
     internal_grp | polevec_follow_j1 | polevec_follow_j2    
     
-    polevec_follow_ikHandle = pm.ikHandle(sj=polevec_follow_j1, ee=polevec_follow_j2, solver="ikSCsolver")[0]
-    polevec_follow_ikHandle.rename(@name+"_ik_polevector_follow_ikHandle")
+    polevec_follow_ikHandle = proxy.node(cmds.ikHandle(sj=polevec_follow_j1, ee=polevec_follow_j2, solver="ikSCsolver")[0])
+    polevec_follow_ikHandle.rename(f"{@name}_ik_polevector_follow_ikHandle")
     internal_grp | polevec_follow_ikHandle
     
-    pm.parentConstraint(ik_ctrl, polevec_follow_ikHandle, mo=True)
-    pm.pointConstraint(ik1, polevec_follow_j1)
+    cmds.parentConstraint(ik_ctrl, polevec_follow_ikHandle, mo=True)
+    cmds.pointConstraint(ik1, polevec_follow_j1)
     
-    polevec_ctrl = pm.createNode("transform", n=@name + "_ik_polevector_control", p=controls_grp)
-    pm.matchTransform(polevec_ctrl, h_polevector, position=True, rotation=False)
+    polevec_ctrl = proxy.create("transform", f"{@name}_ik_polevector_control", parent=controls_grp, suffix=False)
+    cmds.matchTransform(polevec_ctrl, h_polevector, position=True, rotation=False)
     rig_utils.setToOffsetParentMatrix(polevec_ctrl)    
 
     switcher.addFollow(polevec_ctrl, internal_grp, polevec_follow_j1, attr="follow", default=0.0, type="parent")
     
-    polevec_ctrl.addAttr("snap", min=0, max=1, k=True)
-    polevec_ctrl.addAttr("stretch", min=0, max=1, dv=1, k=True)
+    polevec_ctrl.addAttr(ln="snap", min=0, max=1, k=True)
+    polevec_ctrl.addAttr(ln="stretch", min=0, max=1, dv=1, k=True)
     polevec_ctrl.stretch.set(0)
 
     rig_utils.curve.makeFromCurve(polevec_ctrl, h_polevector)
@@ -289,158 +290,158 @@ if @mode == 1:  # run
     
     rig_utils.lockTRS(polevec_ctrl, [], [1, 1, 1], [1, 1, 1], 1)
 
-    pm.pointConstraint(polevec_ctrl, fix_ikHandle1)  # snap fix1-fix2
+    cmds.pointConstraint(polevec_ctrl, fix_ikHandle1)  # snap fix1-fix2
     
     if @constrainIK:
-        pm.pointConstraint(ik_ctrl, fix_ikHandle2)  # snap fix2-fix3    
+        cmds.pointConstraint(ik_ctrl, fix_ikHandle2)  # snap fix2-fix3
 
     dynamicParent.makeDynamicParent(polevec_ctrl, polevec_ctrl)
 
     rig_utils.makeHelpLine(
-        @name + "_polevector", 
+        f"{@name}_polevector",
         [polevec_ctrl, joint2],
-        visibleAttr=ikfk_rev.outputX,
+        visibleAttr=str(ikfk_rev.outputX),
         parent=others_grp)
 
-    ik_ctrl.addAttr("stretch", min=0, max=1, dv=1, k=True)
+    ik_ctrl.addAttr(ln="stretch", min=0, max=1, dv=1, k=True)
     ik_ctrl.stretch.set(0)
 
-    dFix1 = rig_utils.createDistance(@name + "_fix_1_distance", fix1, polevec_ctrl)
-    dFix2 = rig_utils.createDistance(@name + "_fix_2_distance", fix2, ik_ctrl)
-    d = rig_utils.createDistance(@name + "_ik_distance", ik1, ik_ctrl)
+    dFix1 = rig_utils.createDistance(f"{@name}_fix_1_distance", fix1, polevec_ctrl)
+    dFix2 = rig_utils.createDistance(f"{@name}_fix_2_distance", fix2, ik_ctrl)
+    d = rig_utils.createDistance(f"{@name}_ik_distance", ik1, ik_ctrl)
 
-    ik2_tx_scaleMult = pm.createNode("multDL", n=ik2 + "_tx_scaleFactor1x_multDL")
+    ik2_tx_scaleMult = proxy.create("multDL", f"{ik2.localName()}_tx_scaleFactor1x")
     ik2_tx_scaleMult.input1.set(abs(ik2.tx.get()))
     options_ctrl.scaleFactor1x >> ik2_tx_scaleMult.input2
 
-    ik3_tx_scaleMult = pm.createNode("multDL", n=ik3 + "_tx_scaleFactor2x_multDL")
+    ik3_tx_scaleMult = proxy.create("multDL", f"{ik3.localName()}_tx_scaleFactor2x")
     ik3_tx_scaleMult.input1.set(abs(ik3.tx.get()))
     options_ctrl.scaleFactor2x >> ik3_tx_scaleMult.input2
 
-    ik2ik3_tx_sumAdd = pm.createNode("addDL", n=@name + "_ik_sum_tx_addDL")
+    ik2ik3_tx_sumAdd = proxy.create("addDL", f"{@name}_ik_sum_tx")
     ik2_tx_scaleMult.output >> ik2ik3_tx_sumAdd.input1
     ik3_tx_scaleMult.output >> ik2ik3_tx_sumAdd.input2
 
     sFix1 = rig_utils.makeStretchable(
-        @name + "_fix_1", 
+        f"{@name}_fix_1",
         [fix1],
         dFix1, 
-        polevec_ctrl.stretch,
+        str(polevec_ctrl.stretch),
         0.01, 0,
-        ik2_tx_scaleMult.output,
+        str(ik2_tx_scaleMult.output),
         scales=[True, False, False])
                                     
     sFix2 = rig_utils.makeStretchable(
-        @name + "_fix_2", 
+        f"{@name}_fix_2",
         [fix2],
         dFix2,
-        ik_ctrl.stretch,
+        str(ik_ctrl.stretch),
         0.01,
         0,
-        ik3_tx_scaleMult.output,
+        str(ik3_tx_scaleMult.output),
         scales=[True, False, False])
                                     
     s = rig_utils.makeStretchable(
-        @name + "_ik", 
+        f"{@name}_ik",
         [ik1, ik2],
         d,
-        ik_ctrl.stretch,
+        str(ik_ctrl.stretch),
         1,
         0,
-        ik2ik3_tx_sumAdd.output,
+        str(ik2ik3_tx_sumAdd.output),
         scales=[True, False, False],  
         useTx=False)
 
     # softIK
-    ik_ctrl.addAttr("softIK", min=0, max=0.5, dv=0.05, k=True)
+    ik_ctrl.addAttr(ln="softIK", min=0, max=0.5, dv=0.05, k=True)
 
-    ac_x = rig_utils.anim.createSoftIKAnimCurve(@name + "_softIK")
+    ac_x = proxy.node(rig_utils.anim.createSoftIKAnimCurve(f"{@name}_softIK"))
 
-    stretchX = pm.PyNode(@name + "_ik_stretch_x_blendTwoAttr")
-    cond = pm.PyNode(@name + "_ik_squash_condition")
+    stretchX = proxy.node(f"{@name}_ik_stretch_x_blendTwoAttr")
+    cond = proxy.node(f"{@name}_ik_squash_condition")
 
     stretchX.output >> ac_x.input
 
-    softIk_switch = pm.createNode("multDL", n=@name + "_softIK_switch_multDL")
+    softIk_switch = proxy.create("multDL", f"{@name}_softIK_switch")
     ik_ctrl.softIK >> softIk_switch.input1
     ik_ctrl.stretch >> softIk_switch.input2
 
-    softIk_b2a = pm.createNode("blendTwoAttr", n=@name + "_softIK_blendTwoAttr")
+    softIk_b2a = proxy.create("blendTwoAttr", f"{@name}_softIK")
     softIk_switch.output >> softIk_b2a.attributesBlender
     stretchX.output >> softIk_b2a.i[0]
     ac_x.output >> softIk_b2a.i[1]
 
-    softIk_b2a.output >> cond.firstTerm
-    softIk_b2a.output >> cond.colorIfTrueR
+    softIk_b2a.output.connect(cond.firstTerm, force=True)
+    softIk_b2a.output.connect(cond.colorIfTrueR, force=True)
 
     # fk stretch with scaleFactor
-    fk2_scaleFactor_mult = pm.createNode("multDL", n=fk2 + "_scaleFactor_multDL")
+    fk2_scaleFactor_mult = proxy.create("multDL", f"{fk2.localName()}_scaleFactor")
     options_ctrl.scaleFactor1x >> fk2_scaleFactor_mult.input1
     fk2_scaleFactor_mult.input2.set(fk2.tx.get())
     fk2_scaleFactor_mult.output >> fk2.tx
     
-    fk3_scaleFactor_mult = pm.createNode("multDL", n=fk3 + "_scaleFactor_multDL")
+    fk3_scaleFactor_mult = proxy.create("multDL", f"{fk3.localName()}_scaleFactor")
     options_ctrl.scaleFactor2x >> fk3_scaleFactor_mult.input1
     fk3_scaleFactor_mult.input2.set(fk3.tx.get())
     fk3_scaleFactor_mult.output >> fk3.tx
 
     # ik stretch
-    multIK1 = pm.createNode("multiplyDivide", n=ik1 + "_scaleFactor_multiplyDivide")
+    multIK1 = proxy.create("multiplyDivide", f"{ik1.localName()}_scaleFactor")
     s[0] >> multIK1.input1X
     options_ctrl.scaleFactor1x >> multIK1.input2X
 
-    multIK2 = pm.createNode("multiplyDivide", n=ik2 + "_scaleFactor_multiplyDivide")
+    multIK2 = proxy.create("multiplyDivide", f"{ik2.localName()}_scaleFactor")
     s[0] >> multIK2.input1X
     options_ctrl.scaleFactor2x >> multIK2.input2X
 
-    multFIX1 = pm.createNode("multiplyDivide", n=fix1 + "_scaleFactor_multiplyDivide")
+    multFIX1 = proxy.create("multiplyDivide", f"{fix1.localName()}_scaleFactor")
     sFix1[0] >> multFIX1.input1X
     options_ctrl.scaleFactor1x >> multFIX1.input2X
-    multFIX1.outputX >> fix1.sx
+    multFIX1.outputX.connect(fix1.sx, force=True)
 
-    multFIX2 = pm.createNode("multiplyDivide", n=fix2 + "_scaleFactor_multiplyDivide")
+    multFIX2 = proxy.create("multiplyDivide", f"{fix2.localName()}_scaleFactor")
     sFix2[0] >> multFIX2.input1X
     options_ctrl.scaleFactor2x >> multFIX2.input2X
-    multFIX2.outputX >> fix2.sx
+    multFIX2.outputX.connect(fix2.sx, force=True)
 
-    b2a = pm.createNode("blendTwoAttr", n=ik1 + "_stretch_x_blendTwoAttr")
+    b2a = proxy.create("blendTwoAttr", f"{ik1.localName()}_stretch_x")
     multIK1.outputX >> b2a.i[0]
     multFIX1.outputX >> b2a.i[1]
     polevec_ctrl.snap >> b2a.attributesBlender
-    b2a.output >> ik1.sx
+    b2a.output.connect(ik1.sx, force=True)
 
-    b2a = pm.createNode("blendTwoAttr", n=ik2 + "_stretch_x_blendTwoAttr")
+    b2a = proxy.create("blendTwoAttr", f"{ik2.localName()}_stretch_x")
     multIK2.outputX >> b2a.i[0]
     multFIX2.outputX >> b2a.i[1]
     polevec_ctrl.snap >> b2a.attributesBlender
-    b2a.output >> ik2.sx
+    b2a.output.connect(ik2.sx, force=True)
 
-    defPolevec = pm.createNode("transform", n=polevec_ctrl + "_default_transform")
-    pm.matchTransform(defPolevec, h_polevector, position=True, rotation=False)
-    pm.parent(defPolevec, fk2)
+    defPolevec = proxy.create("transform", f"{polevec_ctrl.localName()}_default")
+    cmds.matchTransform(defPolevec, h_polevector, position=True, rotation=False)
+    cmds.parent(defPolevec, fk2)
 
-    pm.poleVectorConstraint(polevec_ctrl, ikHandle)
+    cmds.poleVectorConstraint(polevec_ctrl, ikHandle)
 
     if @constrainIK:
-        pc = pm.pointConstraint(ik_ctrl, fix3, ikHandle)
+        pc = proxy.node(cmds.pointConstraint(ik_ctrl, fix3, ikHandle)[0])
 
-        snap_rev = pm.createNode("reverse", n=@name + "_ik_snap_reverse")
+        snap_rev = proxy.create("reverse", f"{@name}_ik_snap")
         polevec_ctrl.snap >> snap_rev.inputX
 
         snap_rev.outputX >> pc.w0
         polevec_ctrl.snap >> pc.w1
 
-        pm.orientConstraint(ik_ctrl, ik3, mo=True)
+        cmds.orientConstraint(ik_ctrl, ik3, mo=True)
 
     # blend IKFK constraints
     for j, ikj, fkj in [(joint1, ik1, fk1), (joint2, ik2, fk2), (joint3, ik3, fk3)]:
-        oc = pm.parentConstraint(ikj, fkj, j)
+        oc = proxy.node(cmds.parentConstraint(ikj, fkj, j)[0])
         oc.interpType.set(2)
         ikfk_rev.outputX >> oc.w0
         options_ctrl.ikfk >> oc.w1
         
     # ModuleInfo
-    moduleInfo = rig_utils.moduleInfo.ModuleInfo(@name + "_limb")
+    moduleInfo = rig_utils.moduleInfo.ModuleInfo(f"{@name}_limb")
     moduleInfo.setAttr("type", "limb")
 
     moduleInfo.setAttr("options", options_ctrl.message)

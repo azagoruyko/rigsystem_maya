@@ -70,7 +70,7 @@ The following plug-ins are included as compiled `.mll` files. Their source code 
 | `colliders.mll` | [`colliders`](https://github.com/azagoruyko/colliders) |
 | `skeleposer.mll` | [`skeleposer`](https://github.com/azagoruyko/skeleposer) |
 
-The Python scripts and many Rig Builder modules use `PyMEL`. Install it in the Maya 2026 Python environment if it is not already available. [Rig Builder](https://github.com/azagoruyko/rigBuilder) is a separate application required to use the modules in `rigsystem/rb_modules`.
+The Python scripts and Rig Builder modules use `maya.cmds`, the Maya API 2.0, and the bundled `rigsystem.proxy` layer instead of `PyMEL`. [Rig Builder](https://github.com/azagoruyko/rigBuilder) is a separate application required to use the modules in `rigsystem/rb_modules`.
 
 ## 🧪 Compatibility
 

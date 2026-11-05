@@ -1,12 +1,12 @@
 <module name="getAnimCurve" type="Tools/GetAnimCurve" muted="0" uid="dc8b7eedb70245a68d294d58cf5b3967">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 from rigsystem import rig_utils
     
 if @mode == 0: # get
-    @set_data(rig_utils.getAnimCurveData(pm.PyNode(@animCurve)))
+    @set_data(rig_utils.anim.getAnimCurveData(proxy.node(@animCurve)))
     
 elif @mode == 1: # set
-    rig_utils.makeAnimCurve(@data)
+    rig_utils.anim.makeAnimCurve(@data)
 ]]></run>
 <doc><![CDATA[## Summary
 Retrieves keyframe and tangent information from a Maya animation curve into a structured Python list, or creates a new animation curve from such data. This tool is useful for exporting, mirroring, or re‑applying animation curves across controls.

@@ -1,5 +1,8 @@
 <module name="rivet" muted="0" uid="88e30aae9d5745fcb70ee99e215ea28d">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[import maya.api.OpenMaya as om
+from rigsystem import proxy
+
+cmds = proxy.cmds
 
 class Rivet():
     """Create a rivet
@@ -8,7 +11,7 @@ class Rivet():
 
     def create(self, mesh, edge1, edge2, parent):
         self.sources = {
-            "oMesh": mesh,
+            "oMesh": proxy.node(mesh),
             "edgeIndex1": edge1,
             "edgeIndex2": edge2}
 
@@ -16,21 +19,21 @@ class Rivet():
         self.createConnections()
         self.setAttributes()
         if parent:
-            pm.parent(self.o_node["locator"].getParent(), parent)
+            cmds.parent(str(self.o_node["locator"].getParent()), str(parent))
             
-        pm.rename(self.o_node["locator"].getParent(), @name+"_locator")
+        self.o_node["locator"].getParent().rename(@name + "_locator")
 
         return self.o_node["locator"].getParent()
 
     def createNodes(self, *args):
         self.o_node = {
-            "meshEdgeNode1": pm.createNode("curveFromMeshEdge", n=@name+"_edge1_curveFromMeshEdge"),
-            "meshEdgeNode2": pm.createNode("curveFromMeshEdge", n=@name+"_edge2_curveFromMeshEdge"),
-            "ptOnSurfaceIn": pm.createNode("pointOnSurfaceInfo", n=@name+"_pointOnSurfaceInfo"),
-            "matrixNode": pm.createNode("fourByFourMatrix", n=@name+"_fourByFourMatrix"),
-            "decomposeMatrix": pm.createNode("decomposeMatrix", n=@name+"_decomposeMatrix"),
-            "loftNode": pm.createNode("loft", n=@name+"_loft"),
-            "locator": pm.createNode("locator")
+            "meshEdgeNode1": proxy.create("curveFromMeshEdge", @name + "_edge1"),
+            "meshEdgeNode2": proxy.create("curveFromMeshEdge", @name + "_edge2"),
+            "ptOnSurfaceIn": proxy.create("pointOnSurfaceInfo", @name),
+            "matrixNode": proxy.create("fourByFourMatrix", @name),
+            "decomposeMatrix": proxy.create("decomposeMatrix", @name),
+            "loftNode": proxy.create("loft", @name),
+            "locator": proxy.create("locator")
         }
 
     def createConnections(self, *args):
@@ -83,7 +86,7 @@ class Rivet():
             self.sources["edgeIndex2"])
 
         self.o_node["loftNode"].reverseSurfaceNormals.set(1)
-        self.o_node["loftNode"].inputCurve.set(size=2)
+        cmds.setAttr(str(self.o_node["loftNode"].inputCurve), size=2)
         self.o_node["loftNode"].uniform.set(True)
         self.o_node["loftNode"].sectionSpans.set(3)
         self.o_node["loftNode"].caching.set(True)
@@ -93,12 +96,20 @@ class Rivet():
         self.o_node["ptOnSurfaceIn"].parameterV.set(0.5)
         self.o_node["ptOnSurfaceIn"].caching.set(True)
 
-ls = pm.ls(sl=True, fl=True)
-if ls and len(ls)==2:
-    e1, e2 = ls
-   
+selection = cmds.ls(sl=True, fl=True) or []
+if len(selection) == 2:
+    edgeSelections = om.MSelectionList()
+    edgeSelections.add(selection[0])
+    edgeSelections.add(selection[1])
+    meshDag, edgeComponent1 = edgeSelections.getComponent(0)
+    _, edgeComponent2 = edgeSelections.getComponent(1)
+    edgeIndices1 = om.MFnSingleIndexedComponent(edgeComponent1).getElements()
+    edgeIndices2 = om.MFnSingleIndexedComponent(edgeComponent2).getElements()
+    if not edgeIndices1 or not edgeIndices2:
+        error("Select two mesh edges")
+
     rivet = Rivet()
-    rivet.create(e1.node(), e1.index(), e2.index(), None)
+    rivet.create(meshDag, edgeIndices1[0], edgeIndices2[0], None)
 else:
     error("Select two mesh edges")    ]]></run>
 <doc><![CDATA[## Summary

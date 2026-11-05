@@ -1,25 +1,27 @@
 <module name="findUnusedGeo" muted="0" uid="e705e52bf9284751a7ca2ce039a24722">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
+
+cmds = proxy.cmds
 
 out = []
 
 if @nurbs:
     for typ in ["nurbsSurface", "nurbsCurve"]:
-        for n in pm.ls(type="nurbsSurface"):
+        for n in proxy.nodes(cmds.ls(type=typ) or []):
             if not n.create.inputs() and not n.local.outputs() and not n.worldSpace.outputs() and n.intermediateObject.get():
-                out.append(n.name())
+                out.append(str(n))
 
 if @mesh:    
-    for n in pm.ls(type="mesh"):
+    for n in proxy.nodes(cmds.ls(type="mesh") or []):
         if not n.inMesh.inputs() and not n.outMesh.outputs() and not n.worldMesh.outputs() and n.intermediateObject.get():
-            out.append(n.name())
+            out.append(str(n))
 
 if out:
     print(out)
     if @remove:
-        pm.delete(out)
+        cmds.delete(out)
     else:
-        pm.select(out)    ]]></run>
+        cmds.select(out)]]></run>
 <doc><![CDATA[## Summary
 Finds and optionally removes unused geometry nodes (nurbs surfaces, curves, or meshes) that are marked as intermediate objects and have no connections to other nodes. The module reports the names of these nodes, selects them in the scene, or deletes them if the **Remove** option is enabled.
 

@@ -1,42 +1,50 @@
 <module name="averageSkinWeights" type="Tools/AverageSkinWeights" muted="0" uid="d73db96a87244fc5bca4875396ed3dd8">
-<run><![CDATA[import pymel.core as pm
-import time
+<run><![CDATA[import maya.mel as mel
+from rigsystem import proxy
 
-ls = pm.ls(sl=True, fl=True)
-if ls and len(ls) > 1:    
-    geom = ls[0].node()
-    skin = pm.PyNode(pm.mel.eval("findRelatedSkinCluster "+geom))
+cmds = proxy.cmds
+
+selection = cmds.ls(sl=True, fl=True) or []
+if selection and len(selection) > 1:
+    geom = selection[0].split(".", 1)[0]
+    skinName = mel.eval('findRelatedSkinCluster "{}"'.format(geom))
+    skin = proxy.node(skinName)
+    skinFn = skin.mfn()
+    vertexIndices = [
+        int(component.rsplit("[", 1)[1][:-1])
+        for component in selection
+    ]
+    influenceIndices = [
+        skinFn.indexForInfluenceObject(proxy.node(influence).mdagpath)
+        for influence in cmds.skinCluster(str(skin), query=True, influence=True) or []
+    ]
     
-    beginProgress("Calculating average", len(ls), 0.1)
+    beginProgress("Calculating average", len(selection), 0.1)
     weights = {}    
-    for i, v in enumerate(ls):
+    for i, idx in enumerate(vertexIndices):
         stepProgress(i)
-        idx = v.indices()[0]
            
-        for inf in skin.influenceObjects():
-            infIdx = skin.indexForInfluenceObject(inf)
+        for infIdx in influenceIndices:
             
-            w = pm.getAttr(skin+".weightList[%s].weights[%s]" % (idx, infIdx))
+            w = cmds.getAttr("{}.weightList[{}].weights[{}]".format(skin, idx, infIdx))
             if not w:
                 continue
             
-            if inf not in weights: 
-                weights[inf] = w
+            if infIdx not in weights:
+                weights[infIdx] = w
             else:
-                weights[inf] = (weights[inf] + w)/2.0
+                weights[infIdx] = (weights[infIdx] + w) / 2.0
                 
     endProgress()        
     
-    normalizeWeights = skin.normalizeWeights.get()   
+    normalizeWeights = skin.normalizeWeights.get()
     
     skin.normalizeWeights.set(0)
-    for inf in weights:    
-        infIdx = skin.indexForInfluenceObject(inf)        
-        for v in ls:  
-            idx = v.indices()[0]
-            w = pm.getAttr(skin+".weightList[%s].weights[%s]"%(idx, infIdx))
-            newWeight = weights[inf] * @percent + w*(1-@percent)
-            pm.setAttr(skin+".weightList[%s].weights[%s]"%(idx, infIdx), newWeight)
+    for infIdx in weights:
+        for idx in vertexIndices:
+            w = cmds.getAttr("{}.weightList[{}].weights[{}]".format(skin, idx, infIdx))
+            newWeight = weights[infIdx] * @percent + w*(1-@percent)
+            cmds.setAttr("{}.weightList[{}].weights[{}]".format(skin, idx, infIdx), newWeight)
     
     skin.normalizeWeights.set(normalizeWeights)]]></run>
 <doc><![CDATA[## Summary  

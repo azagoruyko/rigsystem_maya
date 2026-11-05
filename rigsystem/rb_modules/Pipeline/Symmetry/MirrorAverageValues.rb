@@ -1,29 +1,35 @@
 <module name="mirrorAverageValues" muted="0" uid="e7f568dc08e241e09d741aa978e51e5f">
-<run><![CDATA[import pymel.core as pm
-from rigsystem import rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
-averages = pm.ls("*_average_*_locator")
+cmds = proxy.cmds
+averages = proxy.nodes(cmds.ls("*_average_*_locator") or [])
 for avg in averages:
-    if not ("_pos_" in avg.name() or "_neg_" in avg.name()):
+    name = str(avg)
+    if not ("_pos_" in name or "_neg_" in name):
         continue
         
-    if not rig_utils.naming.isLeftSide(avg.name()):
+    if not rig_utils.naming.isLeftSide(name):
         continue
         
-    symAvg = rig_utils.naming.findSymmetricName(avg)
-    if "_pos_" in avg.name():
+    symAvg = rig_utils.naming.findSymmetricName(name)
+    if "_pos_" in name:
         symAvg = symAvg.replace("_pos_", "_neg_")
-    elif "_neg_" in avg.name():
+    elif "_neg_" in name:
         symAvg = symAvg.replace("_neg_", "_pos_")
     
-    if symAvg != avg and pm.objExists(symAvg):
-        print("{} >> {}".format(avg, symAvg))
-        symAvg = pm.PyNode(symAvg)
+    if symAvg != name and cmds.objExists(symAvg):
+        print(f"{avg} >> {symAvg}")
+        symAvg = proxy.node(symAvg)
         for a in ["t", "speedInner", "speedOutter"]:
             coeff = -1 if a == "t" else 1
-            if symAvg.attr(a).isSettable():
-                v = avg.attr(a).get()           
-                symAvg.attr(a).set(coeff * v)]]></run>
+            destination = symAvg.attr(a)
+            if cmds.getAttr(str(destination), settable=True):
+                value = avg.attr(a).get()
+                if a == "t":
+                    value = tuple(-component for component in value[0])
+                else:
+                    value *= coeff
+                destination.set(value)]]></run>
 <doc><![CDATA[## Summary
 Mirrors the average locator parameters (`t`, `speedInner`, `speedOutter`) from left‑side rig components to their right‑side counterparts, automatically negating the `t` value for proper mirroring.
 

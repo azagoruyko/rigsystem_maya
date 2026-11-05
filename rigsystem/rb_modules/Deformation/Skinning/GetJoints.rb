@@ -1,13 +1,12 @@
 <module name="GetJoints" muted="0" uid="9f20a01b042e46d389ce6774b7248fc3">
-<run><![CDATA[import pymel.core as pm
+<run><![CDATA[from rigsystem import proxy
 
+cmds = proxy.cmds
 joints = []
 for skin in @skinClusters:
-    skin = pm.PyNode(skin)
-    
-    for inf in skin.influenceObjects():
+    for inf in cmds.skinCluster(skin, query=True, influence=True) or []:
         if inf not in joints:
-            joints.append(inf.name())
+            joints.append(inf)
             
 @set_outJoints(joints)]]></run>
 <doc><![CDATA[## Summary  
@@ -27,7 +26,7 @@ Collects all unique joint names that influence the selected skin clusters. The m
 3. **Run the Module** – Press **Run** (or execute the module) to collect all unique joint names from the listed skin clusters.  
 4. **Consume the Output** – The resulting joint names appear in the `outJoints` list box. Connect this output to other modules that need a joint list, such as constraint or rigging tools.]]></doc>
 <attributes>
-<attr name="skinClusters" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": ["skinCluster13"], "placeholder": "", "buttonCommand": "import pymel.core as pm\n\nls = pm.ls(sl=True, fl=True)\n    \nvalue = []\nfor obj in ls:\n\tskin = pm.mel.eval(\"findRelatedSkinCluster \"+obj)\n\tif skin and skin not in value:\n\t\tvalue.append(skin)\n", "buttonLabel": "Get skinClusters by mesh", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="skinClusters" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": ["skinCluster13"], "placeholder": "", "buttonCommand": "import maya.cmds as cmds\nimport maya.mel as mel\n\nls = cmds.ls(sl=True, fl=True) or []\nvalue = []\nfor obj in ls:\n    skin = mel.eval('findRelatedSkinCluster \"{}\"'.format(obj))\n    if skin and skin not in value:\n        value.append(skin)\n", "buttonLabel": "Get skinClusters by mesh", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="" template="label" category="General" connect=""><![CDATA[{"default": "text", "text": "Press <b>Run</b> to get skinClusters' joints."}]]></attr>
 <attr name="outJoints" template="listBox" category="General" connect=""><![CDATA[{"items": [], "default": "items"}]]></attr>
 </attributes>
