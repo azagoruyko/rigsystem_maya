@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: face_eyelids.ma
-//Last modified: Tue, Nov 03, 2026 10:13:26 AM
+//Last modified: Tue, Nov 03, 2026 04:17:25 PM
 //Codeset: 1251
 requires maya "2026";
 requires -nodeType "skeleposer" "skeleposer" "Unknown";
@@ -9,21 +9,20 @@ requires -nodeType "simpleSelector" -nodeType "renderSetupLayer" -nodeType "rend
 		 -nodeType "collection" -nodeType "renderSettingsCollection" -nodeType "absOverride"
 		 -nodeType "absUniqueOverride" "renderSetup.py" "1.0";
 requires "Mayatomr" "2013.0 - 3.10.1.11 ";
-requires "stereoCamera" "10.0";
 currentUnit -l centimeter -a degree -t ntsc;
 fileInfo "application" "maya";
 fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
 fileInfo "osv" "Windows 11 Pro v2009 (Build: 26200)";
-fileInfo "UUID" "0E97C6EE-49DE-A84C-06B3-61BB45014C62";
+fileInfo "UUID" "DEDA519A-44FE-88A6-B15C-60BE0C82673C";
 createNode transform -s -n "persp";
 	rename -uid "8DCF4356-4D3E-3DFF-4277-379CE6A38D01";
 	setAttr ".v" no;
 	setAttr -s 3 ".rlio";
 	setAttr -s 3 ".rlio";
-	setAttr ".t" -type "double3" 9.0718174200568065 163.01463962775617 19.927289851619456 ;
-	setAttr ".r" -type "double3" -12.46058509890994 31.488017255227113 0 ;
+	setAttr ".t" -type "double3" 1.193922241746928 161.94583561959863 19.291429604897587 ;
+	setAttr ".r" -type "double3" -10.660585098910081 -7.7119827447728238 7.0209669134023485e-16 ;
 	setAttr ".s" -type "double3" 0.00095447319492794331 0.00095447319492794331 0.00095447319492794331 ;
 	setAttr ".rp" -type "double3" 1.6845304834877758e-15 6.2791705623511449e-14 1.2873024250788868e-14 ;
 	setAttr ".rpt" -type "double3" -4.3822704679452255e-14 1.2879062013619588e-14 -4.4159604867783264e-14 ;
@@ -32,7 +31,7 @@ createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "A6BC27AA-453E-F4CE-2D57-C0A1FFD6CDEF";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
-	setAttr ".coi" 12.103401071115529;
+	setAttr ".coi" 9.7055251361344599;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -1008,7 +1007,7 @@ createNode parentConstraint -n "L_eyelids_corner_outer_joint_parentConstraint1" 
 	setAttr ".rsrr" -type "double3" 1.1103887082007465e-06 2.1828698198566294e-14 -9.3978412452407717e-07 ;
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
-createNode joint -n "L_eyelid_upper_fold_1_joint" -p "L_eyelids_joint";
+createNode joint -n "L_eyelid_upper_fold_main_1_joint" -p "L_eyelids_joint";
 	rename -uid "71D0E24A-4FBB-2792-041A-4B948C9FE76C";
 	addAttr -ci true -sn "liw" -ln "lockInfluenceWeights" -min 0 -max 1 -at "bool";
 	setAttr ".uoc" 1;
@@ -1019,8 +1018,8 @@ createNode joint -n "L_eyelid_upper_fold_1_joint" -p "L_eyelids_joint";
 	setAttr ".bps" -type "matrix" 0.63660081385459666 0.75566018913151201 0.15400351412027119 0
 		 -0.74373209334620605 0.54875091882380911 0.38175254081262533 0 0.20396562731630938 -0.3575613341117187 0.91134401584786418 0
 		 1.9567903272863552 160.07411724681776 10.037393057179969 1;
-createNode parentConstraint -n "L_eyelid_upper_fold_1_joint_parentConstraint1" -p
-		 "L_eyelid_upper_fold_1_joint";
+createNode parentConstraint -n "L_eyelid_upper_fold_main_1_joint_parentConstraint1" 
+		-p "L_eyelid_upper_fold_main_1_joint";
 	rename -uid "CC33E285-4EAD-BBF0-795D-B09AAACBCEA0";
 	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "L_eyelid_upper_fold_1_controlW0" 
 		-dv 1 -min 0 -at "double";
@@ -1041,7 +1040,7 @@ createNode parentConstraint -n "L_eyelid_upper_fold_1_joint_parentConstraint1" -
 	setAttr ".rsrr" -type "double3" 5.6653630263568893e-15 3.1805546814635168e-15 2.9817700138720489e-16 ;
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
-createNode joint -n "L_eyelid_upper_fold_2_joint" -p "L_eyelids_joint";
+createNode joint -n "L_eyelid_upper_fold_main_2_joint" -p "L_eyelids_joint";
 	rename -uid "B32432F2-49F1-76DD-AB57-BDA51948D6E4";
 	addAttr -ci true -sn "liw" -ln "lockInfluenceWeights" -min 0 -max 1 -at "bool";
 	setAttr ".uoc" 1;
@@ -1052,8 +1051,8 @@ createNode joint -n "L_eyelid_upper_fold_2_joint" -p "L_eyelids_joint";
 	setAttr ".bps" -type "matrix" 0.98418489917200147 0.017002205397214632 -0.17632642811963375 0
 		 -0.017272840611174775 0.99985081336028336 1.8596235662471372e-15 0 0.17630012257232938 0.003045658288446218 0.98433174831789882 0
 		 3.8551003925534215 161.11848817141779 10.05707784884526 1;
-createNode parentConstraint -n "L_eyelid_upper_fold_2_joint_parentConstraint1" -p
-		 "L_eyelid_upper_fold_2_joint";
+createNode parentConstraint -n "L_eyelid_upper_fold_main_2_joint_parentConstraint1" 
+		-p "L_eyelid_upper_fold_main_2_joint";
 	rename -uid "C7B7A2DB-45AB-1AFA-A37F-86955BC51707";
 	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "L_eyelid_upper_fold_2_controlW0" 
 		-dv 1 -min 0 -at "double";
@@ -1075,7 +1074,7 @@ createNode parentConstraint -n "L_eyelid_upper_fold_2_joint_parentConstraint1" -
 		5.9635400277440939e-16 ;
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
-createNode joint -n "L_eyelid_upper_fold_3_joint" -p "L_eyelids_joint";
+createNode joint -n "L_eyelid_upper_fold_main_3_joint" -p "L_eyelids_joint";
 	rename -uid "96A2293C-42BE-CB7D-1E54-0EA14B8F9D93";
 	addAttr -ci true -sn "liw" -ln "lockInfluenceWeights" -min 0 -max 1 -at "bool";
 	setAttr ".uoc" 1;
@@ -1086,8 +1085,8 @@ createNode joint -n "L_eyelid_upper_fold_3_joint" -p "L_eyelids_joint";
 	setAttr ".bps" -type "matrix" 0.65190905618347672 -0.56244459320589069 -0.50859675779484492 0
 		 0.59781445256683641 0.79382722476834278 -0.11160742591245724 0 0.46651094603254739 -0.23128860064873583 0.85374066345803568 0
 		 5.5087399475937522 160.36029583568958 8.8855747819161017 1;
-createNode parentConstraint -n "L_eyelid_upper_fold_3_joint_parentConstraint1" -p
-		 "L_eyelid_upper_fold_3_joint";
+createNode parentConstraint -n "L_eyelid_upper_fold_main_3_joint_parentConstraint1" 
+		-p "L_eyelid_upper_fold_main_3_joint";
 	rename -uid "71B0DF05-427D-3A4E-CCA0-769CB7059196";
 	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "L_eyelid_upper_fold_3_controlW0" 
 		-dv 1 -min 0 -at "double";
@@ -1341,7 +1340,7 @@ createNode parentConstraint -n "R_eyelids_joint_parentConstraint1" -p "R_eyelids
 		-1.3877787807814457e-17 ;
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
-createNode joint -n "R_eyelid_upper_fold_1_joint" -p "R_eyelids_joint";
+createNode joint -n "R_eyelid_upper_fold_main_1_joint" -p "R_eyelids_joint";
 	rename -uid "A8A4A8A2-4274-188E-CEB7-20882816A968";
 	addAttr -ci true -sn "liw" -ln "lockInfluenceWeights" -min 0 -max 1 -at "bool";
 	setAttr ".uoc" 1;
@@ -1352,8 +1351,8 @@ createNode joint -n "R_eyelid_upper_fold_1_joint" -p "R_eyelids_joint";
 	setAttr ".bps" -type "matrix" 0.63660081902590249 -0.75566017925121787 -0.15400354122411389 0
 		 -0.74373208019673631 -0.54875089375251829 -0.3817526024692533 0 0.20396565912374962 0.35756139346947047 -0.91134398544039597 0
 		 -1.9567903287652706 160.07411724681262 10.037393056973073 1;
-createNode parentConstraint -n "R_eyelid_upper_fold_1_joint_parentConstraint1" -p
-		 "R_eyelid_upper_fold_1_joint";
+createNode parentConstraint -n "R_eyelid_upper_fold_main_1_joint_parentConstraint1" 
+		-p "R_eyelid_upper_fold_main_1_joint";
 	rename -uid "79D5093A-4088-CD5E-0357-03A1C4DAB62F";
 	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "R_eyelid_upper_fold_1_controlW0" 
 		-dv 1 -min 0 -at "double";
@@ -1377,7 +1376,7 @@ createNode parentConstraint -n "R_eyelid_upper_fold_1_joint_parentConstraint1" -
 	setAttr ".rsrr" -type "double3" -1.6473265842893804e-07 1.7493050760765905e-14 8.845917682673028e-15 ;
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
-createNode joint -n "R_eyelid_upper_fold_2_joint" -p "R_eyelids_joint";
+createNode joint -n "R_eyelid_upper_fold_main_2_joint" -p "R_eyelids_joint";
 	rename -uid "7E7F7037-4F9E-5A28-F424-BE9A498B62A4";
 	addAttr -ci true -sn "liw" -ln "lockInfluenceWeights" -min 0 -max 1 -at "bool";
 	setAttr ".uoc" 1;
@@ -1388,8 +1387,8 @@ createNode joint -n "R_eyelid_upper_fold_2_joint" -p "R_eyelids_joint";
 	setAttr ".bps" -type "matrix" 0.98418489917215757 -0.017002205390018996 0.17632642811945562 0
 		 -0.01727284060386481 -0.9998508133604096 9.7144514654701197e-16 0 0.17630012257217356 -0.0030456582871570825 -0.9843317483179308 0
 		 -3.8551003940371515 161.11848817140776 10.057077848437673 1;
-createNode parentConstraint -n "R_eyelid_upper_fold_2_joint_parentConstraint1" -p
-		 "R_eyelid_upper_fold_2_joint";
+createNode parentConstraint -n "R_eyelid_upper_fold_main_2_joint_parentConstraint1" 
+		-p "R_eyelid_upper_fold_main_2_joint";
 	rename -uid "E8B72D5A-4C04-BD37-5835-FC92E9F10FB7";
 	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "R_eyelid_upper_fold_2_controlW0" 
 		-dv 1 -min 0 -at "double";
@@ -1415,7 +1414,7 @@ createNode parentConstraint -n "R_eyelid_upper_fold_2_joint_parentConstraint1" -
 	setAttr ".rdta" -type "double3" -1.9081958235744875e-17 3.5908775952719912e-16 5.8980598183211454e-17 ;
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
-createNode joint -n "R_eyelid_upper_fold_3_joint" -p "R_eyelids_joint";
+createNode joint -n "R_eyelid_upper_fold_main_3_joint" -p "R_eyelids_joint";
 	rename -uid "560B4059-4D00-3C11-5E04-01B67032685E";
 	addAttr -ci true -sn "liw" -ln "lockInfluenceWeights" -min 0 -max 1 -at "bool";
 	setAttr ".uoc" 1;
@@ -1426,8 +1425,8 @@ createNode joint -n "R_eyelid_upper_fold_3_joint" -p "R_eyelids_joint";
 	setAttr ".bps" -type "matrix" 0.65190904719817444 0.56244459068102326 0.50859677210421284 0
 		 0.59781448831099337 -0.79382720662346218 0.11160736351090832 0 0.46651091278407802 0.23128866906540638 -0.85374066309115149 0
 		 -5.5087399489516535 160.36029583567517 8.885574781333677 1;
-createNode parentConstraint -n "R_eyelid_upper_fold_3_joint_parentConstraint1" -p
-		 "R_eyelid_upper_fold_3_joint";
+createNode parentConstraint -n "R_eyelid_upper_fold_main_3_joint_parentConstraint1" 
+		-p "R_eyelid_upper_fold_main_3_joint";
 	rename -uid "1891413F-4AA8-6603-3239-D9AA049F6465";
 	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "R_eyelid_upper_fold_3_controlW0" 
 		-dv 1 -min 0 -at "double";
@@ -1617,15 +1616,9 @@ createNode nurbsCurve -n "L_eyelid_lower_tuner_curveShape" -p "L_eyelid_lower_tu
 		"softMod1_1" 1 "cv[0]";
 createNode transform -n "eyelids_controls";
 	rename -uid "65042F44-4842-4FF5-12CA-CA808BF6414A";
-	setAttr -l on -k off ".tx";
-	setAttr -l on -k off ".ty";
-	setAttr -l on -k off ".tz";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
+	setAttr -k on ".t";
+	setAttr -k on ".r";
+	setAttr -k on ".s";
 createNode transform -n "L_eyelid_lower_major_1_control_transform" -p "eyelids_controls";
 	rename -uid "15709E90-45E8-6543-A92A-5BA0DC6D897E";
 	setAttr ".s" -type "double3" 0.99999999999999967 1.0000000000000002 0.99999999999999989 ;
@@ -2557,10 +2550,11 @@ createNode nurbsCurve -n "L_eye_transform_controlShape" -p "L_eye_transform_cont
 		2.5688928681485494 -0.12743034726766495 2.8013541099860531
 		2.5688928681485494 0.12743034726783475 2.8013541099860531
 		;
-createNode transform -n "L_eyelid_upper_fold_1_control_transform" -p "L_eye_transform_control";
+createNode transform -n "L_eyelid_upper_fold_main_1_control_transform" -p "L_eye_transform_control";
 	rename -uid "1AE6178E-446B-DB84-4BC5-15AE33B02C3F";
 	setAttr ".t" -type "double3" -1.0687763816436235 -0.074370924597616295 2.6837706713341296 ;
-createNode aimConstraint -n "L_eyelid_upper_fold_1_control_aimConstraint1" -p "L_eyelid_upper_fold_1_control_transform";
+createNode aimConstraint -n "L_eyelid_upper_fold_main_1_control_aimConstraint1" -p
+		 "L_eyelid_upper_fold_main_1_control_transform";
 	rename -uid "22755162-47ED-D04C-9FA9-E4B507EE3836";
 	addAttr -dcb 0 -ci true -sn "w0" -ln "L_eyelid_upper_fold_2_controlW0" -dv 1 -at "double";
 	setAttr -k on ".nds";
@@ -2579,7 +2573,7 @@ createNode aimConstraint -n "L_eyelid_upper_fold_1_control_aimConstraint1" -p "L
 	setAttr ".o" -type "double3" 126.04367550954488 -19.047626641389598 -12.350883147637758 ;
 	setAttr ".rsrr" -type "double3" 22.751797164732668 -8.8683305747324237 49.813299512351172 ;
 	setAttr -k on ".w0";
-createNode transform -n "L_eyelid_upper_fold_1_control" -p "L_eyelid_upper_fold_1_control_transform";
+createNode transform -n "L_eyelid_upper_fold_main_1_control" -p "L_eyelid_upper_fold_main_1_control_transform";
 	rename -uid "A2390F3A-4BEE-E48F-2551-80957C5799F1";
 	setAttr -l on -k off ".v";
 	setAttr -l on -k off ".rx";
@@ -2588,7 +2582,7 @@ createNode transform -n "L_eyelid_upper_fold_1_control" -p "L_eyelid_upper_fold_
 	setAttr -l on -k off ".sx";
 	setAttr -l on -k off ".sy";
 	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "L_eyelid_upper_fold_1_controlShape" -p "L_eyelid_upper_fold_1_control";
+createNode nurbsCurve -n "L_eyelid_upper_fold_main_main_1_controlShape" -p "L_eyelid_upper_fold_main_1_control";
 	rename -uid "9E266D90-42FF-BD6D-635E-DB8FB466BD8D";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -2609,7 +2603,7 @@ createNode nurbsCurve -n "L_eyelid_upper_fold_1_controlShape" -p "L_eyelid_upper
 		-1.7792375713682334e-17 9.5493669641314808e-18 -0.083991782069543386
 		-0.11027553537463761 6.752421728934314e-18 -0.03831423601738046
 		;
-createNode nurbsCurve -n "L_eyelid_upper_fold_1_controlShape1" -p "L_eyelid_upper_fold_1_control";
+createNode nurbsCurve -n "L_eyelid_upper_fold_main_main_1_controlShape1" -p "L_eyelid_upper_fold_main_1_control";
 	rename -uid "620BA3B9-4C11-1234-5D64-2CB4FEB383DF";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -2630,7 +2624,7 @@ createNode nurbsCurve -n "L_eyelid_upper_fold_1_controlShape1" -p "L_eyelid_uppe
 		-1.7792375713682334e-17 -0.15595308142680053 0.071961299357257147
 		-0.11027553537463761 -0.11027553537463761 0.071961299357257175
 		;
-createNode nurbsCurve -n "L_eyelid_upper_fold_1_controlShape2" -p "L_eyelid_upper_fold_1_control";
+createNode nurbsCurve -n "L_eyelid_upper_fold_main_main_1_controlShape2" -p "L_eyelid_upper_fold_main_1_control";
 	rename -uid "043B9AA0-46F0-F034-A0BD-E082A181C6BE";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -2651,10 +2645,11 @@ createNode nurbsCurve -n "L_eyelid_upper_fold_1_controlShape2" -p "L_eyelid_uppe
 		-9.5493669641314808e-18 -1.7792375713682334e-17 -0.083991782069543386
 		-3.3638000345718391e-34 -0.11027553537463761 -0.03831423601738046
 		;
-createNode transform -n "L_eyelid_upper_fold_3_control_transform" -p "L_eye_transform_control";
+createNode transform -n "L_eyelid_upper_fold_main_3_control_transform" -p "L_eye_transform_control";
 	rename -uid "2667C112-4BEB-9B5D-74E2-3DB4BF2E6A3A";
 	setAttr ".t" -type "double3" 2.4831732386032637 0.21180766426957121 1.5319523958824695 ;
-createNode aimConstraint -n "L_eyelid_upper_fold_3_control_aimConstraint1" -p "L_eyelid_upper_fold_3_control_transform";
+createNode aimConstraint -n "L_eyelid_upper_fold_main_3_control_aimConstraint1" -p
+		 "L_eyelid_upper_fold_main_3_control_transform";
 	rename -uid "FDD2A9AF-473C-3129-6867-BFAE91E64C75";
 	addAttr -dcb 0 -ci true -sn "w0" -ln "L_eyelid_upper_fold_2_controlW0" -dv 1 -at "double";
 	setAttr -k on ".nds";
@@ -2674,7 +2669,7 @@ createNode aimConstraint -n "L_eyelid_upper_fold_3_control_aimConstraint1" -p "L
 	setAttr ".o" -type "double3" 118.16614710595704 12.908461777703408 5.22936009463512 ;
 	setAttr ".rsrr" -type "double3" -7.3840303194675396 30.605384530217041 -40.706457324863472 ;
 	setAttr -k on ".w0";
-createNode transform -n "L_eyelid_upper_fold_3_control" -p "L_eyelid_upper_fold_3_control_transform";
+createNode transform -n "L_eyelid_upper_fold_main_3_control" -p "L_eyelid_upper_fold_main_3_control_transform";
 	rename -uid "7364A85E-4ED3-53F0-E414-0EB8B4D7F280";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 1.4210854715202004e-14 -2.8421709430404007e-14 1.7763568394002505e-14 ;
@@ -2684,7 +2679,7 @@ createNode transform -n "L_eyelid_upper_fold_3_control" -p "L_eyelid_upper_fold_
 	setAttr -l on -k off ".sx";
 	setAttr -l on -k off ".sy";
 	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "L_eyelid_upper_fold_3_controlShape" -p "L_eyelid_upper_fold_3_control";
+createNode nurbsCurve -n "L_eyelid_upper_fold_main_main_3_controlShape" -p "L_eyelid_upper_fold_main_3_control";
 	rename -uid "FF9B2668-4967-2C98-99CE-1F92A25346AA";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -2705,7 +2700,7 @@ createNode nurbsCurve -n "L_eyelid_upper_fold_3_controlShape" -p "L_eyelid_upper
 		-1.7792375713682334e-17 9.5493669641314808e-18 -0.083991782069543386
 		-0.11027553537463761 6.752421728934314e-18 -0.03831423601738046
 		;
-createNode nurbsCurve -n "L_eyelid_upper_fold_3_controlShape1" -p "L_eyelid_upper_fold_3_control";
+createNode nurbsCurve -n "L_eyelid_upper_fold_main_main_3_controlShape1" -p "L_eyelid_upper_fold_main_3_control";
 	rename -uid "9B86D3A0-4C14-458A-49F9-53A6E76FE5F0";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -2726,7 +2721,7 @@ createNode nurbsCurve -n "L_eyelid_upper_fold_3_controlShape1" -p "L_eyelid_uppe
 		-1.7792375713682334e-17 -0.15595308142680053 0.071961299357257147
 		-0.11027553537463761 -0.11027553537463761 0.071961299357257175
 		;
-createNode nurbsCurve -n "L_eyelid_upper_fold_3_controlShape2" -p "L_eyelid_upper_fold_3_control";
+createNode nurbsCurve -n "L_eyelid_upper_fold_main_main_3_controlShape2" -p "L_eyelid_upper_fold_main_3_control";
 	rename -uid "FE228BF1-40EC-EA17-544D-41A4192E9DE6";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -2807,11 +2802,11 @@ createNode nurbsCurve -n "L_eyelid_upper_main_controlShape3" -p "L_eyelid_upper_
 		-0.67021036351894669 -0.14393256736318566 0.23731847273804968
 		-0.68586735107650765 -0.57505556966192128 0.23731847273804971
 		;
-createNode transform -n "L_eyelid_upper_fold_2_control_transform" -p "L_eye_transform_control";
+createNode transform -n "L_eyelid_upper_fold_main_2_control_transform" -p "L_eye_transform_control";
 	rename -uid "CEE0A849-4992-70EF-F56C-E4B335DED5F4";
 	setAttr ".mntl" -type "double3" -1 0 -1 ;
 	setAttr ".mtye" yes;
-createNode transform -n "L_eyelid_upper_fold_2_control" -p "L_eyelid_upper_fold_2_control_transform";
+createNode transform -n "L_eyelid_upper_fold_main_2_control" -p "L_eyelid_upper_fold_main_2_control_transform";
 	rename -uid "29854F13-4FC4-BFDD-02E8-11928C2DFB0C";
 	setAttr -l on -k off ".v";
 	setAttr -l on -k off ".rx";
@@ -2819,7 +2814,7 @@ createNode transform -n "L_eyelid_upper_fold_2_control" -p "L_eyelid_upper_fold_
 	setAttr ".opm" -type "matrix" 0.9841848991720793 0.017002205393616628 -0.17632642811954499 0
 		 -0.017272840607519786 0.99985081336034665 2.1684043449710079e-19 0 0.17630012257225181 0.0030456582878021967 0.98433174831791492 0
 		 0.82953368362584667 0.96999999999994202 2.7034554628990675 1;
-createNode nurbsCurve -n "L_eyelid_upper_fold_2_controlShape" -p "L_eyelid_upper_fold_2_control";
+createNode nurbsCurve -n "L_eyelid_upper_fold_main_main_2_controlShape" -p "L_eyelid_upper_fold_main_2_control";
 	rename -uid "8569DE59-4A98-4BAC-AF21-0BA5758BB980";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -2840,7 +2835,7 @@ createNode nurbsCurve -n "L_eyelid_upper_fold_2_controlShape" -p "L_eyelid_upper
 		-1.7792375713682334e-17 9.5493669641314808e-18 -0.083991782069543386
 		-0.11027553537463761 6.752421728934314e-18 -0.03831423601738046
 		;
-createNode nurbsCurve -n "L_eyelid_upper_fold_2_controlShape1" -p "L_eyelid_upper_fold_2_control";
+createNode nurbsCurve -n "L_eyelid_upper_fold_main_main_2_controlShape1" -p "L_eyelid_upper_fold_main_2_control";
 	rename -uid "2BFCED1C-4383-B409-39D6-81A534209F3B";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -2861,7 +2856,7 @@ createNode nurbsCurve -n "L_eyelid_upper_fold_2_controlShape1" -p "L_eyelid_uppe
 		-1.7792375713682334e-17 -0.15595308142680053 0.071961299357257147
 		-0.11027553537463761 -0.11027553537463761 0.071961299357257175
 		;
-createNode nurbsCurve -n "L_eyelid_upper_fold_2_controlShape2" -p "L_eyelid_upper_fold_2_control";
+createNode nurbsCurve -n "L_eyelid_upper_fold_main_main_2_controlShape2" -p "L_eyelid_upper_fold_main_2_control";
 	rename -uid "0AADC0B5-4770-7622-21A2-B498BA7E30EF";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3070,10 +3065,10 @@ createNode nurbsCurve -n "R_eye_transform_controlShape" -p "R_eye_transform_cont
 		2.5688928681485494 -0.12743034726766495 2.8013541099860531
 		2.5688928681485494 0.12743034726783475 2.8013541099860531
 		;
-createNode transform -n "R_eyelid_upper_fold_1_control_transform" -p "R_eye_transform_control";
+createNode transform -n "R_eyelid_upper_fold_main_1_control_transform" -p "R_eye_transform_control";
 	rename -uid "16E64F58-43F3-9F89-BC42-3489FE0DE70F";
 	setAttr ".s" -type "double3" 0.99999999999999989 0.99999999999999967 0.99999999999999967 ;
-createNode transform -n "R_eyelid_upper_fold_1_control" -p "R_eyelid_upper_fold_1_control_transform";
+createNode transform -n "R_eyelid_upper_fold_main_1_control" -p "R_eyelid_upper_fold_main_1_control_transform";
 	rename -uid "3755A68C-4DAF-84E7-5639-58B1D410559F";
 	setAttr -l on -k off ".v";
 	setAttr -l on -k off ".rx";
@@ -3082,7 +3077,7 @@ createNode transform -n "R_eyelid_upper_fold_1_control" -p "R_eyelid_upper_fold_
 	setAttr -l on -k off ".sx";
 	setAttr -l on -k off ".sy";
 	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "R_eyelid_upper_fold_1_controlShape" -p "R_eyelid_upper_fold_1_control";
+createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_1_controlShape" -p "R_eyelid_upper_fold_main_1_control";
 	rename -uid "CDBBF6D5-4900-3191-06BB-9A83ED6A660E";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3103,7 +3098,7 @@ createNode nurbsCurve -n "R_eyelid_upper_fold_1_controlShape" -p "R_eyelid_upper
 		-1.7792375713682334e-17 9.5493669641314808e-18 -0.083991782069543386
 		-0.11027553537463761 6.752421728934314e-18 -0.03831423601738046
 		;
-createNode nurbsCurve -n "R_eyelid_upper_fold_1_controlShape1" -p "R_eyelid_upper_fold_1_control";
+createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_1_controlShape1" -p "R_eyelid_upper_fold_main_1_control";
 	rename -uid "584730F7-4C46-27F1-54E0-0F886D872121";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3124,7 +3119,7 @@ createNode nurbsCurve -n "R_eyelid_upper_fold_1_controlShape1" -p "R_eyelid_uppe
 		-1.7792375713682334e-17 -0.15595308142680053 0.071961299357257147
 		-0.11027553537463761 -0.11027553537463761 0.071961299357257175
 		;
-createNode nurbsCurve -n "R_eyelid_upper_fold_1_controlShape2" -p "R_eyelid_upper_fold_1_control";
+createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_1_controlShape2" -p "R_eyelid_upper_fold_main_1_control";
 	rename -uid "44E7F549-44F5-B515-2505-53970386105E";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3145,7 +3140,8 @@ createNode nurbsCurve -n "R_eyelid_upper_fold_1_controlShape2" -p "R_eyelid_uppe
 		-9.5493669641314808e-18 -1.7792375713682334e-17 -0.083991782069543386
 		-3.3638000345718391e-34 -0.11027553537463761 -0.03831423601738046
 		;
-createNode aimConstraint -n "R_eyelid_upper_fold_1_control_aimConstraint1" -p "R_eyelid_upper_fold_1_control_transform";
+createNode aimConstraint -n "R_eyelid_upper_fold_main_1_control_aimConstraint1" -p
+		 "R_eyelid_upper_fold_main_1_control_transform";
 	rename -uid "8329E6BB-4F8F-4414-18D8-FFB31E75E69F";
 	addAttr -dcb 0 -ci true -sn "w0" -ln "R_eyelid_upper_fold_2_controlW0" -dv 1 -at "double";
 	setAttr -k on ".nds";
@@ -3163,10 +3159,10 @@ createNode aimConstraint -n "R_eyelid_upper_fold_1_control_aimConstraint1" -p "R
 	setAttr ".wut" 1;
 	setAttr ".rsrr" -type "double3" 22.751797000000021 -8.8683305747324326 49.813299512351207 ;
 	setAttr -k on ".w0";
-createNode transform -n "R_eyelid_upper_fold_3_control_transform" -p "R_eye_transform_control";
+createNode transform -n "R_eyelid_upper_fold_main_3_control_transform" -p "R_eye_transform_control";
 	rename -uid "5DCA880E-42AE-AD9E-7C44-0A8A845B938E";
 	setAttr ".s" -type "double3" 0.99999999999999989 0.99999999999999989 0.99999999999999978 ;
-createNode transform -n "R_eyelid_upper_fold_3_control" -p "R_eyelid_upper_fold_3_control_transform";
+createNode transform -n "R_eyelid_upper_fold_main_3_control" -p "R_eyelid_upper_fold_main_3_control_transform";
 	rename -uid "919D82ED-4B97-0FCE-A28B-D9A7A84BA3BD";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 1.4210854715202004e-14 2.8421709430404007e-14 0 ;
@@ -3176,7 +3172,7 @@ createNode transform -n "R_eyelid_upper_fold_3_control" -p "R_eyelid_upper_fold_
 	setAttr -l on -k off ".sx";
 	setAttr -l on -k off ".sy";
 	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "R_eyelid_upper_fold_3_controlShape" -p "R_eyelid_upper_fold_3_control";
+createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_3_controlShape" -p "R_eyelid_upper_fold_main_3_control";
 	rename -uid "0D306F0E-42B0-3775-B000-BDAAB1CA825B";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3197,7 +3193,7 @@ createNode nurbsCurve -n "R_eyelid_upper_fold_3_controlShape" -p "R_eyelid_upper
 		-1.7792375713682334e-17 9.5493669641314808e-18 -0.083991782069543386
 		-0.11027553537463761 6.752421728934314e-18 -0.03831423601738046
 		;
-createNode nurbsCurve -n "R_eyelid_upper_fold_3_controlShape1" -p "R_eyelid_upper_fold_3_control";
+createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_3_controlShape1" -p "R_eyelid_upper_fold_main_3_control";
 	rename -uid "B0A4F100-4B72-4980-5B5A-8D8BC679E91E";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3218,7 +3214,7 @@ createNode nurbsCurve -n "R_eyelid_upper_fold_3_controlShape1" -p "R_eyelid_uppe
 		-1.7792375713682334e-17 -0.15595308142680053 0.071961299357257147
 		-0.11027553537463761 -0.11027553537463761 0.071961299357257175
 		;
-createNode nurbsCurve -n "R_eyelid_upper_fold_3_controlShape2" -p "R_eyelid_upper_fold_3_control";
+createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_3_controlShape2" -p "R_eyelid_upper_fold_main_3_control";
 	rename -uid "6D512549-4C26-51C0-FAD5-AD8762F118F4";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3239,7 +3235,8 @@ createNode nurbsCurve -n "R_eyelid_upper_fold_3_controlShape2" -p "R_eyelid_uppe
 		-9.5493669641314808e-18 -1.7792375713682334e-17 -0.083991782069543386
 		-3.3638000345718391e-34 -0.11027553537463761 -0.03831423601738046
 		;
-createNode aimConstraint -n "R_eyelid_upper_fold_3_control_aimConstraint1" -p "R_eyelid_upper_fold_3_control_transform";
+createNode aimConstraint -n "R_eyelid_upper_fold_main_3_control_aimConstraint1" -p
+		 "R_eyelid_upper_fold_main_3_control_transform";
 	rename -uid "31B21215-4036-BE7D-0AE4-1EB259F642C7";
 	addAttr -dcb 0 -ci true -sn "w0" -ln "R_eyelid_upper_fold_2_controlW0" -dv 1 -at "double";
 	setAttr -k on ".nds";
@@ -3318,11 +3315,11 @@ createNode nurbsCurve -n "R_eyelid_upper_main_controlShape3" -p "R_eyelid_upper_
 		-0.67021036351894725 -0.1439325673631856 0.23731847273804962
 		-0.6858673510765082 -0.57505556966192106 0.23731847273804965
 		;
-createNode transform -n "R_eyelid_upper_fold_2_control_transform" -p "R_eye_transform_control";
+createNode transform -n "R_eyelid_upper_fold_main_2_control_transform" -p "R_eye_transform_control";
 	rename -uid "9691745F-4F57-D851-26C9-03AEE16ABBD0";
 	setAttr ".mntl" -type "double3" -1 0 -1 ;
 	setAttr ".mtye" yes;
-createNode transform -n "R_eyelid_upper_fold_2_control" -p "R_eyelid_upper_fold_2_control_transform";
+createNode transform -n "R_eyelid_upper_fold_main_2_control" -p "R_eyelid_upper_fold_main_2_control_transform";
 	rename -uid "A7875EE1-411C-DB9B-36E9-35879B9875D8";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 1.6653345369377348e-16 -9.9920072216264089e-16 4.4408920985006262e-16 ;
@@ -3332,7 +3329,7 @@ createNode transform -n "R_eyelid_upper_fold_2_control" -p "R_eyelid_upper_fold_
 	setAttr ".opm" -type "matrix" 0.9841848991720793 0.017002205393616614 -0.1763264281195446 0
 		 -0.017272840607519772 0.99985081336034665 2.1684043449710084e-19 0 0.17630012257225139 0.0030456582878021863 0.9843317483179147 0
 		 0.82953368362584534 0.96999999999999997 2.703455462899071 1;
-createNode nurbsCurve -n "R_eyelid_upper_fold_2_controlShape" -p "R_eyelid_upper_fold_2_control";
+createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_2_controlShape" -p "R_eyelid_upper_fold_main_2_control";
 	rename -uid "E6149193-44BA-758A-1339-4E833AF621EE";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3353,7 +3350,7 @@ createNode nurbsCurve -n "R_eyelid_upper_fold_2_controlShape" -p "R_eyelid_upper
 		-1.7792375713682334e-17 9.5493669641314808e-18 -0.083991782069543386
 		-0.11027553537463761 6.752421728934314e-18 -0.03831423601738046
 		;
-createNode nurbsCurve -n "R_eyelid_upper_fold_2_controlShape1" -p "R_eyelid_upper_fold_2_control";
+createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_2_controlShape1" -p "R_eyelid_upper_fold_main_2_control";
 	rename -uid "A114C081-4380-40D3-DAC7-A4A1F8675F6B";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3374,7 +3371,7 @@ createNode nurbsCurve -n "R_eyelid_upper_fold_2_controlShape1" -p "R_eyelid_uppe
 		-1.7792375713682334e-17 -0.15595308142680053 0.071961299357257147
 		-0.11027553537463761 -0.11027553537463761 0.071961299357257175
 		;
-createNode nurbsCurve -n "R_eyelid_upper_fold_2_controlShape2" -p "R_eyelid_upper_fold_2_control";
+createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_2_controlShape2" -p "R_eyelid_upper_fold_main_2_control";
 	rename -uid "9037DC8A-4193-0348-DE45-AF8573C9B4EE";
 	setAttr -k off ".v";
 	setAttr ".ove" yes;
@@ -3547,11 +3544,11 @@ createNode locator -n "R_eyelids_transform_tunerShape" -p "R_eyelids_transform_t
 	rename -uid "998E0529-49B0-EA80-B313-75BCA9D1466A";
 	setAttr -k off ".v";
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "84182D83-4915-5287-4304-648D6E92BE7C";
-	setAttr -s 14 ".lnk";
-	setAttr -s 14 ".slnk";
+	rename -uid "092BF6B0-4E1C-3490-987C-268FEC3291E1";
+	setAttr -s 2 ".lnk";
+	setAttr -s 2 ".slnk";
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "362C7A5E-49F9-BD1E-339E-A8A3B31DA9C2";
+	rename -uid "DD5D53A1-4E53-6E69-C82B-98AFF2B94043";
 	setAttr -s 9 ".bsdt";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 2 4 5 ;
 	setAttr ".bsdt[1].bscd" -type "Int32Array" 0 ;
@@ -3572,18 +3569,18 @@ createNode shapeEditorManager -n "shapeEditorManager";
 	setAttr -s 2 ".bspr";
 	setAttr -s 2 ".obsv";
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "C3D943AF-4F96-BD89-3CFF-2DA0925F9BBF";
+	rename -uid "3D6B12E0-4B1C-78A5-07A0-4594BE7DA0C0";
 	setAttr -s 2 ".tpdt";
 	setAttr ".tpdt[0].tpcd" -type "Int32Array" 1 -1 ;
 	setAttr ".tpdt[1].tpcd" -type "Int32Array" 0 ;
 	setAttr ".tpdt[1].tpdn" -type "string" "chr_abendis_MDL_Model_v010_fix";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "F7487BF4-4DDC-983F-F07B-4D8E962F8380";
+	rename -uid "E81F95A1-4F1E-EDA9-090A-C1AE90EF2D48";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "9E8B42AB-4BF5-DAB9-7C6A-E5AA0822CA3A";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "EA326D79-4EC3-2CCF-9E0D-7080EBE7900B";
+	rename -uid "BA39A7FC-467D-67A8-4344-7DA48D6907BA";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "4CFE04FF-4860-69A8-4D68-BD989CFA5CAF";
 	setAttr ".g" yes;
@@ -5845,125 +5842,128 @@ connectAttr "L_eyelids_corner_outer_control.pm" "L_eyelids_corner_outer_joint_pa
 		;
 connectAttr "L_eyelids_corner_outer_joint_parentConstraint1.w0" "L_eyelids_corner_outer_joint_parentConstraint1.tg[0].tw"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint_parentConstraint1.ctx" "L_eyelid_upper_fold_1_joint.tx"
+connectAttr "L_eyelid_upper_fold_main_1_joint_parentConstraint1.ctx" "L_eyelid_upper_fold_main_1_joint.tx"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint_parentConstraint1.cty" "L_eyelid_upper_fold_1_joint.ty"
+connectAttr "L_eyelid_upper_fold_main_1_joint_parentConstraint1.cty" "L_eyelid_upper_fold_main_1_joint.ty"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint_parentConstraint1.ctz" "L_eyelid_upper_fold_1_joint.tz"
+connectAttr "L_eyelid_upper_fold_main_1_joint_parentConstraint1.ctz" "L_eyelid_upper_fold_main_1_joint.tz"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint_parentConstraint1.crx" "L_eyelid_upper_fold_1_joint.rx"
+connectAttr "L_eyelid_upper_fold_main_1_joint_parentConstraint1.crx" "L_eyelid_upper_fold_main_1_joint.rx"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint_parentConstraint1.cry" "L_eyelid_upper_fold_1_joint.ry"
+connectAttr "L_eyelid_upper_fold_main_1_joint_parentConstraint1.cry" "L_eyelid_upper_fold_main_1_joint.ry"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint_parentConstraint1.crz" "L_eyelid_upper_fold_1_joint.rz"
+connectAttr "L_eyelid_upper_fold_main_1_joint_parentConstraint1.crz" "L_eyelid_upper_fold_main_1_joint.rz"
 		;
-connectAttr "L_eyelid_upper_fold_1_control.s" "L_eyelid_upper_fold_1_joint.s";
-connectAttr "L_eyelids_joint.s" "L_eyelid_upper_fold_1_joint.is";
-connectAttr "L_eyelid_upper_fold_1_joint.ro" "L_eyelid_upper_fold_1_joint_parentConstraint1.cro"
+connectAttr "L_eyelid_upper_fold_main_1_control.s" "L_eyelid_upper_fold_main_1_joint.s"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint.pim" "L_eyelid_upper_fold_1_joint_parentConstraint1.cpim"
+connectAttr "L_eyelids_joint.s" "L_eyelid_upper_fold_main_1_joint.is";
+connectAttr "L_eyelid_upper_fold_main_1_joint.ro" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.cro"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint.rp" "L_eyelid_upper_fold_1_joint_parentConstraint1.crp"
+connectAttr "L_eyelid_upper_fold_main_1_joint.pim" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.cpim"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint.rpt" "L_eyelid_upper_fold_1_joint_parentConstraint1.crt"
+connectAttr "L_eyelid_upper_fold_main_1_joint.rp" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.crp"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint.jo" "L_eyelid_upper_fold_1_joint_parentConstraint1.cjo"
+connectAttr "L_eyelid_upper_fold_main_1_joint.rpt" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.crt"
 		;
-connectAttr "L_eyelid_upper_fold_1_control.t" "L_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tt"
+connectAttr "L_eyelid_upper_fold_main_1_joint.jo" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.cjo"
 		;
-connectAttr "L_eyelid_upper_fold_1_control.rp" "L_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].trp"
+connectAttr "L_eyelid_upper_fold_main_1_control.t" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tt"
 		;
-connectAttr "L_eyelid_upper_fold_1_control.rpt" "L_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].trt"
+connectAttr "L_eyelid_upper_fold_main_1_control.rp" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].trp"
 		;
-connectAttr "L_eyelid_upper_fold_1_control.r" "L_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tr"
+connectAttr "L_eyelid_upper_fold_main_1_control.rpt" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].trt"
 		;
-connectAttr "L_eyelid_upper_fold_1_control.ro" "L_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tro"
+connectAttr "L_eyelid_upper_fold_main_1_control.r" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tr"
 		;
-connectAttr "L_eyelid_upper_fold_1_control.s" "L_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].ts"
+connectAttr "L_eyelid_upper_fold_main_1_control.ro" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tro"
 		;
-connectAttr "L_eyelid_upper_fold_1_control.pm" "L_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tpm"
+connectAttr "L_eyelid_upper_fold_main_1_control.s" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].ts"
 		;
-connectAttr "L_eyelid_upper_fold_1_joint_parentConstraint1.w0" "L_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tw"
+connectAttr "L_eyelid_upper_fold_main_1_control.pm" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tpm"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint_parentConstraint1.ctx" "L_eyelid_upper_fold_2_joint.tx"
+connectAttr "L_eyelid_upper_fold_main_1_joint_parentConstraint1.w0" "L_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tw"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint_parentConstraint1.cty" "L_eyelid_upper_fold_2_joint.ty"
+connectAttr "L_eyelid_upper_fold_main_2_joint_parentConstraint1.ctx" "L_eyelid_upper_fold_main_2_joint.tx"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint_parentConstraint1.ctz" "L_eyelid_upper_fold_2_joint.tz"
+connectAttr "L_eyelid_upper_fold_main_2_joint_parentConstraint1.cty" "L_eyelid_upper_fold_main_2_joint.ty"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint_parentConstraint1.crx" "L_eyelid_upper_fold_2_joint.rx"
+connectAttr "L_eyelid_upper_fold_main_2_joint_parentConstraint1.ctz" "L_eyelid_upper_fold_main_2_joint.tz"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint_parentConstraint1.cry" "L_eyelid_upper_fold_2_joint.ry"
+connectAttr "L_eyelid_upper_fold_main_2_joint_parentConstraint1.crx" "L_eyelid_upper_fold_main_2_joint.rx"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint_parentConstraint1.crz" "L_eyelid_upper_fold_2_joint.rz"
+connectAttr "L_eyelid_upper_fold_main_2_joint_parentConstraint1.cry" "L_eyelid_upper_fold_main_2_joint.ry"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.s" "L_eyelid_upper_fold_2_joint.s";
-connectAttr "L_eyelids_joint.s" "L_eyelid_upper_fold_2_joint.is";
-connectAttr "L_eyelid_upper_fold_2_joint.ro" "L_eyelid_upper_fold_2_joint_parentConstraint1.cro"
+connectAttr "L_eyelid_upper_fold_main_2_joint_parentConstraint1.crz" "L_eyelid_upper_fold_main_2_joint.rz"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint.pim" "L_eyelid_upper_fold_2_joint_parentConstraint1.cpim"
+connectAttr "L_eyelid_upper_fold_main_2_control.s" "L_eyelid_upper_fold_main_2_joint.s"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint.rp" "L_eyelid_upper_fold_2_joint_parentConstraint1.crp"
+connectAttr "L_eyelids_joint.s" "L_eyelid_upper_fold_main_2_joint.is";
+connectAttr "L_eyelid_upper_fold_main_2_joint.ro" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.cro"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint.rpt" "L_eyelid_upper_fold_2_joint_parentConstraint1.crt"
+connectAttr "L_eyelid_upper_fold_main_2_joint.pim" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.cpim"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint.jo" "L_eyelid_upper_fold_2_joint_parentConstraint1.cjo"
+connectAttr "L_eyelid_upper_fold_main_2_joint.rp" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.crp"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.t" "L_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tt"
+connectAttr "L_eyelid_upper_fold_main_2_joint.rpt" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.crt"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.rp" "L_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].trp"
+connectAttr "L_eyelid_upper_fold_main_2_joint.jo" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.cjo"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.rpt" "L_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].trt"
+connectAttr "L_eyelid_upper_fold_main_2_control.t" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tt"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.r" "L_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tr"
+connectAttr "L_eyelid_upper_fold_main_2_control.rp" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].trp"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.ro" "L_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tro"
+connectAttr "L_eyelid_upper_fold_main_2_control.rpt" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].trt"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.s" "L_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].ts"
+connectAttr "L_eyelid_upper_fold_main_2_control.r" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tr"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.pm" "L_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tpm"
+connectAttr "L_eyelid_upper_fold_main_2_control.ro" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tro"
 		;
-connectAttr "L_eyelid_upper_fold_2_joint_parentConstraint1.w0" "L_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tw"
+connectAttr "L_eyelid_upper_fold_main_2_control.s" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].ts"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint_parentConstraint1.ctx" "L_eyelid_upper_fold_3_joint.tx"
+connectAttr "L_eyelid_upper_fold_main_2_control.pm" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tpm"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint_parentConstraint1.cty" "L_eyelid_upper_fold_3_joint.ty"
+connectAttr "L_eyelid_upper_fold_main_2_joint_parentConstraint1.w0" "L_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tw"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint_parentConstraint1.ctz" "L_eyelid_upper_fold_3_joint.tz"
+connectAttr "L_eyelid_upper_fold_main_3_joint_parentConstraint1.ctx" "L_eyelid_upper_fold_main_3_joint.tx"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint_parentConstraint1.crx" "L_eyelid_upper_fold_3_joint.rx"
+connectAttr "L_eyelid_upper_fold_main_3_joint_parentConstraint1.cty" "L_eyelid_upper_fold_main_3_joint.ty"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint_parentConstraint1.cry" "L_eyelid_upper_fold_3_joint.ry"
+connectAttr "L_eyelid_upper_fold_main_3_joint_parentConstraint1.ctz" "L_eyelid_upper_fold_main_3_joint.tz"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint_parentConstraint1.crz" "L_eyelid_upper_fold_3_joint.rz"
+connectAttr "L_eyelid_upper_fold_main_3_joint_parentConstraint1.crx" "L_eyelid_upper_fold_main_3_joint.rx"
 		;
-connectAttr "L_eyelid_upper_fold_3_control.s" "L_eyelid_upper_fold_3_joint.s";
-connectAttr "L_eyelids_joint.s" "L_eyelid_upper_fold_3_joint.is";
-connectAttr "L_eyelid_upper_fold_3_joint.ro" "L_eyelid_upper_fold_3_joint_parentConstraint1.cro"
+connectAttr "L_eyelid_upper_fold_main_3_joint_parentConstraint1.cry" "L_eyelid_upper_fold_main_3_joint.ry"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint.pim" "L_eyelid_upper_fold_3_joint_parentConstraint1.cpim"
+connectAttr "L_eyelid_upper_fold_main_3_joint_parentConstraint1.crz" "L_eyelid_upper_fold_main_3_joint.rz"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint.rp" "L_eyelid_upper_fold_3_joint_parentConstraint1.crp"
+connectAttr "L_eyelid_upper_fold_main_3_control.s" "L_eyelid_upper_fold_main_3_joint.s"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint.rpt" "L_eyelid_upper_fold_3_joint_parentConstraint1.crt"
+connectAttr "L_eyelids_joint.s" "L_eyelid_upper_fold_main_3_joint.is";
+connectAttr "L_eyelid_upper_fold_main_3_joint.ro" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.cro"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint.jo" "L_eyelid_upper_fold_3_joint_parentConstraint1.cjo"
+connectAttr "L_eyelid_upper_fold_main_3_joint.pim" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.cpim"
 		;
-connectAttr "L_eyelid_upper_fold_3_control.t" "L_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tt"
+connectAttr "L_eyelid_upper_fold_main_3_joint.rp" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.crp"
 		;
-connectAttr "L_eyelid_upper_fold_3_control.rp" "L_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].trp"
+connectAttr "L_eyelid_upper_fold_main_3_joint.rpt" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.crt"
 		;
-connectAttr "L_eyelid_upper_fold_3_control.rpt" "L_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].trt"
+connectAttr "L_eyelid_upper_fold_main_3_joint.jo" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.cjo"
 		;
-connectAttr "L_eyelid_upper_fold_3_control.r" "L_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tr"
+connectAttr "L_eyelid_upper_fold_main_3_control.t" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tt"
 		;
-connectAttr "L_eyelid_upper_fold_3_control.ro" "L_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tro"
+connectAttr "L_eyelid_upper_fold_main_3_control.rp" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].trp"
 		;
-connectAttr "L_eyelid_upper_fold_3_control.s" "L_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].ts"
+connectAttr "L_eyelid_upper_fold_main_3_control.rpt" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].trt"
 		;
-connectAttr "L_eyelid_upper_fold_3_control.pm" "L_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tpm"
+connectAttr "L_eyelid_upper_fold_main_3_control.r" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tr"
 		;
-connectAttr "L_eyelid_upper_fold_3_joint_parentConstraint1.w0" "L_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tw"
+connectAttr "L_eyelid_upper_fold_main_3_control.ro" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tro"
+		;
+connectAttr "L_eyelid_upper_fold_main_3_control.s" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].ts"
+		;
+connectAttr "L_eyelid_upper_fold_main_3_control.pm" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tpm"
+		;
+connectAttr "L_eyelid_upper_fold_main_3_joint_parentConstraint1.w0" "L_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tw"
 		;
 connectAttr "R_eyelids_joint_parentConstraint1.ctx" "R_eyelids_joint.tx";
 connectAttr "R_eyelids_joint_parentConstraint1.cty" "R_eyelids_joint.ty";
@@ -6229,123 +6229,124 @@ connectAttr "R_eye_transform_control.pm" "R_eyelids_joint_parentConstraint1.tg[0
 		;
 connectAttr "R_eyelids_joint_parentConstraint1.w0" "R_eyelids_joint_parentConstraint1.tg[0].tw"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint_parentConstraint1.ctx" "R_eyelid_upper_fold_1_joint.tx"
+connectAttr "R_eyelid_upper_fold_main_1_joint_parentConstraint1.ctx" "R_eyelid_upper_fold_main_1_joint.tx"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint_parentConstraint1.cty" "R_eyelid_upper_fold_1_joint.ty"
+connectAttr "R_eyelid_upper_fold_main_1_joint_parentConstraint1.cty" "R_eyelid_upper_fold_main_1_joint.ty"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint_parentConstraint1.ctz" "R_eyelid_upper_fold_1_joint.tz"
+connectAttr "R_eyelid_upper_fold_main_1_joint_parentConstraint1.ctz" "R_eyelid_upper_fold_main_1_joint.tz"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint_parentConstraint1.crx" "R_eyelid_upper_fold_1_joint.rx"
+connectAttr "R_eyelid_upper_fold_main_1_joint_parentConstraint1.crx" "R_eyelid_upper_fold_main_1_joint.rx"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint_parentConstraint1.cry" "R_eyelid_upper_fold_1_joint.ry"
+connectAttr "R_eyelid_upper_fold_main_1_joint_parentConstraint1.cry" "R_eyelid_upper_fold_main_1_joint.ry"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint_parentConstraint1.crz" "R_eyelid_upper_fold_1_joint.rz"
+connectAttr "R_eyelid_upper_fold_main_1_joint_parentConstraint1.crz" "R_eyelid_upper_fold_main_1_joint.rz"
 		;
-connectAttr "R_eyelids_joint.s" "R_eyelid_upper_fold_1_joint.is";
-connectAttr "R_eyelid_upper_fold_1_joint.ro" "R_eyelid_upper_fold_1_joint_parentConstraint1.cro"
+connectAttr "R_eyelids_joint.s" "R_eyelid_upper_fold_main_1_joint.is";
+connectAttr "R_eyelid_upper_fold_main_1_joint.ro" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.cro"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint.pim" "R_eyelid_upper_fold_1_joint_parentConstraint1.cpim"
+connectAttr "R_eyelid_upper_fold_main_1_joint.pim" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.cpim"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint.rp" "R_eyelid_upper_fold_1_joint_parentConstraint1.crp"
+connectAttr "R_eyelid_upper_fold_main_1_joint.rp" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.crp"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint.rpt" "R_eyelid_upper_fold_1_joint_parentConstraint1.crt"
+connectAttr "R_eyelid_upper_fold_main_1_joint.rpt" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.crt"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint.jo" "R_eyelid_upper_fold_1_joint_parentConstraint1.cjo"
+connectAttr "R_eyelid_upper_fold_main_1_joint.jo" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.cjo"
 		;
-connectAttr "R_eyelid_upper_fold_1_control.t" "R_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tt"
+connectAttr "R_eyelid_upper_fold_main_1_control.t" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tt"
 		;
-connectAttr "R_eyelid_upper_fold_1_control.rp" "R_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].trp"
+connectAttr "R_eyelid_upper_fold_main_1_control.rp" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].trp"
 		;
-connectAttr "R_eyelid_upper_fold_1_control.rpt" "R_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].trt"
+connectAttr "R_eyelid_upper_fold_main_1_control.rpt" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].trt"
 		;
-connectAttr "R_eyelid_upper_fold_1_control.r" "R_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tr"
+connectAttr "R_eyelid_upper_fold_main_1_control.r" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tr"
 		;
-connectAttr "R_eyelid_upper_fold_1_control.ro" "R_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tro"
+connectAttr "R_eyelid_upper_fold_main_1_control.ro" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tro"
 		;
-connectAttr "R_eyelid_upper_fold_1_control.s" "R_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].ts"
+connectAttr "R_eyelid_upper_fold_main_1_control.s" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].ts"
 		;
-connectAttr "R_eyelid_upper_fold_1_control.pm" "R_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tpm"
+connectAttr "R_eyelid_upper_fold_main_1_control.pm" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tpm"
 		;
-connectAttr "R_eyelid_upper_fold_1_joint_parentConstraint1.w0" "R_eyelid_upper_fold_1_joint_parentConstraint1.tg[0].tw"
+connectAttr "R_eyelid_upper_fold_main_1_joint_parentConstraint1.w0" "R_eyelid_upper_fold_main_1_joint_parentConstraint1.tg[0].tw"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint_parentConstraint1.ctx" "R_eyelid_upper_fold_2_joint.tx"
+connectAttr "R_eyelid_upper_fold_main_2_joint_parentConstraint1.ctx" "R_eyelid_upper_fold_main_2_joint.tx"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint_parentConstraint1.cty" "R_eyelid_upper_fold_2_joint.ty"
+connectAttr "R_eyelid_upper_fold_main_2_joint_parentConstraint1.cty" "R_eyelid_upper_fold_main_2_joint.ty"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint_parentConstraint1.ctz" "R_eyelid_upper_fold_2_joint.tz"
+connectAttr "R_eyelid_upper_fold_main_2_joint_parentConstraint1.ctz" "R_eyelid_upper_fold_main_2_joint.tz"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint_parentConstraint1.crx" "R_eyelid_upper_fold_2_joint.rx"
+connectAttr "R_eyelid_upper_fold_main_2_joint_parentConstraint1.crx" "R_eyelid_upper_fold_main_2_joint.rx"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint_parentConstraint1.cry" "R_eyelid_upper_fold_2_joint.ry"
+connectAttr "R_eyelid_upper_fold_main_2_joint_parentConstraint1.cry" "R_eyelid_upper_fold_main_2_joint.ry"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint_parentConstraint1.crz" "R_eyelid_upper_fold_2_joint.rz"
+connectAttr "R_eyelid_upper_fold_main_2_joint_parentConstraint1.crz" "R_eyelid_upper_fold_main_2_joint.rz"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.s" "R_eyelid_upper_fold_2_joint.s";
-connectAttr "R_eyelids_joint.s" "R_eyelid_upper_fold_2_joint.is";
-connectAttr "R_eyelid_upper_fold_2_joint.ro" "R_eyelid_upper_fold_2_joint_parentConstraint1.cro"
+connectAttr "R_eyelid_upper_fold_main_2_control.s" "R_eyelid_upper_fold_main_2_joint.s"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint.pim" "R_eyelid_upper_fold_2_joint_parentConstraint1.cpim"
+connectAttr "R_eyelids_joint.s" "R_eyelid_upper_fold_main_2_joint.is";
+connectAttr "R_eyelid_upper_fold_main_2_joint.ro" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.cro"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint.rp" "R_eyelid_upper_fold_2_joint_parentConstraint1.crp"
+connectAttr "R_eyelid_upper_fold_main_2_joint.pim" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.cpim"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint.rpt" "R_eyelid_upper_fold_2_joint_parentConstraint1.crt"
+connectAttr "R_eyelid_upper_fold_main_2_joint.rp" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.crp"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint.jo" "R_eyelid_upper_fold_2_joint_parentConstraint1.cjo"
+connectAttr "R_eyelid_upper_fold_main_2_joint.rpt" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.crt"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.t" "R_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tt"
+connectAttr "R_eyelid_upper_fold_main_2_joint.jo" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.cjo"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.rp" "R_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].trp"
+connectAttr "R_eyelid_upper_fold_main_2_control.t" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tt"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.rpt" "R_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].trt"
+connectAttr "R_eyelid_upper_fold_main_2_control.rp" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].trp"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.r" "R_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tr"
+connectAttr "R_eyelid_upper_fold_main_2_control.rpt" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].trt"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.ro" "R_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tro"
+connectAttr "R_eyelid_upper_fold_main_2_control.r" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tr"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.s" "R_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].ts"
+connectAttr "R_eyelid_upper_fold_main_2_control.ro" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tro"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.pm" "R_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tpm"
+connectAttr "R_eyelid_upper_fold_main_2_control.s" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].ts"
 		;
-connectAttr "R_eyelid_upper_fold_2_joint_parentConstraint1.w0" "R_eyelid_upper_fold_2_joint_parentConstraint1.tg[0].tw"
+connectAttr "R_eyelid_upper_fold_main_2_control.pm" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tpm"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint_parentConstraint1.ctx" "R_eyelid_upper_fold_3_joint.tx"
+connectAttr "R_eyelid_upper_fold_main_2_joint_parentConstraint1.w0" "R_eyelid_upper_fold_main_2_joint_parentConstraint1.tg[0].tw"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint_parentConstraint1.cty" "R_eyelid_upper_fold_3_joint.ty"
+connectAttr "R_eyelid_upper_fold_main_3_joint_parentConstraint1.ctx" "R_eyelid_upper_fold_main_3_joint.tx"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint_parentConstraint1.ctz" "R_eyelid_upper_fold_3_joint.tz"
+connectAttr "R_eyelid_upper_fold_main_3_joint_parentConstraint1.cty" "R_eyelid_upper_fold_main_3_joint.ty"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint_parentConstraint1.crx" "R_eyelid_upper_fold_3_joint.rx"
+connectAttr "R_eyelid_upper_fold_main_3_joint_parentConstraint1.ctz" "R_eyelid_upper_fold_main_3_joint.tz"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint_parentConstraint1.cry" "R_eyelid_upper_fold_3_joint.ry"
+connectAttr "R_eyelid_upper_fold_main_3_joint_parentConstraint1.crx" "R_eyelid_upper_fold_main_3_joint.rx"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint_parentConstraint1.crz" "R_eyelid_upper_fold_3_joint.rz"
+connectAttr "R_eyelid_upper_fold_main_3_joint_parentConstraint1.cry" "R_eyelid_upper_fold_main_3_joint.ry"
 		;
-connectAttr "R_eyelids_joint.s" "R_eyelid_upper_fold_3_joint.is";
-connectAttr "R_eyelid_upper_fold_3_joint.ro" "R_eyelid_upper_fold_3_joint_parentConstraint1.cro"
+connectAttr "R_eyelid_upper_fold_main_3_joint_parentConstraint1.crz" "R_eyelid_upper_fold_main_3_joint.rz"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint.pim" "R_eyelid_upper_fold_3_joint_parentConstraint1.cpim"
+connectAttr "R_eyelids_joint.s" "R_eyelid_upper_fold_main_3_joint.is";
+connectAttr "R_eyelid_upper_fold_main_3_joint.ro" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.cro"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint.rp" "R_eyelid_upper_fold_3_joint_parentConstraint1.crp"
+connectAttr "R_eyelid_upper_fold_main_3_joint.pim" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.cpim"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint.rpt" "R_eyelid_upper_fold_3_joint_parentConstraint1.crt"
+connectAttr "R_eyelid_upper_fold_main_3_joint.rp" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.crp"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint.jo" "R_eyelid_upper_fold_3_joint_parentConstraint1.cjo"
+connectAttr "R_eyelid_upper_fold_main_3_joint.rpt" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.crt"
 		;
-connectAttr "R_eyelid_upper_fold_3_control.t" "R_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tt"
+connectAttr "R_eyelid_upper_fold_main_3_joint.jo" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.cjo"
 		;
-connectAttr "R_eyelid_upper_fold_3_control.rp" "R_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].trp"
+connectAttr "R_eyelid_upper_fold_main_3_control.t" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tt"
 		;
-connectAttr "R_eyelid_upper_fold_3_control.rpt" "R_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].trt"
+connectAttr "R_eyelid_upper_fold_main_3_control.rp" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].trp"
 		;
-connectAttr "R_eyelid_upper_fold_3_control.r" "R_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tr"
+connectAttr "R_eyelid_upper_fold_main_3_control.rpt" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].trt"
 		;
-connectAttr "R_eyelid_upper_fold_3_control.ro" "R_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tro"
+connectAttr "R_eyelid_upper_fold_main_3_control.r" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tr"
 		;
-connectAttr "R_eyelid_upper_fold_3_control.s" "R_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].ts"
+connectAttr "R_eyelid_upper_fold_main_3_control.ro" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tro"
 		;
-connectAttr "R_eyelid_upper_fold_3_control.pm" "R_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tpm"
+connectAttr "R_eyelid_upper_fold_main_3_control.s" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].ts"
 		;
-connectAttr "R_eyelid_upper_fold_3_joint_parentConstraint1.w0" "R_eyelid_upper_fold_3_joint_parentConstraint1.tg[0].tw"
+connectAttr "R_eyelid_upper_fold_main_3_control.pm" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tpm"
+		;
+connectAttr "R_eyelid_upper_fold_main_3_joint_parentConstraint1.w0" "R_eyelid_upper_fold_main_3_joint_parentConstraint1.tg[0].tw"
 		;
 connectAttr "R_eyelids_joint.s" "R_eyelids_corner_inner_joint.is";
 connectAttr "R_eyelids_corner_inner_joint_parentConstraint1.ctx" "R_eyelids_corner_inner_joint.tx"
@@ -6586,61 +6587,61 @@ connectAttr "R_eye_transform_control.pm" "R_eyelid_upper_major_2_control_orientC
 connectAttr "R_eyelid_upper_major_2_control_orientConstraint1.w0" "R_eyelid_upper_major_2_control_orientConstraint1.tg[0].tw"
 		;
 connectAttr "L_eyelids_transform_tuner.m" "L_eye_transform_control.opm";
-connectAttr "L_eyelid_upper_fold_1_control_aimConstraint1.crx" "L_eyelid_upper_fold_1_control_transform.rx"
+connectAttr "L_eyelid_upper_fold_main_1_control_aimConstraint1.crx" "L_eyelid_upper_fold_main_1_control_transform.rx"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_aimConstraint1.cry" "L_eyelid_upper_fold_1_control_transform.ry"
+connectAttr "L_eyelid_upper_fold_main_1_control_aimConstraint1.cry" "L_eyelid_upper_fold_main_1_control_transform.ry"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_aimConstraint1.crz" "L_eyelid_upper_fold_1_control_transform.rz"
+connectAttr "L_eyelid_upper_fold_main_1_control_aimConstraint1.crz" "L_eyelid_upper_fold_main_1_control_transform.rz"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_transform.pim" "L_eyelid_upper_fold_1_control_aimConstraint1.cpim"
+connectAttr "L_eyelid_upper_fold_main_1_control_transform.pim" "L_eyelid_upper_fold_main_1_control_aimConstraint1.cpim"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_transform.t" "L_eyelid_upper_fold_1_control_aimConstraint1.ct"
+connectAttr "L_eyelid_upper_fold_main_1_control_transform.t" "L_eyelid_upper_fold_main_1_control_aimConstraint1.ct"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_transform.rp" "L_eyelid_upper_fold_1_control_aimConstraint1.crp"
+connectAttr "L_eyelid_upper_fold_main_1_control_transform.rp" "L_eyelid_upper_fold_main_1_control_aimConstraint1.crp"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_transform.rpt" "L_eyelid_upper_fold_1_control_aimConstraint1.crt"
+connectAttr "L_eyelid_upper_fold_main_1_control_transform.rpt" "L_eyelid_upper_fold_main_1_control_aimConstraint1.crt"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_transform.ro" "L_eyelid_upper_fold_1_control_aimConstraint1.cro"
+connectAttr "L_eyelid_upper_fold_main_1_control_transform.ro" "L_eyelid_upper_fold_main_1_control_aimConstraint1.cro"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.t" "L_eyelid_upper_fold_1_control_aimConstraint1.tg[0].tt"
+connectAttr "L_eyelid_upper_fold_main_2_control.t" "L_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].tt"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.rp" "L_eyelid_upper_fold_1_control_aimConstraint1.tg[0].trp"
+connectAttr "L_eyelid_upper_fold_main_2_control.rp" "L_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].trp"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.rpt" "L_eyelid_upper_fold_1_control_aimConstraint1.tg[0].trt"
+connectAttr "L_eyelid_upper_fold_main_2_control.rpt" "L_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].trt"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.pm" "L_eyelid_upper_fold_1_control_aimConstraint1.tg[0].tpm"
+connectAttr "L_eyelid_upper_fold_main_2_control.pm" "L_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].tpm"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_aimConstraint1.w0" "L_eyelid_upper_fold_1_control_aimConstraint1.tg[0].tw"
+connectAttr "L_eyelid_upper_fold_main_1_control_aimConstraint1.w0" "L_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].tw"
 		;
-connectAttr "L_eyelids_joint.wm" "L_eyelid_upper_fold_1_control_aimConstraint1.wum"
+connectAttr "L_eyelids_joint.wm" "L_eyelid_upper_fold_main_1_control_aimConstraint1.wum"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_aimConstraint1.crx" "L_eyelid_upper_fold_3_control_transform.rx"
+connectAttr "L_eyelid_upper_fold_main_3_control_aimConstraint1.crx" "L_eyelid_upper_fold_main_3_control_transform.rx"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_aimConstraint1.cry" "L_eyelid_upper_fold_3_control_transform.ry"
+connectAttr "L_eyelid_upper_fold_main_3_control_aimConstraint1.cry" "L_eyelid_upper_fold_main_3_control_transform.ry"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_aimConstraint1.crz" "L_eyelid_upper_fold_3_control_transform.rz"
+connectAttr "L_eyelid_upper_fold_main_3_control_aimConstraint1.crz" "L_eyelid_upper_fold_main_3_control_transform.rz"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_transform.pim" "L_eyelid_upper_fold_3_control_aimConstraint1.cpim"
+connectAttr "L_eyelid_upper_fold_main_3_control_transform.pim" "L_eyelid_upper_fold_main_3_control_aimConstraint1.cpim"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_transform.t" "L_eyelid_upper_fold_3_control_aimConstraint1.ct"
+connectAttr "L_eyelid_upper_fold_main_3_control_transform.t" "L_eyelid_upper_fold_main_3_control_aimConstraint1.ct"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_transform.rp" "L_eyelid_upper_fold_3_control_aimConstraint1.crp"
+connectAttr "L_eyelid_upper_fold_main_3_control_transform.rp" "L_eyelid_upper_fold_main_3_control_aimConstraint1.crp"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_transform.rpt" "L_eyelid_upper_fold_3_control_aimConstraint1.crt"
+connectAttr "L_eyelid_upper_fold_main_3_control_transform.rpt" "L_eyelid_upper_fold_main_3_control_aimConstraint1.crt"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_transform.ro" "L_eyelid_upper_fold_3_control_aimConstraint1.cro"
+connectAttr "L_eyelid_upper_fold_main_3_control_transform.ro" "L_eyelid_upper_fold_main_3_control_aimConstraint1.cro"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.t" "L_eyelid_upper_fold_3_control_aimConstraint1.tg[0].tt"
+connectAttr "L_eyelid_upper_fold_main_2_control.t" "L_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].tt"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.rp" "L_eyelid_upper_fold_3_control_aimConstraint1.tg[0].trp"
+connectAttr "L_eyelid_upper_fold_main_2_control.rp" "L_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].trp"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.rpt" "L_eyelid_upper_fold_3_control_aimConstraint1.tg[0].trt"
+connectAttr "L_eyelid_upper_fold_main_2_control.rpt" "L_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].trt"
 		;
-connectAttr "L_eyelid_upper_fold_2_control.pm" "L_eyelid_upper_fold_3_control_aimConstraint1.tg[0].tpm"
+connectAttr "L_eyelid_upper_fold_main_2_control.pm" "L_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].tpm"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_aimConstraint1.w0" "L_eyelid_upper_fold_3_control_aimConstraint1.tg[0].tw"
+connectAttr "L_eyelid_upper_fold_main_3_control_aimConstraint1.w0" "L_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].tw"
 		;
-connectAttr "L_eyelids_joint.wm" "L_eyelid_upper_fold_3_control_aimConstraint1.wum"
+connectAttr "L_eyelids_joint.wm" "L_eyelid_upper_fold_main_3_control_aimConstraint1.wum"
 		;
 connectAttr "L_eyelids_lower_main_tuner.m" "L_eyelid_lower_main_control.opm";
 connectAttr "L_eyelids_upper_main_tuner.m" "L_eyelid_upper_main_control.opm";
@@ -6733,69 +6734,69 @@ connectAttr "L_eyelid_upper_main_control.pm" "L_eyelids_corner_outer_control_tra
 connectAttr "L_eyelids_corner_outer_control_transform_parentConstraint1.w1" "L_eyelids_corner_outer_control_transform_parentConstraint1.tg[1].tw"
 		;
 connectAttr "R_eyelids_transform_tuner.m" "R_eye_transform_control.opm";
-connectAttr "R_eyelid_upper_fold_1_control_aimConstraint1.crx" "R_eyelid_upper_fold_1_control_transform.rx"
+connectAttr "R_eyelid_upper_fold_main_1_control_aimConstraint1.crx" "R_eyelid_upper_fold_main_1_control_transform.rx"
 		;
-connectAttr "R_eyelid_upper_fold_1_control_aimConstraint1.cry" "R_eyelid_upper_fold_1_control_transform.ry"
+connectAttr "R_eyelid_upper_fold_main_1_control_aimConstraint1.cry" "R_eyelid_upper_fold_main_1_control_transform.ry"
 		;
-connectAttr "R_eyelid_upper_fold_1_control_aimConstraint1.crz" "R_eyelid_upper_fold_1_control_transform.rz"
+connectAttr "R_eyelid_upper_fold_main_1_control_aimConstraint1.crz" "R_eyelid_upper_fold_main_1_control_transform.rz"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_transform.t" "R_eyelid_upper_fold_1_control_transform.t"
+connectAttr "L_eyelid_upper_fold_main_1_control_transform.t" "R_eyelid_upper_fold_main_1_control_transform.t"
 		;
-connectAttr "R_eyelid_upper_fold_1_control_transform.pim" "R_eyelid_upper_fold_1_control_aimConstraint1.cpim"
+connectAttr "R_eyelid_upper_fold_main_1_control_transform.pim" "R_eyelid_upper_fold_main_1_control_aimConstraint1.cpim"
 		;
-connectAttr "R_eyelid_upper_fold_1_control_transform.t" "R_eyelid_upper_fold_1_control_aimConstraint1.ct"
+connectAttr "R_eyelid_upper_fold_main_1_control_transform.t" "R_eyelid_upper_fold_main_1_control_aimConstraint1.ct"
 		;
-connectAttr "R_eyelid_upper_fold_1_control_transform.rp" "R_eyelid_upper_fold_1_control_aimConstraint1.crp"
+connectAttr "R_eyelid_upper_fold_main_1_control_transform.rp" "R_eyelid_upper_fold_main_1_control_aimConstraint1.crp"
 		;
-connectAttr "R_eyelid_upper_fold_1_control_transform.rpt" "R_eyelid_upper_fold_1_control_aimConstraint1.crt"
+connectAttr "R_eyelid_upper_fold_main_1_control_transform.rpt" "R_eyelid_upper_fold_main_1_control_aimConstraint1.crt"
 		;
-connectAttr "R_eyelid_upper_fold_1_control_transform.ro" "R_eyelid_upper_fold_1_control_aimConstraint1.cro"
+connectAttr "R_eyelid_upper_fold_main_1_control_transform.ro" "R_eyelid_upper_fold_main_1_control_aimConstraint1.cro"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.t" "R_eyelid_upper_fold_1_control_aimConstraint1.tg[0].tt"
+connectAttr "R_eyelid_upper_fold_main_2_control.t" "R_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].tt"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.rp" "R_eyelid_upper_fold_1_control_aimConstraint1.tg[0].trp"
+connectAttr "R_eyelid_upper_fold_main_2_control.rp" "R_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].trp"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.rpt" "R_eyelid_upper_fold_1_control_aimConstraint1.tg[0].trt"
+connectAttr "R_eyelid_upper_fold_main_2_control.rpt" "R_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].trt"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.pm" "R_eyelid_upper_fold_1_control_aimConstraint1.tg[0].tpm"
+connectAttr "R_eyelid_upper_fold_main_2_control.pm" "R_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].tpm"
 		;
-connectAttr "R_eyelid_upper_fold_1_control_aimConstraint1.w0" "R_eyelid_upper_fold_1_control_aimConstraint1.tg[0].tw"
+connectAttr "R_eyelid_upper_fold_main_1_control_aimConstraint1.w0" "R_eyelid_upper_fold_main_1_control_aimConstraint1.tg[0].tw"
 		;
-connectAttr "R_eyelids_joint.wm" "R_eyelid_upper_fold_1_control_aimConstraint1.wum"
+connectAttr "R_eyelids_joint.wm" "R_eyelid_upper_fold_main_1_control_aimConstraint1.wum"
 		;
-connectAttr "L_eyelid_upper_fold_1_control_aimConstraint1.o" "R_eyelid_upper_fold_1_control_aimConstraint1.o"
+connectAttr "L_eyelid_upper_fold_main_1_control_aimConstraint1.o" "R_eyelid_upper_fold_main_1_control_aimConstraint1.o"
 		;
-connectAttr "R_eyelid_upper_fold_3_control_aimConstraint1.crx" "R_eyelid_upper_fold_3_control_transform.rx"
+connectAttr "R_eyelid_upper_fold_main_3_control_aimConstraint1.crx" "R_eyelid_upper_fold_main_3_control_transform.rx"
 		;
-connectAttr "R_eyelid_upper_fold_3_control_aimConstraint1.cry" "R_eyelid_upper_fold_3_control_transform.ry"
+connectAttr "R_eyelid_upper_fold_main_3_control_aimConstraint1.cry" "R_eyelid_upper_fold_main_3_control_transform.ry"
 		;
-connectAttr "R_eyelid_upper_fold_3_control_aimConstraint1.crz" "R_eyelid_upper_fold_3_control_transform.rz"
+connectAttr "R_eyelid_upper_fold_main_3_control_aimConstraint1.crz" "R_eyelid_upper_fold_main_3_control_transform.rz"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_transform.t" "R_eyelid_upper_fold_3_control_transform.t"
+connectAttr "L_eyelid_upper_fold_main_3_control_transform.t" "R_eyelid_upper_fold_main_3_control_transform.t"
 		;
-connectAttr "R_eyelid_upper_fold_3_control_transform.pim" "R_eyelid_upper_fold_3_control_aimConstraint1.cpim"
+connectAttr "R_eyelid_upper_fold_main_3_control_transform.pim" "R_eyelid_upper_fold_main_3_control_aimConstraint1.cpim"
 		;
-connectAttr "R_eyelid_upper_fold_3_control_transform.t" "R_eyelid_upper_fold_3_control_aimConstraint1.ct"
+connectAttr "R_eyelid_upper_fold_main_3_control_transform.t" "R_eyelid_upper_fold_main_3_control_aimConstraint1.ct"
 		;
-connectAttr "R_eyelid_upper_fold_3_control_transform.rp" "R_eyelid_upper_fold_3_control_aimConstraint1.crp"
+connectAttr "R_eyelid_upper_fold_main_3_control_transform.rp" "R_eyelid_upper_fold_main_3_control_aimConstraint1.crp"
 		;
-connectAttr "R_eyelid_upper_fold_3_control_transform.rpt" "R_eyelid_upper_fold_3_control_aimConstraint1.crt"
+connectAttr "R_eyelid_upper_fold_main_3_control_transform.rpt" "R_eyelid_upper_fold_main_3_control_aimConstraint1.crt"
 		;
-connectAttr "R_eyelid_upper_fold_3_control_transform.ro" "R_eyelid_upper_fold_3_control_aimConstraint1.cro"
+connectAttr "R_eyelid_upper_fold_main_3_control_transform.ro" "R_eyelid_upper_fold_main_3_control_aimConstraint1.cro"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.t" "R_eyelid_upper_fold_3_control_aimConstraint1.tg[0].tt"
+connectAttr "R_eyelid_upper_fold_main_2_control.t" "R_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].tt"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.rp" "R_eyelid_upper_fold_3_control_aimConstraint1.tg[0].trp"
+connectAttr "R_eyelid_upper_fold_main_2_control.rp" "R_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].trp"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.rpt" "R_eyelid_upper_fold_3_control_aimConstraint1.tg[0].trt"
+connectAttr "R_eyelid_upper_fold_main_2_control.rpt" "R_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].trt"
 		;
-connectAttr "R_eyelid_upper_fold_2_control.pm" "R_eyelid_upper_fold_3_control_aimConstraint1.tg[0].tpm"
+connectAttr "R_eyelid_upper_fold_main_2_control.pm" "R_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].tpm"
 		;
-connectAttr "R_eyelid_upper_fold_3_control_aimConstraint1.w0" "R_eyelid_upper_fold_3_control_aimConstraint1.tg[0].tw"
+connectAttr "R_eyelid_upper_fold_main_3_control_aimConstraint1.w0" "R_eyelid_upper_fold_main_3_control_aimConstraint1.tg[0].tw"
 		;
-connectAttr "R_eyelids_joint.wm" "R_eyelid_upper_fold_3_control_aimConstraint1.wum"
+connectAttr "R_eyelids_joint.wm" "R_eyelid_upper_fold_main_3_control_aimConstraint1.wum"
 		;
-connectAttr "L_eyelid_upper_fold_3_control_aimConstraint1.o" "R_eyelid_upper_fold_3_control_aimConstraint1.o"
+connectAttr "L_eyelid_upper_fold_main_3_control_aimConstraint1.o" "R_eyelid_upper_fold_main_3_control_aimConstraint1.o"
 		;
 connectAttr "L_eyelid_lower_main_control.opm" "R_eyelid_lower_main_control.opm";
 connectAttr "L_eyelid_upper_main_control.opm" "R_eyelid_upper_main_control.opm";
@@ -7314,26 +7315,26 @@ connectAttr "R_eyelid_lower_major_2_joint_basis.wim" "skinCluster49.pm[1]";
 connectAttr "R_eyelids_joint.wim" "skinCluster49.pm[2]";
 connectAttr "L_eyelid_upper_fold_curveShapeOrig.ws" "skinCluster57.ip[0].ig";
 connectAttr "L_eyelid_upper_fold_curveShapeOrig.l" "skinCluster57.orggeom[0]";
-connectAttr "L_eyelid_upper_fold_1_joint.wm" "skinCluster57.ma[0]";
-connectAttr "L_eyelid_upper_fold_2_joint.wm" "skinCluster57.ma[1]";
-connectAttr "L_eyelid_upper_fold_3_joint.wm" "skinCluster57.ma[2]";
-connectAttr "L_eyelid_upper_fold_1_joint.liw" "skinCluster57.lw[0]";
-connectAttr "L_eyelid_upper_fold_2_joint.liw" "skinCluster57.lw[1]";
-connectAttr "L_eyelid_upper_fold_3_joint.liw" "skinCluster57.lw[2]";
-connectAttr "L_eyelid_upper_fold_1_joint.obcc" "skinCluster57.ifcl[0]";
-connectAttr "L_eyelid_upper_fold_2_joint.obcc" "skinCluster57.ifcl[1]";
-connectAttr "L_eyelid_upper_fold_3_joint.obcc" "skinCluster57.ifcl[2]";
+connectAttr "L_eyelid_upper_fold_main_1_joint.wm" "skinCluster57.ma[0]";
+connectAttr "L_eyelid_upper_fold_main_2_joint.wm" "skinCluster57.ma[1]";
+connectAttr "L_eyelid_upper_fold_main_3_joint.wm" "skinCluster57.ma[2]";
+connectAttr "L_eyelid_upper_fold_main_1_joint.liw" "skinCluster57.lw[0]";
+connectAttr "L_eyelid_upper_fold_main_2_joint.liw" "skinCluster57.lw[1]";
+connectAttr "L_eyelid_upper_fold_main_3_joint.liw" "skinCluster57.lw[2]";
+connectAttr "L_eyelid_upper_fold_main_1_joint.obcc" "skinCluster57.ifcl[0]";
+connectAttr "L_eyelid_upper_fold_main_2_joint.obcc" "skinCluster57.ifcl[1]";
+connectAttr "L_eyelid_upper_fold_main_3_joint.obcc" "skinCluster57.ifcl[2]";
 connectAttr "R_eyelid_upper_fold_curveShapeOrig1.ws" "skinCluster58.ip[0].ig";
 connectAttr "R_eyelid_upper_fold_curveShapeOrig1.l" "skinCluster58.orggeom[0]";
-connectAttr "R_eyelid_upper_fold_1_joint.wm" "skinCluster58.ma[0]";
-connectAttr "R_eyelid_upper_fold_2_joint.wm" "skinCluster58.ma[1]";
-connectAttr "R_eyelid_upper_fold_3_joint.wm" "skinCluster58.ma[2]";
-connectAttr "R_eyelid_upper_fold_1_joint.liw" "skinCluster58.lw[0]";
-connectAttr "R_eyelid_upper_fold_2_joint.liw" "skinCluster58.lw[1]";
-connectAttr "R_eyelid_upper_fold_3_joint.liw" "skinCluster58.lw[2]";
-connectAttr "R_eyelid_upper_fold_1_joint.obcc" "skinCluster58.ifcl[0]";
-connectAttr "R_eyelid_upper_fold_2_joint.obcc" "skinCluster58.ifcl[1]";
-connectAttr "R_eyelid_upper_fold_3_joint.obcc" "skinCluster58.ifcl[2]";
+connectAttr "R_eyelid_upper_fold_main_1_joint.wm" "skinCluster58.ma[0]";
+connectAttr "R_eyelid_upper_fold_main_2_joint.wm" "skinCluster58.ma[1]";
+connectAttr "R_eyelid_upper_fold_main_3_joint.wm" "skinCluster58.ma[2]";
+connectAttr "R_eyelid_upper_fold_main_1_joint.liw" "skinCluster58.lw[0]";
+connectAttr "R_eyelid_upper_fold_main_2_joint.liw" "skinCluster58.lw[1]";
+connectAttr "R_eyelid_upper_fold_main_3_joint.liw" "skinCluster58.lw[2]";
+connectAttr "R_eyelid_upper_fold_main_1_joint.obcc" "skinCluster58.ifcl[0]";
+connectAttr "R_eyelid_upper_fold_main_2_joint.obcc" "skinCluster58.ifcl[1]";
+connectAttr "R_eyelid_upper_fold_main_3_joint.obcc" "skinCluster58.ifcl[2]";
 connectAttr "L_eyelids_avg_curveShapeOrig1.ws" "L_eyelids_avg_blendShape.ip[0].ig"
 		;
 connectAttr "L_eyelids_avg_curveShapeOrig1.l" "L_eyelids_avg_blendShape.orggeom[0]"
@@ -7444,15 +7445,15 @@ connectAttr "rs_lines1.msg" ":defaultRenderingList1.r" -na;
 connectAttr "defaultRenderLayer2.msg" ":defaultRenderingList1.r" -na;
 connectAttr "template_Nose_System_dummy_defaultRenderLayer.msg" ":defaultRenderingList1.r"
 		 -na;
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
+dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
+dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
+dataStructure -fmt "raw" -as "name=DiffArea:float=value";
 dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
 dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
-dataStructure -fmt "raw" -as "name=DiffArea:float=value";
-dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
 dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
-dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
-dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
 dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
+dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
 // End of face_eyelids.ma
