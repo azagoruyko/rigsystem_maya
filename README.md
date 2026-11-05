@@ -137,3 +137,15 @@ When opening a pull request here, describe the affected component, the Maya vers
 ## 📄 License
 
 See [`LICENSE`](LICENSE) for this repository. Refer to the linked plug-in repositories for their source licenses.
+
+## 🏷️ Versions
+
+Version numbers use `major.minor.patch`: a major release can change existing workflows, a minor release adds features, and a patch release fixes problems without intentionally changing workflows.
+
+| Version | What changed |
+| --- | --- |
+| `v1.0.0` | First tagged RigSystem release. |
+| `v2.0.0` | Moved Maya tools into the `rigsystem` Python package and installed the viewport menu without replacing Maya's `dagMenuProc.mel`. |
+| `v3.0.0` | Removed the PyMEL dependency from Python utilities and Rig Builder modules, replacing it with `maya.cmds`, Maya API 2.0, and `rigsystem.proxy`. Added face rig templates and fitting modules. |
+
+For the exact changes in a release, compare its Git tag with the previous tag.
