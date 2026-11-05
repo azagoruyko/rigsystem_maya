@@ -177,8 +177,13 @@ class BlendShapeHelper(object):
 
         targetIndices = []
         for component in components:
-            start, _, end = component.removeprefix("vtx[").removesuffix("]").partition(":")
-            targetIndices.extend(range(int(start), int(end) + 1) if end else [int(start)])
+            match = re.fullmatch(r"[^[]+\[(\d+)(?::(\d+))?]", component)
+            if not match:
+                raise ValueError(f"Unsupported blendShape component: {component}")
+
+            start = int(match.group(1))
+            end = int(match.group(2)) if match.group(2) else start
+            targetIndices.extend(range(start, end + 1))
 
         return targetIndices, [list(p) for p in targetDeltas]
 
@@ -207,7 +212,15 @@ class BlendShapeHelper(object):
             if om.MVector(delta[0], delta[1], delta[2]).length() >= 1e-3
         }
 
-        targetComponents = [f"vtx[{v}]" for v in data]
+        geometryFn = self.getGeometry().mfn(shape=True)
+        if isinstance(geometryFn, om.MFnMesh):
+            componentType = "vtx"
+        elif isinstance(geometryFn, om.MFnNurbsCurve):
+            componentType = "cv"
+        else:
+            raise TypeError("Target delta is supported only for meshes and NURBS curves")
+
+        targetComponents = [f"{componentType}[{v}]" for v in data]
         newDeltas = [tuple(delta) if len(delta) == 4 else (*delta, 1.0) for delta in data.values()]
         item = f"inputTarget[0].inputTargetGroup[{targetIndex}].inputTargetItem[6000]"
         cmds.setAttr(self.node.attr(f"{item}.inputPointsTarget"), len(newDeltas), *newDeltas, type="pointArray")
@@ -301,12 +314,16 @@ class BlendShapeHelper(object):
             shapes=True,
         )[0]
         inputMeshNode = proxy.node(inputMesh)
-        meshDagPath = inputMeshNode.mdagpath
-        meshFn = inputMeshNode.mfn(shape=True)
-        basePoints = meshFn.getPoints(om.MSpace.kWorld)
-
-        meshIntersector = om.MMeshIntersector()
-        meshIntersector.create(meshDagPath.node(), meshDagPath.inclusiveMatrix())
+        geometryFn = inputMeshNode.mfn(shape=True)
+        meshIntersector = None
+        if isinstance(geometryFn, om.MFnMesh):
+            basePoints = geometryFn.getPoints(om.MSpace.kObject)
+            meshIntersector = om.MMeshIntersector()
+            meshIntersector.create(inputMeshNode.mdagpath.node())
+        elif isinstance(geometryFn, om.MFnNurbsCurve):
+            basePoints = geometryFn.cvPositions(om.MSpace.kObject)
+        else:
+            raise TypeError("Mirror is supported only for meshes and NURBS curves")
 
         targetIndices, targetDeltas = self.getTargetDelta(targetIndex)
         oldDeltas = {}
@@ -317,15 +334,24 @@ class BlendShapeHelper(object):
         for i in range(len(basePoints)):
             mirroredP = om.MPoint(basePoints[i])
             mirroredP.x *= -1
-            pom = meshIntersector.getClosestPoint(mirroredP)
+            if meshIntersector is None:
+                nearest = min(
+                    range(len(basePoints)),
+                    key=lambda index: (basePoints[index] - mirroredP).length(),
+                )
+                if (basePoints[nearest] - mirroredP).length() > tolerance:
+                    raise ValueError("NURBS curve CVs are not symmetric across local X")
+                wp = om.MPoint(oldDeltas.get(nearest, om.MPoint(0, 0, 0)))
+            else:
+                pom = meshIntersector.getClosestPoint(mirroredP)
+                vertices3 = geometryFn.getPolygonTriangleVertices(pom.face, pom.triangle)
+                u, v = pom.barycentricCoords
+                w = 1 - u - v
 
-            vertices3 = meshFn.getPolygonTriangleVertices(pom.face, pom.triangle)
-            u, v = pom.barycentricCoords
-            w = 1 - u - v
+                wp = om.MPoint()
+                for wt, vtx in zip([u, v, w], vertices3):
+                    wp += oldDeltas.get(vtx, om.MPoint(0, 0, 0)) * wt
 
-            wp = om.MPoint()
-            for wt, vtx in zip([u, v, w], vertices3):
-                wp += oldDeltas.get(vtx, om.MPoint(0, 0, 0)) * wt
             wp.x *= -1
 
             if (wp - om.MPoint()).length() > tolerance:
@@ -335,7 +361,7 @@ class BlendShapeHelper(object):
             for i in oldDeltas:
                 newDeltas[i] = oldDeltas[i] if i not in newDeltas else [a + b for a, b in zip(oldDeltas[i], newDeltas[i])]
 
-        self.setTargetDelta(targetIndex, list(newDeltas.keys()), list(newDeltas.values()))
+        self.setTargetDelta(targetIndex, list(newDeltas.keys()), list(newDeltas.values()), useSelection=False)
 
 
     def saveToFile(self, filename):
