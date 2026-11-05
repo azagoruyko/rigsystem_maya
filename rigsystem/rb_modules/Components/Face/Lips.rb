@@ -173,48 +173,59 @@ Import face_lips, set the two parent inputs, then run Lips. Input direction may 
 cmds = proxy.cmds
 joints = proxy.nodes(@joints)
 
-
 def getJointsSkinClusters(joint):
     return {plug.node for plug in joint.worldMatrix.outputs(type="skinCluster")}
-
 
 def influenceIndex(skin, joint):
     return skin.mfn().indexForInfluenceObject(joint.mdagpath)
 
-
-if @mode == 0:
-    for joint in joints:
-        for skin in getJointsSkinClusters(joint):
-            index = influenceIndex(skin, joint)
-            preMatrix = skin.bindPreMatrix[index]
+if @mode == 0: # unbind
+    for j in joints:
+        for skin in getJointsSkinClusters(j):
+            idx = influenceIndex(skin, j)
+        
+            preMatrix = skin.bindPreMatrix[idx]
             if not preMatrix.inputs():
-                joint.worldInverseMatrix[0] >> preMatrix
-
+                j.worldInverseMatrix[0] >> preMatrix
+    
     print("Unbinded")
     @set_mode("Unbinded")
 else:
-    for joint in joints:
-        for skin in getJointsSkinClusters(joint):
-            index = influenceIndex(skin, joint)
-            matrix = joint.worldInverseMatrix[0].get()
+    for j in joints:
+        for skin in getJointsSkinClusters(j):
+            idx = influenceIndex(skin, j)
+        
+            matrix = j.worldInverseMatrix[0].get()
 
-            if cmds.isConnected(
-                str(joint.worldInverseMatrix[0]),
-                str(skin.bindPreMatrix[index]),
-            ):
-                cmds.disconnectAttr(
-                    str(joint.worldInverseMatrix[0]),
-                    str(skin.bindPreMatrix[index]),
-                )
-                skin.bindPreMatrix[index].set(matrix)
-
+            if cmds.isConnected(str(j.worldInverseMatrix[0]), str(skin.bindPreMatrix[idx])):
+                cmds.disconnectAttr(str(j.worldInverseMatrix[0]), str(skin.bindPreMatrix[idx]))
+                skin.bindPreMatrix[idx].set(matrix)
+    
     print("Binded")
     @set_mode("")
-]]></run>
-<doc><![CDATA[Temporarily unbinds and rebinds the lip main-curve skin influences so their bind pre-matrices match the fitted curves.]]></doc>
+        ]]></run>
+<doc><![CDATA[## Summary  
+The **bindMode** module toggles the binding state of selected joints to their skin clusters in Maya. When executed, it either connects each joint’s world inverse matrix to the skin cluster’s bind pre‑matrix (unbinding) or disconnects that connection and writes the current matrix back (rebinding). The module updates the `mode` attribute to reflect the new state and prints a status message.
+
+## Inputs  
+- **`joints`** (listBox): A list of joint names that the script will process.  
+- **`mode`** (label): A flag indicating the current state. When empty, the module will perform a *bind* operation; when set to any value (e.g., `"Unbinded"`), it will perform an *unbind* operation.
+
+## Outputs  
+- **`mode`** (label): Updated to `"Unbinded"` after an unbind operation or cleared after a bind operation.  
+- Console output: Prints `"Unbinded"` or `"Binded"` to indicate the action taken.
+
+## Usage  
+1. **Select Joints** – In the `joints` listBox, choose the joints you want to toggle.  
+2. **Unbind** – If `mode` is empty, click **Run**. The script will unbind the selected joints from their skin clusters and set `mode` to `"Unbinded"`.  
+3. **Adjust Joints** – Move or modify the joints as needed.  
+4. **Rebind** – With `mode` now set, click **Run** again. The script will rebind the joints, restoring the original skin cluster matrices and clearing `mode`.  
+5. **Repeat** – You can toggle between bind and unbind states as required during rigging or animation adjustments.]]></doc>
 <attributes>
+<attr name="" template="label" category="General" connect=""><![CDATA[{"text": "<html>\nHow to use: <br>\n1. Set joints and press <b>Run</b> to unbind joints from skin clusters.<br>\n2. Change joints position.<br>\n3. Press <b>Run</b> to rebind again.<br>\n</html>", "default": "text"}]]></attr>
 <attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"items": ["Unbind", "Bind"], "current": "", "columns": 3, "default": "current"}]]></attr>
 <attr name="joints" template="listBox" category="General" connect=""><![CDATA[{"items": ["L_lips_corner_main_joint", "M_lip_lower_main_joint", "M_lip_upper_main_joint", "R_lips_corner_main_joint"], "default": "items"}]]></attr>
+<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import maya.cmds as cmds\nimport maya.mel as mel\n\njoints = set()\nfor mesh in cmds.ls(sl=True) or []:\n    skin = mel.eval('findRelatedSkinCluster \"{}\"'.format(mesh))\n    if skin:\n        joints.update(cmds.skinCluster(skin, query=True, influence=True) or [])\n\nchset(\"/joints\", sorted(joints))", "label": "Get From Mesh", "color": "", "default": "command"}]]></attr>
 </attributes>
 </module>
 </children>
@@ -504,7 +515,7 @@ for j in proxy.nodes(@joints):
 <attr name="scaleAttr" template="comboBox" category="General" connect="/upper_connectLipScale/scaleAttr"><![CDATA[{"items": ["sx", "sy", "sz"], "current": "sy", "default": "current"}]]></attr>
 </attributes>
 </module>
-<module name="LipsZip" muted="0" uid="f79ad52fcfbe438484e0ed8c6504bd0a">
+<module name="LipsZip" muted="0" uid="">
 <run><![CDATA[import maya.api.OpenMaya as om
 from rigsystem import proxy, rig_utils
 
@@ -682,35 +693,26 @@ Creates a lip‑zip rig system that averages an upper and lower lip curve, gener
 from rigsystem import proxy
 
 cmds = proxy.cmds
-
 curve = proxy.node(@curve)
 transforms = proxy.nodes(@transforms)
-
 curveShape = curve.getShapes(type="nurbsCurve")[0] if curve.type() == "transform" else curve
 curveFn = curveShape.mfn(shape=True)
 
 for t in transforms:
-    position = cmds.xform(str(t), q=True, ws=True, t=True)
-    position = om.MPoint(position[0], position[1], position[2])
+    coords = cmds.xform(str(t), q=True, ws=True, t=True)
+    position = om.MPoint(coords[0], coords[1], coords[2])
     _, param = curveFn.closestPoint(position, 1e-6, om.MSpace.kWorld)
-
-    # Create pointOnCurveInfo to drive position
-    poci = proxy.create(
-        "pointOnCurveInfo", f"{t}"
-    )
+    poci = proxy.create("pointOnCurveInfo", f"{t}")
     curveShape.worldSpace[0] >> poci.inputCurve
     poci.parameter.set(param)
     poci.turnOnPercentage.set(False)
-    
-    pmm = proxy.create(
-        "pointMatrixMultDL", f"{t}_parentInverse"
-    )
+    pmm = proxy.create("pointMatrixMultDL", f"{t}_parentInverse")
     poci.position >> pmm.inPoint
-    t.parentInverseMatrix >> pmm.inMatrix    
+    t.parentInverseMatrix >> pmm.inMatrix
     pmm.output >> t.translate
     ]]></run>
 <doc><![CDATA[## Summary  
-The **attachToCurve** module snaps a list of transforms to a NURBS curve by projecting each transform’s world position onto the curve. It uses a `nearestPointOnCurve` node to find the closest curve parameter and a `pointOnCurveInfo` node to drive the transform’s translate, leaving rotation and scale untouched.
+The **attachToCurve** module snaps a list of transforms to a NURBS curve by projecting each transform’s world position onto the curve. It uses a `pointOnCurveInfo` node to drive the transform’s translation, leaving rotation and scale untouched.
 
 ## Inputs  
 - **`curve`** – Name or reference to the NURBS curve that will serve as the attachment surface.  
@@ -721,11 +723,10 @@ The **attachToCurve** module snaps a list of transforms to a NURBS curve by proj
 - The module directly modifies the **translate** attributes of each transform in the `transforms` list, aligning them to the nearest point on the specified curve.
 
 ## Usage  
-1. **Select the curve** you want to attach to and set the `curve` attribute (or use the button to pick the selected curve).  
-2. **Populate the `transforms` list** with the transforms you wish to snap (e.g., IK handles, control joints, helper objects).  
-3. **Run the module**. Each transform’s translate will be driven by a `pointOnCurveInfo` node that follows the curve’s shape.  
-4. **Optional**: After execution, the temporary `nearestPointOnCurve` node is automatically deleted, leaving only the `pointOnCurveInfo` nodes connected to the transforms.  
-5. **Adjust** the transforms in the viewport if needed; the connections will keep them attached to the curve as you move the curve or the transforms.]]></doc>
+1. **Select the curve** you want the transforms to follow and set the **`curve`** attribute (or use its button to pick the selected curve).  
+2. **Populate the `transforms` list** with the transforms to attach.  
+3. **Run the module**. Each transform is snapped to the curve and follows its shape.  
+4. **Adjust** the transforms as needed; their translate remains connected to the curve.]]></doc>
 <attributes>
 <attr name="" template="label" category="General" connect=""><![CDATA[{"default": "text", "text": "Attach <b>transforms</b> to <b>NURBS curve</b> using closest point (translate only)."}]]></attr>
 <attr name="curve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lip_lower_curve", "placeholder": "NURBS curve name", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
