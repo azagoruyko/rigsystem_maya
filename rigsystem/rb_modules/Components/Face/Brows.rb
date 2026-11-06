@@ -152,48 +152,53 @@ Copies the degree-1 inputs into the L/R brow curve Origs. Rebuilds the left inpu
 cmds = proxy.cmds
 joints = proxy.nodes(@joints)
 
-
 def getJointsSkinClusters(joint):
     return {plug.node for plug in joint.worldMatrix.outputs(type="skinCluster")}
-
 
 def influenceIndex(skin, joint):
     return skin.mfn().indexForInfluenceObject(joint.mdagpath)
 
-
-if @mode == 0:
-    for joint in joints:
-        for skin in getJointsSkinClusters(joint):
-            index = influenceIndex(skin, joint)
-            preMatrix = skin.bindPreMatrix[index]
+if @mode == 0: # unbind
+    for j in joints:
+        for skin in getJointsSkinClusters(j):
+            idx = influenceIndex(skin, j)
+        
+            preMatrix = skin.bindPreMatrix[idx]
             if not preMatrix.inputs():
-                joint.worldInverseMatrix[0] >> preMatrix
-
+                j.worldInverseMatrix[0] >> preMatrix
+    
     print("Unbinded")
-    @set_mode("Unbinded")
+    @set_mode(1)
 else:
-    for joint in joints:
-        for skin in getJointsSkinClusters(joint):
-            index = influenceIndex(skin, joint)
-            matrix = joint.worldInverseMatrix[0].get()
+    for j in joints:
+        for skin in getJointsSkinClusters(j):
+            idx = influenceIndex(skin, j)
+        
+            matrix = j.worldInverseMatrix[0].get()
 
-            if cmds.isConnected(
-                str(joint.worldInverseMatrix[0]),
-                str(skin.bindPreMatrix[index]),
-            ):
-                cmds.disconnectAttr(
-                    str(joint.worldInverseMatrix[0]),
-                    str(skin.bindPreMatrix[index]),
-                )
-                skin.bindPreMatrix[index].set(matrix)
-
+            if cmds.isConnected(str(j.worldInverseMatrix[0]), str(skin.bindPreMatrix[idx])):
+                cmds.disconnectAttr(str(j.worldInverseMatrix[0]), str(skin.bindPreMatrix[idx]))
+                skin.bindPreMatrix[idx].set(matrix)
+    
     print("Binded")
-    @set_mode("")
-]]></run>
-<doc><![CDATA[Temporarily unbinds and rebinds the brow main-curve skin influences so their bind pre-matrices match the fitted curves.]]></doc>
+    @set_mode(0)
+        ]]></run>
+<doc><![CDATA[## Summary
+Temporarily follows selected joints with their skin clusters' bind pre-matrices so the joints can be repositioned without changing the skinned geometry. Running again stores the joints' current world inverse matrices as the new bind pre-matrices.
+
+## Inputs
+- **`joints`** (`listBox`): Joints to process. **Get From Mesh** lists the influences of selected meshes.
+- **`mode`** (`radioButton`): `Unbind` (0) connects the world inverse matrices; `Bind` (1) disconnects them and stores the current matrices.
+
+## Usage
+1. Choose the joints and run with **Unbind** selected.
+2. Reposition the joints.
+3. Run again with **Bind** selected. The mode switches automatically after each run.]]></doc>
 <attributes>
+<attr name="" template="label" category="General" connect=""><![CDATA[{"text": "<html>\n1. Set joints and run <b>Unbind</b>.<br>\n2. Reposition the joints.<br>\n3. Run <b>Bind</b> to store their current matrices.<br>\nThe mode switches automatically after each run.\n</html>", "default": "text"}]]></attr>
 <attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"items": ["Unbind", "Bind"], "current": "", "columns": 3, "default": "current"}]]></attr>
 <attr name="joints" template="listBox" category="General" connect=""><![CDATA[{"items": ["L_brow_major_inner_joint", "L_brow_major_mid_joint", "L_brow_major_outer_joint", "R_brow_major_inner_joint", "R_brow_major_mid_joint", "R_brow_major_outer_joint"], "default": "items"}]]></attr>
+<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import maya.cmds as cmds\nimport maya.mel as mel\n\njoints = set()\nfor mesh in cmds.ls(sl=True) or []:\n    skin = mel.eval('findRelatedSkinCluster \"{}\"'.format(mesh))\n    if skin:\n        joints.update(cmds.skinCluster(skin, query=True, influence=True) or [])\n\nchset(\"/joints\", sorted(joints))", "label": "Get From Mesh", "color": "", "default": "command"}]]></attr>
 </attributes>
 </module>
 </children>
