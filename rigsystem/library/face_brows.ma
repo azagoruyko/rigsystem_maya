@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: face_brows.ma
-//Last modified: Tue, Nov 03, 2026 02:27:20 PM
+//Last modified: Fri, Nov 06, 2026 03:01:27 PM
 //Codeset: 1251
 requires maya "2026";
 requires "stereoCamera" "10.0";
@@ -10,20 +10,20 @@ fileInfo "application" "maya";
 fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
-fileInfo "osv" "Windows 11 Pro v2009 (Build: 26200)";
-fileInfo "UUID" "011187B7-4B3C-9989-295A-2D84665A0B4E";
+fileInfo "osv" "Windows 11 Home v2009 (Build: 26200)";
+fileInfo "UUID" "A1FF7C7E-40DD-E023-6B2B-CEA5F6C0AF47";
 createNode transform -s -n "persp";
 	rename -uid "77AE9653-40B9-4F94-7B80-3F95FE3E7DFF";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 3.0025702452997578 168.90666065409411 29.640273832936082 ;
-	setAttr ".r" -type "double3" -18.338352729606076 8.9999999999992735 0 ;
+	setAttr ".t" -type "double3" 2.8149824007021462 164.967508780499 27.481861202308224 ;
+	setAttr ".r" -type "double3" -8.1383527296060567 7.7999999999992431 1.0032051520641137e-16 ;
 	setAttr ".rp" -type "double3" -9.3258734068513149e-15 2.8421709430404007e-14 0 ;
 	setAttr ".rpt" -type "double3" -3.2444650141844978e-15 -3.0391213835245794e-15 -1.2206279012975552e-14 ;
 createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "65C3BDD6-45B3-50A3-1670-8AB70A156D08";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999993;
-	setAttr ".coi" 19.799243509766875;
+	setAttr ".coi" 16.777056364533571;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -765,6 +765,7 @@ createNode pointConstraint -n "R_brow_curv_control_pointConstraint1" -p "R_brow_
 	setAttr -k on ".w1";
 createNode transform -n "brows_others";
 	rename -uid "374AFC09-4B6C-D0B3-38DD-998FC5741504";
+	setAttr ".v" no;
 	setAttr -l on -k off ".tx";
 	setAttr -l on -k off ".ty";
 	setAttr -l on -k off ".tz";
@@ -799,15 +800,8 @@ createNode nurbsCurve -n "L_brow_main_curveShapeOrig1" -p "L_brow_main_curve";
 	rename -uid "967C1A56-41D9-9723-9ADC-1592467E2AA6";
 	setAttr -k off ".v";
 	setAttr ".io" yes;
-	setAttr -s 4 ".gtag";
-	setAttr ".gtag[0].gtagnm" -type "string" "softMod1";
-	setAttr ".gtag[0].gtagcmp" -type "componentList" 1 "cv[2]";
 	setAttr ".gtag[1].gtagnm" -type "string" "L_brow_curv_cluster";
-	setAttr ".gtag[1].gtagcmp" -type "componentList" 1 "cv[1:3]";
-	setAttr ".gtag[2].gtagnm" -type "string" "softMod1_1";
-	setAttr ".gtag[2].gtagcmp" -type "componentList" 1 "cv[1:4]";
-	setAttr ".gtag[3].gtagnm" -type "string" "softMod1_2";
-	setAttr ".gtag[3].gtagcmp" -type "componentList" 1 "cv[2]";
+	setAttr ".gtag[1].gtagcmp" -type "componentList" 1 "cv[1:4]";
 	setAttr ".tw" yes;
 createNode transform -n "L_brow_major_curve" -p "brows_others";
 	rename -uid "80E074F6-46F8-D7D6-E509-0D92222DC9CC";
@@ -859,13 +853,8 @@ createNode nurbsCurve -n "R_brow_main_curveShapeOrig2" -p "R_brow_main_curve";
 	rename -uid "990E5DF4-45E7-82D9-EA41-31AEA5F769A2";
 	setAttr -k off ".v";
 	setAttr ".io" yes;
-	setAttr -s 3 ".gtag";
-	setAttr ".gtag[0].gtagnm" -type "string" "L_brow_curv_cluster";
-	setAttr ".gtag[0].gtagcmp" -type "componentList" 1 "cv[1:3]";
-	setAttr ".gtag[1].gtagnm" -type "string" "softMod1";
-	setAttr ".gtag[1].gtagcmp" -type "componentList" 1 "cv[2]";
 	setAttr ".gtag[2].gtagnm" -type "string" "R_brow_curv_cluster";
-	setAttr ".gtag[2].gtagcmp" -type "componentList" 1 "cv[1:3]";
+	setAttr ".gtag[2].gtagcmp" -type "componentList" 1 "cv[1:4]";
 	setAttr ".tw" yes;
 createNode transform -n "R_brow_major_curve" -p "brows_others";
 	rename -uid "F224CA9F-4411-701A-004B-0F8309DA791A";
@@ -890,11 +879,6 @@ createNode nurbsCurve -n "R_brow_major_curveShapeOrig1" -p "R_brow_major_curve";
 	rename -uid "AA928666-4EB9-E1F3-5FC1-ED86A6CC7637";
 	setAttr -k off ".v";
 	setAttr ".io" yes;
-	setAttr -s 2 ".gtag";
-	setAttr ".gtag[0].gtagnm" -type "string" "L_brow_curv_cluster";
-	setAttr ".gtag[0].gtagcmp" -type "componentList" 1 "cv[1:3]";
-	setAttr ".gtag[1].gtagnm" -type "string" "softMod1";
-	setAttr ".gtag[1].gtagcmp" -type "componentList" 1 "cv[2]";
 	setAttr ".tw" yes;
 createNode transform -n "brows_oncurve_transforms_group" -p "brows_others";
 	rename -uid "56DABD54-4AFB-F11D-6888-7A92C8FA4EB0";
@@ -963,6 +947,7 @@ createNode transform -n "R_brow_8_joint_transform" -p "brows_oncurve_transforms_
 	setAttr ".t" -type "double3" -6.0371103286743102 161.61511230468764 9.0166959762573189 ;
 createNode transform -n "brows_internal";
 	rename -uid "0E239355-4BF7-B1F0-019D-5796BAFDA267";
+	setAttr ".v" no;
 	setAttr -l on -k off ".tx";
 	setAttr -l on -k off ".ty";
 	setAttr -l on -k off ".tz";
@@ -1296,15 +1281,6 @@ createNode transform -n "L_brow_tuner_curve";
 createNode nurbsCurve -n "L_brow_tuner_curveShape" -p "L_brow_tuner_curve";
 	rename -uid "2ACAAAA3-40E7-AFBD-9759-52AC987F7F1D";
 	setAttr -k off ".v";
-	setAttr -s 4 ".gtag";
-	setAttr ".gtag[0].gtagnm" -type "string" "L_brow_curv_cluster";
-	setAttr ".gtag[0].gtagcmp" -type "componentList" 1 "cv[1:3]";
-	setAttr ".gtag[1].gtagnm" -type "string" "softMod1";
-	setAttr ".gtag[1].gtagcmp" -type "componentList" 1 "cv[2]";
-	setAttr ".gtag[2].gtagnm" -type "string" "softMod1_1";
-	setAttr ".gtag[2].gtagcmp" -type "componentList" 1 "cv[1:4]";
-	setAttr ".gtag[3].gtagnm" -type "string" "softMod1_2";
-	setAttr ".gtag[3].gtagcmp" -type "componentList" 1 "cv[2]";
 	setAttr ".cc" -type "nurbsCurve" 
 		3 6 0 no 3
 		11 0 0 0 0.16666666666666666 0.33333333333333331 0.5 0.66666666666666663 0.83333333333333348
@@ -1319,13 +1295,7 @@ createNode nurbsCurve -n "L_brow_tuner_curveShape" -p "L_brow_tuner_curve";
 		5.517692812815512 161.88994020880651 9.8066807797300584
 		5.860459183460299 161.69872644595407 9.2719447846125274
 		6.0371103286743173 161.61511230468753 9.0166959762573224
-		
-
-		"gtag" 4
-		"L_brow_curv_cluster" 1 "cv[1:3]"
-		"softMod1" 1 "cv[2]"
-		"softMod1_1" 1 "cv[1:4]"
-		"softMod1_2" 1 "cv[2]";
+		;
 createNode transform -n "L_brow_main_tuner";
 	rename -uid "CE618D67-4FC0-0AC0-3D98-6DA94C3B725F";
 	setAttr ".t" -type "double3" 3.8986656285775387 161.83586736492782 11.39993386043948 ;
@@ -1336,7 +1306,7 @@ createNode locator -n "L_brow_main_tunerShape" -p "L_brow_main_tuner";
 	setAttr -k off ".v";
 createNode transform -n "R_brow_main_tuner";
 	rename -uid "3921F471-47A9-A80A-5747-A29A4781F661";
-	setAttr ".opm" -type "matrix" -1 -0 -0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+	setAttr ".opm" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
 createNode locator -n "R_brow_main_tunerShape" -p "R_brow_main_tuner";
 	rename -uid "4FE12ABC-4596-54FA-7663-7B93D9AFDFD2";
 	setAttr -k off ".v";
@@ -1399,9 +1369,10 @@ createNode animCurveUU -n "L_brow_main_blendShape_inner";
 createNode cluster -n "L_brow_curv_cluster";
 	rename -uid "ED3C9CC6-425E-87F5-9A18-5CB86B87CE5C";
 	setAttr ".ip[0].gtg" -type "string" "L_brow_curv_cluster";
-	setAttr -s 2 ".wl[0].w";
+	setAttr -s 3 ".wl[0].w";
 	setAttr ".wl[0].w[1]" 0.5;
 	setAttr ".wl[0].w[3]" 0.69999998807907104;
+	setAttr ".wl[0].w[4]" 0.10000000149011612;
 	setAttr ".gm[0]" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
 	setAttr ".ma" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
 createNode skinCluster -n "skinCluster60";
@@ -9578,9 +9549,10 @@ createNode cluster -n "R_brow_curv_cluster";
 	rename -uid "64E9792F-42B4-C54B-974E-C98B791D1594";
 	setAttr ".ip[0].gtg" -type "string" "R_brow_curv_cluster";
 	setAttr ".en" 0.99998998641967773;
-	setAttr -s 2 ".wl[0].w";
+	setAttr -s 3 ".wl[0].w";
 	setAttr ".wl[0].w[1]" 0.5;
 	setAttr ".wl[0].w[3]" 0.69999998807907104;
+	setAttr ".wl[0].w[4]" 0.10000000149011612;
 	setAttr ".gm[0]" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
 	setAttr ".ma" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
 createNode skinCluster -n "skinCluster64";
@@ -9654,33 +9626,30 @@ createNode pointMatrixMultDL -n "L_brow_major_inner_control_transform_parentInve
 createNode pointOnCurveInfo -n "L_brow_major_inner_control_pointOnCurveInfo";
 	rename -uid "AB1C7CD9-48CC-7CF5-1F64-AB945C1036FF";
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "28E39CEC-4F09-282A-882F-6FBB3309CFBA";
+	rename -uid "1E18E11D-4374-0ACB-DAF3-A098547C26EB";
 	setAttr -s 2 ".lnk";
 	setAttr -s 2 ".slnk";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "F167892E-4731-5BF5-CF14-D6B2E1F49E05";
+	rename -uid "FAC10E99-47C5-A2ED-6E37-C9A38812F081";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "B91AB268-4C71-B40C-F933-38A8309F6C9A";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "FB8627CC-434E-17F7-7932-AEBDF3C28B17";
+	rename -uid "34EE2C1A-4DC9-7FBE-F174-CC9859CEEC36";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "9DC857DF-468D-382B-8CF9-6C9244293F04";
 	setAttr ".g" yes;
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "14BB83AD-470D-62A5-B1F8-0AAB9A326447";
+	rename -uid "18F5FD14-4072-D579-6300-DAB8B695B3E9";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 2 6 7 ;
 	setAttr -s 2 ".bspr";
 	setAttr -s 2 ".obsv";
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "88F31AD8-4B48-F5AD-44A3-B2ADAA63ED8A";
+	rename -uid "4C509573-48FB-B48D-AC7F-DA961E42850E";
 createNode script -n "sceneConfigurationScriptNode";
 	rename -uid "D609B326-476E-091A-88EB-4CB49AB78F96";
 	setAttr ".b" -type "string" "playbackOptions -min 0.625 -max 75 -ast 0.625 -aet 125 ";
 	setAttr ".st" 6;
-createNode transformGeometry -n "L_brow_tuner_curve_transformGeometry";
-	rename -uid "F4D12637-4C9C-E0F9-47D9-34B49485183F";
-	setAttr ".txf" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
 createNode multMatrix -n "R_brow_main_control_parent_multMatrix";
 	rename -uid "4DA5839B-438F-DBAF-E932-25924E988862";
 	setAttr -s 2 ".i";
@@ -9708,6 +9677,9 @@ createNode nodeGraphEditorInfo -n "MayaNodeEditorSavedTabsInfo";
 	setAttr ".tgi[0].ni[5].x" 127.38095092773438;
 	setAttr ".tgi[0].ni[5].y" 389.28570556640625;
 	setAttr ".tgi[0].ni[5].nvs" 18306;
+createNode transformGeometry -n "L_brow_tuner_curve_transformGeometry";
+	rename -uid "F4D12637-4C9C-E0F9-47D9-34B49485183F";
+	setAttr ".txf" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
 select -ne :time1;
 	setAttr -av -k on ".cch";
 	setAttr -av -k on ".fzn";
@@ -11586,8 +11558,6 @@ connectAttr "layerManager.dli[0]" "defaultLayer.id";
 connectAttr "renderLayerManager.rlmi[0]" "defaultRenderLayer.rlid";
 connectAttr "L_brow_main_blendShape.mlpr" "shapeEditorManager.bspr[6]";
 connectAttr "R_brow_main_blendShape.mlpr" "shapeEditorManager.bspr[7]";
-connectAttr "L_brow_tuner_curveShape.ws" "L_brow_tuner_curve_transformGeometry.ig"
-		;
 connectAttr "R_brow_main_tuner.m" "R_brow_main_control_parent_multMatrix.i[0]";
 connectAttr "R_brow_main_tuner.opm" "R_brow_main_control_parent_multMatrix.i[1]"
 		;
@@ -11603,18 +11573,20 @@ connectAttr "R_brow_main_tuner.msg" "MayaNodeEditorSavedTabsInfo.tgi[0].ni[4].dn
 		;
 connectAttr "R_brow_main_control_parent_multMatrix.msg" "MayaNodeEditorSavedTabsInfo.tgi[0].ni[5].dn"
 		;
+connectAttr "L_brow_tuner_curveShape.ws" "L_brow_tuner_curve_transformGeometry.ig"
+		;
 connectAttr "R_brow_main_control_parent_multMatrix.msg" ":defaultRenderUtilityList1.u"
 		 -na;
 connectAttr "defaultRenderLayer.msg" ":defaultRenderingList1.r" -na;
-dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
+dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
 dataStructure -fmt "raw" -as "name=DiffArea:float=value";
 dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
-dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
 dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
-dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
 dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
+dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
+dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
+dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
 dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
 // End of face_brows.ma
