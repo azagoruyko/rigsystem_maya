@@ -122,6 +122,11 @@ try:
 finally:
     cmds.delete(duplicate)
 
+headJoint = proxy.node("M_head_joint")
+for side in "LR":
+    mainCurve = proxy.node(f"{side}_brow_main_curve")
+    cmds.skinCluster(headJoint, mainCurve, toSelectedBones=True)
+
 bindMode = module.child("BindMode")
 joints = set()
 for side in "LR":
@@ -139,7 +144,7 @@ bindMode.run()
 <doc><![CDATA[## Summary
 Fits the face_brows wire and tuner curves.
 
-Copies the degree-1 inputs into the L/R brow curve Origs. Rebuilds the left input to six cubic spans and copies it into `L_brow_tuner_curve`; the template mirrors that curve to the right. Positions `L_brow_main_tuner` at normalized parameter 0.5 without changing its offsetParentMatrix, then refreshes the L/R main-curve skin bindings.]]></doc>
+Copies the degree-1 inputs into the L/R brow curve Origs. Rebuilds the left input to six cubic spans and copies it into `L_brow_tuner_curve`; the template mirrors that curve to the right. Positions `L_brow_main_tuner` at normalized parameter 0.5 without changing its offsetParentMatrix, then skins the L/R main curves to `M_head_joint` and refreshes their skin bindings.]]></doc>
 <children>
 <module name="BindMode" muted="1" uid="c7ae99e054f94721afc9256cf449e180">
 <run><![CDATA[from rigsystem import proxy
