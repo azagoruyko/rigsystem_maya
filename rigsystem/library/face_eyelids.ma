@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: face_eyelids.ma
-//Last modified: Tue, Nov 03, 2026 04:17:25 PM
+//Last modified: Fri, Nov 06, 2026 05:00:06 PM
 //Codeset: 1251
 requires maya "2026";
 requires -nodeType "skeleposer" "skeleposer" "Unknown";
@@ -14,8 +14,8 @@ fileInfo "application" "maya";
 fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
-fileInfo "osv" "Windows 11 Pro v2009 (Build: 26200)";
-fileInfo "UUID" "DEDA519A-44FE-88A6-B15C-60BE0C82673C";
+fileInfo "osv" "Windows 11 Home v2009 (Build: 26200)";
+fileInfo "UUID" "A1AA4281-4C10-6552-03D8-D3B0E964A3B7";
 createNode transform -s -n "persp";
 	rename -uid "8DCF4356-4D3E-3DFF-4277-379CE6A38D01";
 	setAttr ".v" no;
@@ -306,6 +306,77 @@ createNode nurbsCurve -n "R_eyelid_lower_major_curveShapeOrig2" -p "R_eyelid_low
 	setAttr ".gtag[0].gtagnm" -type "string" "softMod1";
 	setAttr ".gtag[0].gtagcmp" -type "componentList" 1 "cv[0]";
 	setAttr ".tw" yes;
+createNode transform -n "L_eyelid_upper_fold_curve" -p "eyelids_others";
+	rename -uid "EB05669B-467E-965F-1333-72A22895FD9C";
+	setAttr -l on ".tx";
+	setAttr -l on ".ty";
+	setAttr -l on ".tz";
+	setAttr -l on ".rx";
+	setAttr -l on ".ry";
+	setAttr -l on ".rz";
+	setAttr -l on ".sx";
+	setAttr -l on ".sy";
+	setAttr -l on ".sz";
+createNode nurbsCurve -n "L_eyelid_upper_fold_curveShape" -p "L_eyelid_upper_fold_curve";
+	rename -uid "20105213-49A3-998D-02C5-8AB39EC45587";
+	setAttr -k off ".v";
+	setAttr ".tw" yes;
+createNode nurbsCurve -n "L_eyelid_upper_fold_curveShapeOrig" -p "L_eyelid_upper_fold_curve";
+	rename -uid "083A3D3D-48B2-7B4E-B1A7-A49392DB3C8C";
+	setAttr -k off ".v";
+	setAttr ".io" yes;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 6 0 no 3
+		11 0 0 0 0.16666666666666666 0.33333333333333331 0.5 0.66666666666666663 0.83333333333333337
+		 1 1 1
+		9
+		1.9567903280258179 160.07392883300781 10.037179946899414
+		2.1128216826999093 160.2814849502532 10.058330138111062
+		2.4318173441200566 160.71849299965479 10.123295395486938
+		3.1737123976854882 161.0241553828364 10.18618891080779
+		3.9631958122416031 161.15126744833833 10.056541092439859
+		4.6581484091647676 160.99731032318456 9.693611371676937
+		5.2537740247086822 160.73588220187753 9.2206363540228491
+		5.49828603830644 160.38106906162659 8.9002520086479961
+		5.5974702835083008 160.18218994140625 8.7589759826660156
+		;
+createNode transform -n "R_eyelid_upper_fold_curve" -p "eyelids_others";
+	rename -uid "50C26511-4065-FBAC-D6A6-D7B3EA172707";
+	setAttr -k on ".t";
+	setAttr -l on ".tx";
+	setAttr -l on ".ty";
+	setAttr -l on ".tz";
+	setAttr -k on ".r";
+	setAttr -l on ".rx";
+	setAttr -l on ".ry";
+	setAttr -l on ".rz";
+	setAttr -k on ".s";
+	setAttr -l on ".sx";
+	setAttr -l on ".sy";
+	setAttr -l on ".sz";
+createNode nurbsCurve -n "R_eyelid_upper_fold_curveShape" -p "R_eyelid_upper_fold_curve";
+	rename -uid "0B07EECB-4F4F-646C-8DE6-6DA2E082EDD9";
+	setAttr -k off ".v";
+	setAttr ".tw" yes;
+createNode nurbsCurve -n "R_eyelid_upper_fold_curveShapeOrig1" -p "R_eyelid_upper_fold_curve";
+	rename -uid "850B941E-41EA-D7A2-14EF-44BB40B938C1";
+	setAttr -k off ".v";
+	setAttr ".io" yes;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 6 0 no 3
+		11 0 0 0 0.16666666666666666 0.33333333333333331 0.5 0.66666666666666663 0.83333333333333337
+		 1 1 1
+		9
+		-1.9567903280258199 160.07392883300781 10.03717994689943
+		-2.1128216826999107 160.2814849502532 10.058330138111074
+		-2.431817344120057 160.71849299965481 10.123295395486945
+		-3.1737123976854873 161.02415538283643 10.186188910807788
+		-3.9631958122416022 161.15126744833836 10.056541092439858
+		-4.6581484091647729 160.99731032318459 9.6936113716769405
+		-5.2537740247086919 160.73588220187756 9.2206363540228544
+		-5.4982860383064578 160.38106906162662 8.9002520086480086
+		-5.5974702835083221 160.18218994140628 8.7589759826660298
+		;
 createNode transform -n "eyelids_internal";
 	rename -uid "0EA42E59-49E7-0EC0-123D-D58840AB1035";
 	setAttr -l on -k off ".tx";
@@ -622,77 +693,6 @@ createNode nurbsCurve -n "R_eyelid_lower_major_curveBaseWireShape" -p "R_eyelid_
 	rename -uid "25E077B6-4D03-144D-95F1-28AACBFCD731";
 	setAttr -k off ".v";
 	setAttr ".tw" yes;
-createNode transform -n "L_eyelid_upper_fold_curve" -p "eyelids_internal";
-	rename -uid "EB05669B-467E-965F-1333-72A22895FD9C";
-	setAttr -l on ".tx";
-	setAttr -l on ".ty";
-	setAttr -l on ".tz";
-	setAttr -l on ".rx";
-	setAttr -l on ".ry";
-	setAttr -l on ".rz";
-	setAttr -l on ".sx";
-	setAttr -l on ".sy";
-	setAttr -l on ".sz";
-createNode nurbsCurve -n "L_eyelid_upper_fold_curveShape" -p "L_eyelid_upper_fold_curve";
-	rename -uid "20105213-49A3-998D-02C5-8AB39EC45587";
-	setAttr -k off ".v";
-	setAttr ".tw" yes;
-createNode nurbsCurve -n "L_eyelid_upper_fold_curveShapeOrig" -p "L_eyelid_upper_fold_curve";
-	rename -uid "083A3D3D-48B2-7B4E-B1A7-A49392DB3C8C";
-	setAttr -k off ".v";
-	setAttr ".io" yes;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 6 0 no 3
-		11 0 0 0 0.16666666666666666 0.33333333333333331 0.5 0.66666666666666663 0.83333333333333337
-		 1 1 1
-		9
-		1.9567903280258179 160.07392883300781 10.037179946899414
-		2.1128216826999093 160.2814849502532 10.058330138111062
-		2.4318173441200566 160.71849299965479 10.123295395486938
-		3.1737123976854882 161.0241553828364 10.18618891080779
-		3.9631958122416031 161.15126744833833 10.056541092439859
-		4.6581484091647676 160.99731032318456 9.693611371676937
-		5.2537740247086822 160.73588220187753 9.2206363540228491
-		5.49828603830644 160.38106906162659 8.9002520086479961
-		5.5974702835083008 160.18218994140625 8.7589759826660156
-		;
-createNode transform -n "R_eyelid_upper_fold_curve" -p "eyelids_internal";
-	rename -uid "50C26511-4065-FBAC-D6A6-D7B3EA172707";
-	setAttr -k on ".t";
-	setAttr -l on ".tx";
-	setAttr -l on ".ty";
-	setAttr -l on ".tz";
-	setAttr -k on ".r";
-	setAttr -l on ".rx";
-	setAttr -l on ".ry";
-	setAttr -l on ".rz";
-	setAttr -k on ".s";
-	setAttr -l on ".sx";
-	setAttr -l on ".sy";
-	setAttr -l on ".sz";
-createNode nurbsCurve -n "R_eyelid_upper_fold_curveShape" -p "R_eyelid_upper_fold_curve";
-	rename -uid "0B07EECB-4F4F-646C-8DE6-6DA2E082EDD9";
-	setAttr -k off ".v";
-	setAttr ".tw" yes;
-createNode nurbsCurve -n "R_eyelid_upper_fold_curveShapeOrig1" -p "R_eyelid_upper_fold_curve";
-	rename -uid "850B941E-41EA-D7A2-14EF-44BB40B938C1";
-	setAttr -k off ".v";
-	setAttr ".io" yes;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 6 0 no 3
-		11 0 0 0 0.16666666666666666 0.33333333333333331 0.5 0.66666666666666663 0.83333333333333337
-		 1 1 1
-		9
-		-1.9567903280258199 160.07392883300781 10.03717994689943
-		-2.1128216826999107 160.2814849502532 10.058330138111074
-		-2.431817344120057 160.71849299965481 10.123295395486945
-		-3.1737123976854873 161.02415538283643 10.186188910807788
-		-3.9631958122416022 161.15126744833836 10.056541092439858
-		-4.6581484091647729 160.99731032318459 9.6936113716769405
-		-5.2537740247086919 160.73588220187756 9.2206363540228544
-		-5.4982860383064578 160.38106906162662 8.9002520086480086
-		-5.5974702835083221 160.18218994140628 8.7589759826660298
-		;
 createNode joint -n "L_eyelids_joint";
 	rename -uid "2FAC74E4-4A3C-9FCB-B78C-9FB5315E2E14";
 	addAttr -ci true -sn "liw" -ln "lockInfluenceWeights" -min 0 -max 1 -at "bool";
@@ -3544,11 +3544,11 @@ createNode locator -n "R_eyelids_transform_tunerShape" -p "R_eyelids_transform_t
 	rename -uid "998E0529-49B0-EA80-B313-75BCA9D1466A";
 	setAttr -k off ".v";
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "092BF6B0-4E1C-3490-987C-268FEC3291E1";
+	rename -uid "BC852A75-4C39-8F2C-FBC6-E58C29D668FF";
 	setAttr -s 2 ".lnk";
 	setAttr -s 2 ".slnk";
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "DD5D53A1-4E53-6E69-C82B-98AFF2B94043";
+	rename -uid "0B7EEFD5-4F3B-2EC7-54AB-D88454E53A77";
 	setAttr -s 9 ".bsdt";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 2 4 5 ;
 	setAttr ".bsdt[1].bscd" -type "Int32Array" 0 ;
@@ -3569,18 +3569,18 @@ createNode shapeEditorManager -n "shapeEditorManager";
 	setAttr -s 2 ".bspr";
 	setAttr -s 2 ".obsv";
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "3D6B12E0-4B1C-78A5-07A0-4594BE7DA0C0";
+	rename -uid "581E1D96-43EC-1310-9230-D5A15311323B";
 	setAttr -s 2 ".tpdt";
 	setAttr ".tpdt[0].tpcd" -type "Int32Array" 1 -1 ;
 	setAttr ".tpdt[1].tpcd" -type "Int32Array" 0 ;
 	setAttr ".tpdt[1].tpdn" -type "string" "chr_abendis_MDL_Model_v010_fix";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "E81F95A1-4F1E-EDA9-090A-C1AE90EF2D48";
+	rename -uid "F51FE934-4756-245E-E719-C58C1619B27C";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "9E8B42AB-4BF5-DAB9-7C6A-E5AA0822CA3A";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "BA39A7FC-467D-67A8-4344-7DA48D6907BA";
+	rename -uid "362237DD-4180-E386-2EB5-688BA8462C91";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "4CFE04FF-4860-69A8-4D68-BD989CFA5CAF";
 	setAttr ".g" yes;
@@ -5484,6 +5484,8 @@ connectAttr "L_eyelid_lower_tuner_transformGeometry.og" "R_eyelid_lower_main_cur
 connectAttr "skinCluster49.og[0]" "R_eyelid_lower_major_curveShape.cr";
 connectAttr "R_eyelid_lower_main_curveShape.l" "R_eyelid_lower_major_curveShapeOrig2.cr"
 		;
+connectAttr "skinCluster57.og[0]" "L_eyelid_upper_fold_curveShape.cr";
+connectAttr "skinCluster58.og[0]" "R_eyelid_upper_fold_curveShape.cr";
 connectAttr "L_eyelid_upper_curve_wire.og[0]" "L_eyelid_upper_curveShape.cr";
 connectAttr "L_eyelid_lower_curve_wire.og[0]" "L_eyelid_lower_curveShape.cr";
 connectAttr "L_eyelid_upper_tuner_curveShape.l" "L_eyelid_upper_major_curveBaseWireShape.cr"
@@ -5498,8 +5500,6 @@ connectAttr "L_eyelid_upper_tuner_transformGeometry.og" "R_eyelid_upper_major_cu
 		;
 connectAttr "L_eyelid_lower_tuner_transformGeometry.og" "R_eyelid_lower_major_curveBaseWireShape.cr"
 		;
-connectAttr "skinCluster57.og[0]" "L_eyelid_upper_fold_curveShape.cr";
-connectAttr "skinCluster58.og[0]" "R_eyelid_upper_fold_curveShape.cr";
 connectAttr "L_eyelids_joint_parentConstraint1.ctx" "L_eyelids_joint.tx";
 connectAttr "L_eyelids_joint_parentConstraint1.cty" "L_eyelids_joint.ty";
 connectAttr "L_eyelids_joint_parentConstraint1.ctz" "L_eyelids_joint.tz";
@@ -7445,15 +7445,15 @@ connectAttr "rs_lines1.msg" ":defaultRenderingList1.r" -na;
 connectAttr "defaultRenderLayer2.msg" ":defaultRenderingList1.r" -na;
 connectAttr "template_Nose_System_dummy_defaultRenderLayer.msg" ":defaultRenderingList1.r"
 		 -na;
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
-dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
-dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
-dataStructure -fmt "raw" -as "name=DiffArea:float=value";
-dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
-dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
 dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
+dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
+dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
+dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
 dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
+dataStructure -fmt "raw" -as "name=DiffArea:float=value";
 // End of face_eyelids.ma
