@@ -634,8 +634,10 @@ for i, (uj, lj) in enumerate(zip(proxy.nodes(@upperJoints), proxy.nodes(@lowerJo
     rev.outputX >> pc.w0
     clamp.outputR >> pc.w1
     
-    cmds.orientConstraint("M_lip_upper_main_control_transform", "M_lip_upper_main_control", uj, mo=True)
-    cmds.orientConstraint("M_lip_lower_main_control_transform", "M_lip_lower_main_control", lj, mo=True)
+    oc = cmds.orientConstraint("M_lip_upper_main_control_transform", "M_lip_upper_main_control", uj, mo=True)
+    proxy.node(oc[0]).interpType.set(2) # shortest
+    oc = cmds.orientConstraint("M_lip_lower_main_control_transform", "M_lip_lower_main_control", lj, mo=True)
+    proxy.node(oc[0]).interpType.set(2) # shortest
     
 attachToCurveMod.attr.curve = str(avgCurve)
 attachToCurveMod.attr.transforms = [str(t) for t in zip_transforms]
