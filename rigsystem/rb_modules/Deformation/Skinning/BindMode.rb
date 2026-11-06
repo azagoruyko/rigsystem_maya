@@ -10,7 +10,7 @@ def getJointsSkinClusters(joint):
 def influenceIndex(skin, joint):
     return skin.mfn().indexForInfluenceObject(joint.mdagpath)
 
-if @mode == 0: # unbind
+if @mode in (0, ""): # unbind; older embedded modules may have an empty mode
     for j in joints:
         for skin in getJointsSkinClusters(j):
             idx = influenceIndex(skin, j)
@@ -20,7 +20,7 @@ if @mode == 0: # unbind
                 j.worldInverseMatrix[0] >> preMatrix
     
     print("Unbinded")
-    @set_mode("Unbinded")
+    @set_mode(1)
 else:
     for j in joints:
         for skin in getJointsSkinClusters(j):
@@ -33,27 +33,21 @@ else:
                 skin.bindPreMatrix[idx].set(matrix)
     
     print("Binded")
-    @set_mode("")
+    @set_mode(0)
         ]]></run>
-<doc><![CDATA[## Summary  
-The **bindMode** module toggles the binding state of selected joints to their skin clusters in Maya. When executed, it either connects each joint’s world inverse matrix to the skin cluster’s bind pre‑matrix (unbinding) or disconnects that connection and writes the current matrix back (rebinding). The module updates the `mode` attribute to reflect the new state and prints a status message.
+<doc><![CDATA[## Summary
+Temporarily follows selected joints with their skin clusters' bind pre-matrices so the joints can be repositioned without changing the skinned geometry. Running again stores the joints' current world inverse matrices as the new bind pre-matrices.
 
-## Inputs  
-- **`joints`** (listBox): A list of joint names that the script will process.  
-- **`mode`** (label): A flag indicating the current state. When empty, the module will perform a *bind* operation; when set to any value (e.g., `"Unbinded"`), it will perform an *unbind* operation.
+## Inputs
+- **`joints`** (`listBox`): Joints to process. **Get From Mesh** lists the influences of selected meshes.
+- **`mode`** (`radioButton`): `Unbind` (0) connects the world inverse matrices; `Bind` (1) disconnects them and stores the current matrices. An empty value from an older embedded module is treated as `Unbind`.
 
-## Outputs  
-- **`mode`** (label): Updated to `"Unbinded"` after an unbind operation or cleared after a bind operation.  
-- Console output: Prints `"Unbinded"` or `"Binded"` to indicate the action taken.
-
-## Usage  
-1. **Select Joints** – In the `joints` listBox, choose the joints you want to toggle.  
-2. **Unbind** – If `mode` is empty, click **Run**. The script will unbind the selected joints from their skin clusters and set `mode` to `"Unbinded"`.  
-3. **Adjust Joints** – Move or modify the joints as needed.  
-4. **Rebind** – With `mode` now set, click **Run** again. The script will rebind the joints, restoring the original skin cluster matrices and clearing `mode`.  
-5. **Repeat** – You can toggle between bind and unbind states as required during rigging or animation adjustments.]]></doc>
+## Usage
+1. Choose the joints and run with **Unbind** selected.
+2. Reposition the joints.
+3. Run again with **Bind** selected. The mode switches automatically after each run.]]></doc>
 <attributes>
-<attr name="" template="label" category="General" connect=""><![CDATA[{"text": "<html>\nHow to use: <br>\n1. Set joints and press <b>Run</b> to unbind joints from skin clusters.<br>\n2. Change joints position.<br>\n3. Press <b>Run</b> to rebind again.<br>\n</html>", "default": "text"}]]></attr>
+<attr name="" template="label" category="General" connect=""><![CDATA[{"text": "<html>\n1. Set joints and run <b>Unbind</b>.<br>\n2. Reposition the joints.<br>\n3. Run <b>Bind</b> to store their current matrices.<br>\nThe mode switches automatically after each run.\n</html>", "default": "text"}]]></attr>
 <attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"items": ["Unbind", "Bind"], "current": 0, "columns": 3, "default": "current"}]]></attr>
 <attr name="joints" template="listBox" category="General" connect=""><![CDATA[{"items": [], "default": "items"}]]></attr>
 <attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import maya.cmds as cmds\nimport maya.mel as mel\n\njoints = set()\nfor mesh in cmds.ls(sl=True) or []:\n    skin = mel.eval('findRelatedSkinCluster \"{}\"'.format(mesh))\n    if skin:\n        joints.update(cmds.skinCluster(skin, query=True, influence=True) or [])\n\nchset(\"/joints\", sorted(joints))", "label": "Get From Mesh", "color": "", "default": "command"}]]></attr>
