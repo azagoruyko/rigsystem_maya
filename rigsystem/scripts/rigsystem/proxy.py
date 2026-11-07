@@ -5,7 +5,7 @@ import maya.api.OpenMayaAnim as oma
 
 _API_FUNCTION_SETS = {
     "transform": om.MFnTransform,
-    "joint": oma.MFnIkJoint if "MFnIkJoint" in oma.__dict__ else om.MFnTransform,
+    "joint": om.MFnTransform,
     "mesh": om.MFnMesh,
     "nurbsCurve": om.MFnNurbsCurve,
     "nurbsSurface": om.MFnNurbsSurface,
