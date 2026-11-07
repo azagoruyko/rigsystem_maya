@@ -1,4 +1,4 @@
-<module name="attachToSurface" muted="0" uid="b21c578b1b144f4e9fe06ec449961b0f">
+<module name="AttachToSurface" muted="0" uid="b21c578b1b144f4e9fe06ec449961b0f">
 <run><![CDATA[from rigsystem import proxy, rig_utils
 
 cmds = proxy.cmds
@@ -15,48 +15,39 @@ for t in transforms:
     u = cpos.parameterU.get()
     v = cpos.parameterV.get()
 
-    parent = t.getParent()
-    st = rig_utils.makeSurfaceTransform(str(t), surface, u, v)
-    if parent:
-        cmds.parent(str(st), str(parent))
-    cmds.parent(str(t), str(st))
+    if @addNewParents:
+        parent = t.getParent()
+        st = rig_utils.makeSurfaceTransform(str(t), surface, u, v)
+        if parent:
+            cmds.parent(str(st), str(parent))
+        cmds.parent(str(t), str(st))
+    else:
+        rig_utils.attachTransformToSurface(str(t), surface, u, v)
 
 cmds.delete(str(cpos))
 ]]></run>
 <doc><![CDATA[## Summary
-The **attachToSurface** module projects a list of transforms onto a specified NURBS surface and creates a surface‑transform node at each transform’s closest point. Each original transform is then parented under its corresponding surface transform, preserving the original hierarchy.
+Attaches a list of transform nodes to a NURBS surface by computing the closest surface parameters for each transform. Optionally creates intermediate surface‑aligned transform nodes that become the new parents of the original transforms.
 
 ## Inputs
-- **`surface`** (`lineEditAndButton`)  
-  *Name of the NURBS surface to which the transforms will be attached.*  
-  Example: `nurbsPlane1`.
-
-- **`transforms`** (`listBox`)  
-  *List of transform node names that should be projected onto the surface.*  
-  Example: `L_hair_curl_a_1_control_null`, `L_hair_curl_b_2_control_null`, etc.
+- **`surface`** (`node`): The NURBS surface (or its transform) to which the transforms will be attached.  
+- **`transforms`** (`list[node]`): A list of transform nodes whose world positions will be projected onto the surface.  
+- **`addNewParents`** (`bool`): If `True`, a new surface‑aligned transform is created for each input transform and becomes its parent; otherwise the original transform is directly attached to the surface.
 
 ## Outputs
-- **Surface Transform Nodes**  
-  For each input transform, a new surface‑transform node is created (typically named after the original transform, e.g., `L_hair_curl_a_1_control_null_st`).  
-  These nodes are parented to the original parent of the transform (if any) and then the original transform is parented under the new surface transform.
-
-- **Re‑parented Transforms**  
-  The original transforms are now children of their respective surface transform nodes, effectively locking them to the surface at the projected location.
-
-- **Temporary Node Cleanup**  
-  The temporary `closestPointOnSurface` node used for projection is deleted after the operation.
+- The input **`transforms`** are re‑parented or attached to the specified **`surface`**.  
+- When **`addNewParents`** is `True`, a new surface‑aligned transform node is created for each input transform and becomes its parent.  
+- No explicit output attributes are produced; the module’s effect is the side‑effect on the scene hierarchy.
 
 ## Usage
-1. **Select the NURBS surface** you want to attach to and enter its name in the **`surface`** field (or use the button to pick the selected node).  
-2. **Populate the `transforms` list** with the transforms you wish to project onto the surface.  
-3. **Run the module**.  
-   - The script will compute the closest point on the surface for each transform’s current world position.  
-   - A surface‑transform node is created at that point, the original transform is parented under it, and the original parent relationship is preserved.  
-4. **Verify the result** in the scene hierarchy: each transform should now be a child of a new surface‑transform node positioned on the surface.  
-5. **Optional**: If you need to adjust offsets or orientations, modify the newly created surface transform nodes directly.]]></doc>
+1. Connect a NURBS surface node to the **`surface`** input.  
+2. Provide a list of transform nodes to **`transforms`**.  
+3. Set **`addNewParents`** to `True` if you want each transform to be wrapped in a surface‑aligned parent; leave it `False` to attach the transforms directly.  
+4. Execute the module. The transforms will be positioned on the surface and, if requested, re‑parented under new surface‑aligned nodes.]]></doc>
 <attributes>
 <attr name="" template="label" category="General" connect=""><![CDATA[{"default": "text", "text": "Attach <b>transforms</b> to <b>NURBS surface</b> using closest point projection."}]]></attr>
 <attr name="surface" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "nurbsPlane1", "placeholder": "NURBS surface name", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
-<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"default": "items", "items": ["L_hair_curl_a_1_control_null", "L_hair_curl_a_2_control_null", "L_hair_curl_a_3_control_null", "L_hair_curl_a_4_control_null", "L_hair_curl_a_5_control_null", "L_hair_curl_b_1_control_null", "L_hair_curl_b_2_control_null", "L_hair_curl_b_3_control_null", "L_hair_curl_b_4_control_null", "L_hair_curl_b_5_control_null", "L_hair_curl_b_6_control_null", "L_hair_curl_c_1_control_null", "L_hair_curl_c_2_control_null", "L_hair_curl_c_3_control_null", "L_hair_curl_c_4_control_null", "L_hair_curl_d_1_control_null", "L_hair_curl_d_2_control_null", "L_hair_curl_d_3_control_null", "L_hair_curl_d_4_control_null", "L_hair_curl_d_5_control_null", "L_hair_curl_e_1_control_null", "L_hair_curl_e_2_control_null", "L_hair_curl_e_3_control_null", "L_hair_curl_e_4_control_null"]}]]></attr>
+<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"items": ["ctrl1_pivot_transform", "ctrl2_pivot_transform", "ctrl3_pivot_transform"], "default": "items"}]]></attr>
+<attr name="addNewParents" template="checkBox" category="General" connect=""><![CDATA[{"checked": false, "default": "checked"}]]></attr>
 </attributes>
 </module>
