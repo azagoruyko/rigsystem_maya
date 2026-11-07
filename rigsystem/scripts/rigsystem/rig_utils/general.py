@@ -194,13 +194,13 @@ def toggleVisible(obj):
             return True
 
 
-def makeSurfaceTransform(name, surface, u=0.5, v=0.5, percentUV=False):
-    """Create a transform driven by surface position and tangents."""
-    posi = proxy.create("pointOnSurfaceInfo", name)
-    fourByFour = proxy.create("fourByFourMatrix", name)
-    decompose = proxy.create("decomposeMatrix", name)
-    inv = proxy.create("multMatrix", name)
-    transform = proxy.create("transform", name)
+def attachTransformToSurface(transform, surface, u=0.5, v=0.5, percentUV=False):
+    """Attach a transform to a surface based on its position and tangents."""
+    transform = proxy.node(transform)
+    posi = proxy.create("pointOnSurfaceInfo", str(transform))
+    fourByFour = proxy.create("fourByFourMatrix", str(transform))
+    decompose = proxy.create("decomposeMatrix", str(transform))
+    inv = proxy.create("multMatrix", str(transform))
 
     surfaceShape = (proxy.node(surface).getShapes(noIntermediate=True) or [proxy.node(surface)])[0]
     surfaceShape.worldSpace[0] >> posi.inputSurface
@@ -230,6 +230,13 @@ def makeSurfaceTransform(name, surface, u=0.5, v=0.5, percentUV=False):
     decompose.outputTranslate >> transform.translate
     decompose.outputRotate >> transform.rotate
 
+    return transform
+
+
+def makeSurfaceTransform(name, surface, u=0.5, v=0.5, percentUV=False):
+    """Create a transform driven by surface position and tangents."""
+    transform = proxy.create("transform", name)
+    attachTransformToSurface(transform, surface, u=u, v=v, percentUV=percentUV)
     return transform
 
 
