@@ -247,6 +247,11 @@ class Node:
         return om.MFnDependencyNode(obj).name()
 
 
+    def name(self):
+        """Return the node's current Maya name."""
+        return str(self)
+
+
     def __eq__(self, other):
         if not isinstance(other, Node):
             return NotImplemented
