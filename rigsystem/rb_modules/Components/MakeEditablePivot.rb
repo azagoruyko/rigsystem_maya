@@ -1,11 +1,11 @@
-<module name="makeEditablePivot" muted="0" uid="14932544be434020a1338edbc2110db2">
+<module name="MakeEditablePivot" muted="0" uid="14932544be434020a1338edbc2110db2">
 <run><![CDATA[from rigsystem import proxy, rig_utils
 
 cmds = proxy.cmds
 
 makeHelperMod = module.child("MakeHelper")
 
-controls = []
+out_transforms = []
 for tr in @transforms:
     tr = proxy.node(tr)
     children = tr.getChildren(type="transform")
@@ -42,38 +42,34 @@ for tr in @transforms:
         rig_utils.lockTRS(ctrl, [], [])
         
         cmds.parentConstraint(ctrl, pivot, mo=True)
-        controls.append(ctrl)
+        out_transforms.append(ctrl)
+    else:
+        out_transforms.append(pivot)        
         
-@set_out_controls([str(c) for c in controls])
+@set_out_transforms([str(c) for c in out_transforms])
 
 ]]></run>
-<doc><![CDATA[## Summary  
-Creates pivot helpers and optional control curves for a list of selected transforms. For each transform it generates a pivot transform, an offset parent transform, and, if requested, a helper curve and a control that is constrained to the pivot. The module outputs the names of all created controls for downstream use.
+<doc><![CDATA[## Summary
+Creates pivot helper objects for each selected transform, optionally generating visual helper curves and controls. The module offsets the pivot, locks the helper, and can spawn a helper curve via the child **MakeHelper** module. The resulting transforms (pivots or controls) are exposed for downstream rigging steps.
 
-## Inputs  
-- **`@transforms`** – A list of transform node names or PyNode objects to process.  
-- **`@makeShape`** – Boolean flag. When `True`, a helper curve is created for each pivot using the child module **MakeHelper**.  
-- **`@set_out_controls`** – Output attribute that receives the list of created control names.
+## Inputs
+- **`transforms`** (`list`): A list of transform node names or paths that will receive pivot helpers.  
+- **`makeShape`** (`bool`): When `True`, a helper curve and control are created for each pivot; otherwise only the pivot helper is generated.  
 
-## Outputs  
-- **`out_controls`** – A list of the names of all control transforms created by the module.  
-- (Implicit) For each input transform, the module creates:  
-  - A pivot transform (`*_pivot_transform`) parented to the original transform’s parent.  
-  - A pivot offset transform (`*_pivot_offset_transform`) parented to the original transform, with its `offsetParentMatrix` driven by the pivot’s inverse matrix.  
-  - If `@makeShape` is `True`, a helper curve (`*_helper`) and a control transform (`*_pivot_control`) that inherits the pivot’s transform but is constrained to it.
+## Outputs
+- **`out_transforms`** (`list` of strings): Paths to the created pivot helpers or control transforms. These can be connected to other modules (e.g., IK/FK rigs, constraints, or animation layers).
 
-## Usage  
+## Usage
 1. Select the transforms you want to add pivot helpers to.  
-2. Set the `@transforms` attribute to the list of selected transforms (or let the module auto‑detect the selection).  
-3. Toggle `@makeShape` to `True` if you want a visual helper curve and control for each pivot.  
+2. Set the **`transforms`** attribute to the list of selected nodes (or let the module auto‑detect the selection).  
+3. Toggle **`makeShape`** if you want visual helper curves and controls.  
 4. Execute the module.  
-5. The module will create the pivot hierarchy and, if requested, helper curves and controls.  
-6. The names of all created controls are available in the `out_controls` output for connection to other rig modules or for further manipulation.]]></doc>
+5. The generated pivots or controls will appear in the scene; use the **`out_transforms`** output to feed into subsequent rigging modules.]]></doc>
 <attributes>
 <attr name="curveType" template="comboBox" category="General" connect=""><![CDATA[{"items": ["arc", "arrow", "axis", "axisSphere", "cube", "circle", "diamond", "key", "pyramid", "rect", "sphere", "triangle", "plus"], "current": "axis", "default": "current"}]]></attr>
-<attr name="makeShape" template="checkBox" category="General" connect=""><![CDATA[{"checked": true, "default": "checked"}]]></attr>
-<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"items": ["joint1", "joint2", "joint3", "joint4"], "default": "items"}]]></attr>
-<attr name="out_controls" template="listBox" category="Output" connect=""><![CDATA[{"items": ["joint1_pivot_control", "joint2_pivot_control", "joint3_pivot_control", "joint4_pivot_control"], "default": "items"}]]></attr>
+<attr name="makeShape" template="checkBox" category="General" connect=""><![CDATA[{"checked": false, "default": "checked"}]]></attr>
+<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"items": ["ctrl1", "ctrl2", "ctrl3"], "default": "items"}]]></attr>
+<attr name="out_transforms" template="listBox" category="Output" connect=""><![CDATA[{"items": ["joint1_pivot_control", "joint2_pivot_control", "joint3_pivot_control", "joint4_pivot_control"], "default": "items"}]]></attr>
 </attributes>
 <children>
 <module name="MakeHelper" muted="1" uid="1f5e3d986051407397d0b580e70ef628">
@@ -95,7 +91,8 @@ Creates a helper curve node with a user‑defined name and shape, positioned at 
 3. Execute the module.  
 4. The created helper curve will appear in the scene; you can parent, constrain, or connect it to other rig components as needed.]]></doc>
 <attributes>
-<attr name="curveType" template="comboBox" category="General" connect="/curveType"><![CDATA[{"items": ["arc", "arrow", "axis", "axisSphere", "cube", "circle", "diamond", "key", "pyramid", "rect", "sphere", "triangle", "plus"], "current": "axis", "default": "current"}]]></attr>
+<attr name="curveType" template="comboBox" category="General" connect="/curveType"><![CDATA[{"items": ["arc", "arrow", "arrowCircle", "axis", "axisSphere", "circle", "cube", "diamond", "flag", "gear", "guide", "key", "main", "plus", "pyramid", "rect", "sphere", "triangle"], "current": "axis", "default": "current"}]]></attr>
+<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import os\nfrom rigsystem import rig_utils\n\ncurves = sorted(\n    os.path.splitext(filename)[0]\n    for filename in os.listdir(rig_utils.curve.CurvesPath)\n    if filename.endswith(\".json\")\n)\ncurrent = ch(\"/curveType\")\nif current not in curves:\n    chset(\"/curveType\", curves[0] if curves else \"\", \"current\")\n\nchset(\"/curveType\", curves, \"items\")", "label": "Get All Curves", "color": "", "default": "command"}]]></attr>
 <attr name="name" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "joint4_pivot_transform_helper", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 </attributes>
 </module>
