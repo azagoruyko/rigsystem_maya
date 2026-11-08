@@ -10,7 +10,7 @@ def getJointsSkinClusters(joint):
 def influenceIndex(skin, joint):
     return skin.mfn().indexForInfluenceObject(joint.mdagpath)
 
-if @mode in (0, ""): # unbind; older embedded modules may have an empty mode
+if @mode == 0: # unbind
     for j in joints:
         for skin in getJointsSkinClusters(j):
             idx = influenceIndex(skin, j)
