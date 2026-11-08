@@ -53,6 +53,18 @@ class Plug:
         return self._mplug.name()
 
 
+    def __add__(self, other):
+        if not isinstance(other, str):
+            return NotImplemented
+        return str(self) + other
+
+
+    def __radd__(self, other):
+        if not isinstance(other, str):
+            return NotImplemented
+        return other + str(self)
+
+
     def __getattr__(self, name):
         if name.startswith("__"):
             raise AttributeError(name)
@@ -245,6 +257,18 @@ class Node:
         if obj.hasFn(om.MFn.kDagNode):
             return om.MDagPath.getAPathTo(obj).partialPathName()
         return om.MFnDependencyNode(obj).name()
+
+
+    def __add__(self, other):
+        if not isinstance(other, str):
+            return NotImplemented
+        return str(self) + other
+
+
+    def __radd__(self, other):
+        if not isinstance(other, str):
+            return NotImplemented
+        return other + str(self)
 
 
     def name(self):
