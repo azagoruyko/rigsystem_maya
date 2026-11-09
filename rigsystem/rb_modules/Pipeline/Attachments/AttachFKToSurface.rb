@@ -3,15 +3,14 @@
 
 # make additional transforms to make editable pivots later
 
-controls = proxy.nodes(@controls)
-
-if not controls[-1].getChildren(type="transform"):
-    proxy.create("transform", name=controls[-1]+"_fake_child", parent=controls[-1])    ]]></run>
+for ctrl in proxy.nodes(@controls):
+    if not ctrl.getChildren(type="transform"):
+        proxy.create("transform", name=ctrl+"_fake_child", parent=ctrl)    ]]></run>
 <doc><![CDATA[## Summary
 
 Attach FK controls to nurbs surface preserving controls' FK behaviour.]]></doc>
 <attributes>
-<attr name="controls" template="listBox" category="General" connect=""><![CDATA[{"items": ["ctrl1", "ctrl2", "ctrl3"], "default": "items"}]]></attr>
+<attr name="controls" template="listBox" category="General" connect=""><![CDATA[{"items": ["joint1_control", "joint2_control", "joint3_control", "joint4_control", "joint5_control", "joint6_control", "joint7_control"], "default": "items"}]]></attr>
 <attr name="surface" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "nurbsPlane1", "placeholder": "NURBS surface name", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 </attributes>
 <children>
@@ -85,8 +84,8 @@ Creates pivot helper objects for each selected transform, optionally generating 
 <attributes>
 <attr name="curveType" template="comboBox" category="General" connect=""><![CDATA[{"items": ["arc", "arrow", "axis", "axisSphere", "cube", "circle", "diamond", "key", "pyramid", "rect", "sphere", "triangle", "plus"], "current": "axis", "default": "current"}]]></attr>
 <attr name="makeShape" template="checkBox" category="General" connect=""><![CDATA[{"checked": false, "default": "checked"}]]></attr>
-<attr name="transforms" template="listBox" category="General" connect="/controls"><![CDATA[{"items": ["ctrl1", "ctrl2", "ctrl3"], "default": "items"}]]></attr>
-<attr name="out_transforms" template="listBox" category="Output" connect=""><![CDATA[{"items": ["ctrl1_pivot_transform", "ctrl2_pivot_transform", "ctrl3_pivot_transform"], "default": "items"}]]></attr>
+<attr name="transforms" template="listBox" category="General" connect="/controls"><![CDATA[{"items": ["joint1_control", "joint2_control", "joint3_control", "joint4_control", "joint5_control", "joint6_control", "joint7_control"], "default": "items"}]]></attr>
+<attr name="out_transforms" template="listBox" category="Output" connect=""><![CDATA[{"items": ["joint1_control_pivot_transform", "joint2_control_pivot_transform", "joint3_control_pivot_transform", "joint4_control_pivot_transform", "joint5_control_pivot_transform", "joint6_control_pivot_transform", "joint7_control_pivot_transform"], "default": "items"}]]></attr>
 </attributes>
 <children>
 <module name="MakeHelper" muted="1" uid="1f5e3d986051407397d0b580e70ef628">
@@ -208,7 +207,7 @@ Attaches a list of transform nodes to a NURBS surface by computing the closest s
 <attributes>
 <attr name="" template="label" category="General" connect=""><![CDATA[{"default": "text", "text": "Attach <b>transforms</b> to <b>NURBS surface</b> using closest point projection."}]]></attr>
 <attr name="surface" template="lineEditAndButton" category="General" connect="/surface"><![CDATA[{"value": "nurbsPlane1", "placeholder": "NURBS surface name", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
-<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"items": ["ctrl1_pivot_attached_transform", "ctrl2_pivot_attached_transform", "ctrl3_pivot_attached_transform"], "default": "items"}]]></attr>
+<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"items": ["joint1_control_pivot_attached_transform", "joint2_control_pivot_attached_transform", "joint3_control_pivot_attached_transform", "joint4_control_pivot_attached_transform", "joint5_control_pivot_attached_transform", "joint6_control_pivot_attached_transform", "joint7_control_pivot_attached_transform"], "default": "items"}]]></attr>
 <attr name="addNewParents" template="checkBox" category="General" connect=""><![CDATA[{"checked": false, "default": "checked"}]]></attr>
 </attributes>
 </module>
