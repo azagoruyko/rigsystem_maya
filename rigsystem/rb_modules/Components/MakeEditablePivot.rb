@@ -19,6 +19,7 @@ for tr in @transforms:
     rig_utils.setToOffsetParentMatrix(pivot)
     
     pivot | tr
+    rig_utils.setToOffsetParentMatrix(tr)
             
     pivotOffset = proxy.create("transform", f"{name}_pivot_offset", parent=tr)
     cmds.parent(children, pivotOffset)
@@ -68,8 +69,8 @@ Creates pivot helper objects for each selected transform, optionally generating 
 <attributes>
 <attr name="curveType" template="comboBox" category="General" connect=""><![CDATA[{"items": ["arc", "arrow", "axis", "axisSphere", "cube", "circle", "diamond", "key", "pyramid", "rect", "sphere", "triangle", "plus"], "current": "axis", "default": "current"}]]></attr>
 <attr name="makeShape" template="checkBox" category="General" connect=""><![CDATA[{"checked": false, "default": "checked"}]]></attr>
-<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"items": ["ctrl1", "ctrl2", "ctrl3"], "default": "items"}]]></attr>
-<attr name="out_transforms" template="listBox" category="Output" connect=""><![CDATA[{"items": ["joint1_pivot_control", "joint2_pivot_control", "joint3_pivot_control", "joint4_pivot_control"], "default": "items"}]]></attr>
+<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"items": ["pCube1"], "default": "items"}]]></attr>
+<attr name="out_transforms" template="listBox" category="Output" connect=""><![CDATA[{"items": ["pCube1_pivot_transform"], "default": "items"}]]></attr>
 </attributes>
 <children>
 <module name="MakeHelper" muted="1" uid="1f5e3d986051407397d0b580e70ef628">
