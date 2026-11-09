@@ -14,9 +14,9 @@ else:
 
     # Projection plane mapping: 0 -> XZ, 1 -> XY, 2 -> YZ
     planeMap = {
-        0: ("x", "z", "windSpotX", "windSpotZ"),
-        1: ("x", "y", "windSpotX", "windSpotY"),
-        2: ("y", "z", "windSpotY", "windSpotZ")
+        0: ("x", "z", "tx", "tz"),
+        1: ("x", "y", "tx", "ty"),
+        2: ("y", "z", "ty", "tz")
     }
     axisU, axisV, attrUName, attrVName = planeMap[@projectPlane]
 
@@ -138,40 +138,31 @@ else:
         cmds.expression(s=exprStr, n=@expressionName, ae=True)
 ]]></run>
 <doc><![CDATA[## Summary
-The **hairAutoWindRotation** module automatically drives a sine‑based wind animation for multiple hair curl chains. It analyses the input transforms, determines each chain’s depth, calculates a 2‑D wind spot on a chosen projection plane, and builds a single Maya expression that drives per‑transform rotation along a specified axis with depth‑dependent amplitude, phase offsets, and a quadratic fall‑off.
+AutoWindRotation creates a Maya expression that animates the selected hair controls with a sine wave. It groups the controls by hierarchy, uses each group's world-space center to calculate a normalized position on the chosen plane, and varies rotation by chain depth and distance from a movable wind spot.
 
 ## Inputs
-- **`transforms`** – List of hair control transforms (any order). The module will resolve each chain’s root and depth.
-- **`controlNode`** – Node that will receive the wind attributes (`windAmplitude`, `windFrequency`, etc.). If the node does not exist, the module will not run.
-- **`expressionName`** – Name of the Maya expression node that will be created or updated.
-- **`projectPlane`** – Projection plane for the wind spot: **XZ**, **XY**, or **YZ**. Determines which 2‑D attributes (`windSpotX/Z`, `windSpotX/Y`, or `windSpotY/Z`) are added.
-- **`rotateAxis`** – Axis on which the wind rotation will be applied: **X**, **Y**, or **Z**.
-- **`directConnect`** – If checked, the module will directly connect the expression to the original transforms; otherwise it creates a temporary `<transform>_wind_transform` node above each control and drives that node.
+- **`transforms`**: Hair control transforms in any order. Missing transforms are skipped. Their hierarchy determines curl roots and depths.
+- **`controlNode`**: Existing transform that holds the wind settings. Its built-in translate channels position the wind spot.
+- **`expressionName`**: Name of the expression to create or append to; default `wind_expression`.
+- **`projectPlane`**: XZ uses `tx` and `tz`; XY uses `tx` and `ty`; YZ uses `ty` and `tz` on `controlNode`.
+- **`rotateAxis`**: X, Y, or Z axis of each control's `rotateAxis` attribute.
 
 ## Outputs
-- **Expression node** (`<expressionName>`) that contains the wind rotation logic and updates the selected axis on each transform or its wind transform.
-- **Wind transform nodes** (`<transform>_wind_transform`) created for each input transform when `directConnect` is unchecked.
-- **Wind attributes** added to the `controlNode`:
-  - `windAmplitude`, `windFrequency`, `windCurlOffset`, `windDepthScale`, `windOffset`, `windFalloff`
-  - 2‑D spot attributes (`windSpotX`/`windSpotZ`, `windSpotX`/`windSpotY`, or `windSpotY`/`windSpotZ`) depending on the chosen plane.
-- The module updates the expression node each time it runs, appending new logic for any new transforms.
+- Adds `windAmplitude`, `windFrequency`, `windCurlOffset`, `windDepthScale`, `windOffset`, and `windFalloff` to `controlNode` if they are missing. The spot uses existing translate channels; no separate `windSpot` attributes are created.
+- Creates an expression that writes directly to the chosen `rotateAxis` component of each listed control. No intermediate wind transforms are created.
+- If `expressionName` already exists, appends a new block to its source. Re-running does not replace old blocks, so repeated controls or removed controls can leave old assignments in the expression.
 
 ## Usage
-1. **Select the hair controls** you want to wind. They can be in any order; the module will automatically detect chain roots and depths.
-2. **Choose a control node** that will hold the wind parameters (e.g., a dedicated wind controller).  
-3. **Set the expression name** (default `wind_expression`).  
-4. **Pick the projection plane** (XZ, XY, or YZ) and the rotation axis (X, Y, or Z).  
-5. **Decide on direct connection**:  
-   - *Checked* – the expression drives the original controls directly.  
-   - *Unchecked* – a temporary wind transform node is created above each control and driven instead.  
-6. **Run the module**. It will create the necessary attributes, build or update the expression, and add wind transform nodes if needed.  
-7. **Adjust the wind parameters** on the control node (`windAmplitude`, `windFrequency`, etc.) and the 2‑D spot attributes to shape the wind effect.  
-8. **Re‑run** if you add or remove hair controls; the module will append the new logic to the existing expression.]]></doc>
+1. Supply the hair controls, an existing wind control node, an expression name, a projection plane, and a rotation axis.
+2. Run the module to add wind settings and build the expression.
+3. Animate the wind control's translate channels for the selected plane to move the spot. Curl centers are normalized to the range -1 to 1 on each plane axis, so that range spans the curls. Adjust `windFalloff` to change the affected area.
+4. Adjust amplitude, frequency, curl phase offset, depth scale, and time offset on the wind control.
+5. When changing the control list, remove or replace the old expression before running again if its previous assignments should no longer apply.]]></doc>
 <attributes>
 <attr name="expressionName" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "wind_expression", "placeholder": "Expression node name", "buttonEnabled": false, "default": "value"}]]></attr>
-<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"items": ["L_hair_curl_a_1_control", "L_hair_curl_a_2_control", "L_hair_curl_a_3_control", "L_hair_curl_a_4_control", "L_hair_curl_a_5_control", "L_hair_curl_b_1_control", "L_hair_curl_b_2_control", "L_hair_curl_b_3_control", "L_hair_curl_b_4_control", "L_hair_curl_b_5_control", "L_hair_curl_b_6_control", "L_hair_curl_c_1_control", "L_hair_curl_c_2_control", "L_hair_curl_c_3_control", "L_hair_curl_c_4_control", "L_hair_curl_d_1_control", "L_hair_curl_d_2_control", "L_hair_curl_d_3_control", "L_hair_curl_d_4_control", "L_hair_curl_d_5_control", "M_hair_curl_top_1_control", "M_hair_curl_top_2_control", "M_hair_curl_top_3_control", "L_hair_curl_e_1_control", "L_hair_curl_e_2_control", "L_hair_curl_e_3_control", "L_hair_curl_e_4_control", "M_hair_curl_a_1_control", "M_hair_curl_a_2_control", "M_hair_curl_a_3_control", "M_hair_curl_b_1_control", "M_hair_curl_b_2_control", "M_hair_curl_b_3_control", "R_hair_curl_a_1_control", "R_hair_curl_a_2_control", "R_hair_curl_a_3_control", "R_hair_curl_a_4_control", "R_hair_curl_a_5_control", "R_hair_curl_b_1_control", "R_hair_curl_b_2_control", "R_hair_curl_b_3_control", "R_hair_curl_b_4_control", "R_hair_curl_b_5_control", "R_hair_curl_c_1_control", "R_hair_curl_c_2_control", "R_hair_curl_c_3_control", "R_hair_curl_c_4_control", "R_hair_curl_d_1_control", "R_hair_curl_d_2_control", "R_hair_curl_d_3_control", "R_hair_curl_d_4_control", "R_hair_curl_d_5_control"], "default": "items"}]]></attr>
+<attr name="transforms" template="listBox" category="General" connect=""><![CDATA[{"items": ["L_hair_curl_a_2_control", "L_hair_curl_a_3_control", "L_hair_curl_b_2_control", "L_hair_curl_b_3_control", "L_hair_curl_b_4_control", "L_hair_curl_b_5_control", "L_hair_curl_c_2_control", "L_hair_curl_c_3_control", "L_hair_curl_c_4_control", "L_hair_curl_c_5_control", "L_hair_curl_d_2_control", "L_hair_curl_d_3_control", "L_hair_curl_d_4_control", "L_hair_curl_d_5_control", "L_hair_curl_e_2_control", "L_hair_curl_e_3_control", "L_hair_curl_e_4_control", "L_hair_curl_e_5_control", "L_hair_curl_e_6_control", "L_hair_curl_f_2_control", "L_hair_curl_f_3_control", "L_hair_curl_f_4_control", "L_hair_curl_f_5_control", "L_hair_curl_f_6_control", "L_hair_curl_g_2_control", "L_hair_curl_g_3_control", "L_hair_curl_g_4_control", "L_hair_curl_g_5_control", "L_hair_curl_g_6_control", "L_hair_curl_h_2_control", "L_hair_curl_h_3_control", "L_hair_curl_h_4_control", "L_hair_curl_h_5_control", "L_hair_curl_h_6_control", "L_hair_curl_i_2_control", "L_hair_curl_i_3_control", "L_hair_curl_i_4_control", "L_hair_curl_i_5_control", "L_hair_curl_i_6_control", "L_hair_curl_j_2_control", "L_hair_curl_j_3_control", "L_hair_curl_j_4_control", "L_hair_curl_j_5_control", "L_hair_curl_k_2_control", "L_hair_curl_k_3_control", "L_hair_curl_k_4_control", "L_hair_curl_k_5_control", "L_hair_curl_l_2_control", "L_hair_curl_l_3_control", "L_hair_curl_l_4_control", "L_hair_curl_l_5_control", "L_hair_curl_l_6_control", "L_hair_curl_m_2_control", "L_hair_curl_m_3_control", "L_hair_curl_m_4_control", "L_hair_curl_m_5_control", "L_hair_curl_n_2_control", "L_hair_curl_n_3_control", "L_hair_curl_n_4_control", "L_hair_curl_n_5_control", "L_hair_curl_o_2_control", "L_hair_curl_o_3_control", "L_hair_curl_o_4_control", "L_hair_curl_o_5_control", "R_hair_curl_j_2_control", "R_hair_curl_j_3_control", "R_hair_curl_j_4_control", "R_hair_curl_j_5_control", "R_hair_curl_k_2_control", "R_hair_curl_k_3_control", "R_hair_curl_k_4_control", "R_hair_curl_k_5_control", "R_hair_curl_l_2_control", "R_hair_curl_l_3_control", "R_hair_curl_l_4_control", "R_hair_curl_l_5_control", "R_hair_curl_l_6_control", "R_hair_curl_m_2_control", "R_hair_curl_m_3_control", "R_hair_curl_m_4_control", "R_hair_curl_m_5_control", "R_hair_curl_a_2_control", "R_hair_curl_a_3_control", "R_hair_curl_i_2_control", "R_hair_curl_i_3_control", "R_hair_curl_i_4_control", "R_hair_curl_i_5_control", "R_hair_curl_b_2_control", "R_hair_curl_b_3_control", "R_hair_curl_b_4_control", "R_hair_curl_b_5_control", "R_hair_curl_d_2_control", "R_hair_curl_d_3_control", "R_hair_curl_d_4_control", "R_hair_curl_d_5_control", "R_hair_curl_f_2_control", "R_hair_curl_f_3_control", "R_hair_curl_f_4_control", "R_hair_curl_f_5_control", "R_hair_curl_h_2_control", "R_hair_curl_h_3_control", "R_hair_curl_h_4_control", "R_hair_curl_h_5_control", "R_hair_curl_h_6_control", "R_hair_curl_e_2_control", "R_hair_curl_e_3_control", "R_hair_curl_e_4_control", "R_hair_curl_g_2_control", "R_hair_curl_g_3_control", "R_hair_curl_g_4_control", "R_hair_curl_g_5_control", "R_hair_curl_g_6_control", "R_hair_curl_o_2_control", "R_hair_curl_o_3_control", "R_hair_curl_o_4_control", "R_hair_curl_o_5_control", "R_hair_curl_o_6_control", "R_hair_curl_n_2_control", "R_hair_curl_n_3_control"], "default": "items"}]]></attr>
 <attr name="controlNode" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "M_hair_wind_control", "placeholder": "Node to receive wind attrs", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
-<attr name="projectPlane" template="radioButton" category="General" connect=""><![CDATA[{"current": 0, "items": ["XZ", "XY", "YZ"], "columns": 3, "default": "current"}]]></attr>
+<attr name="projectPlane" template="radioButton" category="General" connect=""><![CDATA[{"items": ["XZ", "XY", "YZ"], "current": 0, "columns": 3, "default": "current"}]]></attr>
 <attr name="rotateAxis" template="radioButton" category="General" connect=""><![CDATA[{"current": 2, "items": ["X", "Y", "Z"], "columns": 3, "default": "current"}]]></attr>
 </attributes>
 </module>
