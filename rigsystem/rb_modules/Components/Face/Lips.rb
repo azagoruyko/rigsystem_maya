@@ -142,18 +142,25 @@ finally:
 
 bindMode = module.child("BindMode")
 joints = set()
+skins = set()
 for lid in ("upper", "lower"):
     mainCurve = proxy.node(f"lip_{lid}_main_curve")
     shape = mainCurve.getShapes(type="nurbsCurve")[0]
 
     for skin in shape.inputs(type="skinCluster"):
+        skins.add(str(skin))
         joints.update(cmds.skinCluster(skin, query=True, influence=True) or [])
 
+if not skins:
+    raise ValueError("No skin clusters found on the lip main curves.")
+
 bindMode.attr.joints = sorted(joints)
+bindMode.attr.skins = sorted(skins)
 bindMode.attr.mode = 0
 bindMode.run()
 bindMode.attr.mode = 1
 bindMode.run()
+cmds.setAttr("lips_corners_root_transform_pointConstraint1.nodeState", 1)
 ]]></run>
 <doc><![CDATA[## Summary
 Fits the face_lips tuner curves and locator tuners to two degree-1 lip edge curves.
@@ -162,7 +169,7 @@ Fits the face_lips tuner curves and locator tuners to two degree-1 lip edge curv
 - Parent `upper_curve` and `lower_curve`: open degree-1 curves that share their L/R corner endpoints.
 
 ## Outputs
-Copies the degree-1 inputs into the upper/lower wire curve Origs. Rebuilds each input to six spans and copies it into the corresponding tuner curve. Positions the L/R corner tuners at the curve ends and the upper/lower main tuners at normalized parameter 0.5.
+Copies the degree-1 inputs into the upper/lower wire curve Origs. Rebuilds each input to six spans and copies it into the corresponding tuner curve. Positions the L/R corner tuners at the curve ends and the upper/lower main tuners at normalized parameter 0.5. Rebinds only the skin clusters on the main curves, then disables the lips corner root point constraint.
 
 ## Usage
 Import face_lips, set the two parent inputs, then run Lips. Input direction may be reversed; wire geometry is normalized from L to R.]]></doc>
@@ -172,6 +179,15 @@ Import face_lips, set the two parent inputs, then run Lips. Input direction may 
 
 cmds = proxy.cmds
 joints = proxy.nodes(@joints)
+selectedSkins = set(proxy.nodes(@skins))
+
+if not joints and selectedSkins:
+    influences = {
+        name
+        for skin in selectedSkins
+        for name in cmds.skinCluster(str(skin), query=True, influence=True) or []
+    }
+    joints = proxy.nodes(sorted(influences))
 
 def getJointsSkinClusters(joint):
     return {plug.node for plug in joint.worldMatrix.outputs(type="skinCluster")}
@@ -182,6 +198,9 @@ def influenceIndex(skin, joint):
 if @mode == 0: # unbind
     for j in joints:
         for skin in getJointsSkinClusters(j):
+            if selectedSkins and skin not in selectedSkins:
+                continue
+
             idx = influenceIndex(skin, j)
         
             preMatrix = skin.bindPreMatrix[idx]
@@ -193,6 +212,9 @@ if @mode == 0: # unbind
 else:
     for j in joints:
         for skin in getJointsSkinClusters(j):
+            if selectedSkins and skin not in selectedSkins:
+                continue
+
             idx = influenceIndex(skin, j)
         
             matrix = j.worldInverseMatrix[0].get()
@@ -204,28 +226,27 @@ else:
     print("Binded")
     @set_mode("")
         ]]></run>
-<doc><![CDATA[## Summary  
-The **bindMode** module toggles the binding state of selected joints to their skin clusters in Maya. When executed, it either connects each joint’s world inverse matrix to the skin cluster’s bind pre‑matrix (unbinding) or disconnects that connection and writes the current matrix back (rebinding). The module updates the `mode` attribute to reflect the new state and prints a status message.
+<doc><![CDATA[## Summary
+BindMode updates bind pre-matrices for the listed joints. Unbind connects each joint's world inverse matrix to its bind pre-matrix so the joint can be repositioned without moving the skinned geometry. Bind disconnects that link and stores the joint's current world inverse matrix.
 
-## Inputs  
-- **`joints`** (listBox): A list of joint names that the script will process.  
-- **`mode`** (label): A flag indicating the current state. When empty, the module will perform a *bind* operation; when set to any value (e.g., `"Unbinded"`), it will perform an *unbind* operation.
+## Inputs
+- `joints`: Joints whose influences are updated. If empty while `skins` is set, Run uses all influences of those skin clusters.
+- `skins`: Skin clusters to update. If the list is empty, Run uses every skin cluster connected to each listed joint. If it contains names, Run updates only those skin clusters.
+- `mode`: Unbind (0) or Bind (1).
 
-## Outputs  
-- **`mode`** (label): Updated to `"Unbinded"` after an unbind operation or cleared after a bind operation.  
-- Console output: Prints `"Unbinded"` or `"Binded"` to indicate the action taken.
+## Get From Selected Geo
+Select geometry and press **Get From Selected Geo** to fill both `skins` and `joints`: the skin clusters found on the selection and their influencing joints. You can also edit either list manually. An empty `skins` list means all skin clusters connected to the listed joints.
 
-## Usage  
-1. **Select Joints** – In the `joints` listBox, choose the joints you want to toggle.  
-2. **Unbind** – If `mode` is empty, click **Run**. The script will unbind the selected joints from their skin clusters and set `mode` to `"Unbinded"`.  
-3. **Adjust Joints** – Move or modify the joints as needed.  
-4. **Rebind** – With `mode` now set, click **Run** again. The script will rebind the joints, restoring the original skin cluster matrices and clearing `mode`.  
-5. **Repeat** – You can toggle between bind and unbind states as required during rigging or animation adjustments.]]></doc>
+## Usage
+1. Set `joints` and, if needed, limit `skins`.
+2. Run **Unbind** before repositioning the joints.
+3. Reposition the joints, then run **Bind** to store their new bind pre-matrices.]]></doc>
 <attributes>
 <attr name="" template="label" category="General" connect=""><![CDATA[{"text": "<html>\nHow to use: <br>\n1. Set joints and press <b>Run</b> to unbind joints from skin clusters.<br>\n2. Change joints position.<br>\n3. Press <b>Run</b> to rebind again.<br>\n</html>", "default": "text"}]]></attr>
 <attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"items": ["Unbind", "Bind"], "current": "", "columns": 3, "default": "current"}]]></attr>
 <attr name="joints" template="listBox" category="General" connect=""><![CDATA[{"items": ["L_lips_corner_main_joint", "M_lip_lower_main_joint", "M_lip_upper_main_joint", "R_lips_corner_main_joint"], "default": "items"}]]></attr>
-<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import maya.cmds as cmds\nimport maya.mel as mel\n\njoints = set()\nfor mesh in cmds.ls(sl=True) or []:\n    skin = mel.eval('findRelatedSkinCluster \"{}\"'.format(mesh))\n    if skin:\n        joints.update(cmds.skinCluster(skin, query=True, influence=True) or [])\n\nchset(\"/joints\", sorted(joints))", "label": "Get From Mesh", "color": "", "default": "command"}]]></attr>
+<attr name="skins" template="listBox" category="General" connect=""><![CDATA[{"items": [], "default": "items"}]]></attr>
+<attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import maya.cmds as cmds\nimport maya.mel as mel\n\njoints = set()\nskins = set()\nfor mesh in cmds.ls(sl=True) or []:\n    skin = mel.eval('findRelatedSkinCluster \"{}\"'.format(mesh))\n    if skin:\n        skins.add(skin)\n        joints.update(cmds.skinCluster(skin, query=True, influence=True) or [])\n        joints.update(cmds.listConnections(\n            f\"{skin}.matrix\", source=True, destination=False, type=\"joint\"\n        ) or [])\n\nchset(\"/joints\", sorted(joints))\nchset(\"/skins\", sorted(skins))", "label": "Get From Selected Geo", "color": "", "default": "command"}]]></attr>
 </attributes>
 </module>
 </children>
