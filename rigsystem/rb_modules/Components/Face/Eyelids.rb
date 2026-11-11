@@ -48,6 +48,7 @@ def copyGeometry(source, target):
 
 sources = {}
 points = {}
+reverseDirections = {}
 for lid, name in [("upper", ch("../upper_curve")), ("lower", ch("../lower_curve"))]:
     curve = proxy.node(name)
     shape = curve.getShapes(type="nurbsCurve")[0] if curve.type() == "transform" else curve
@@ -56,10 +57,12 @@ for lid, name in [("upper", ch("../upper_curve")), ("lower", ch("../lower_curve"
         raise ValueError(f"{lid}_curve must be an open degree-1 curve.")
 
     cvs = fn.cvPositions(om.MSpace.kWorld)
-    if abs(cvs[0].x) >= abs(cvs[-1].x) - 1e-5:
-        raise ValueError(f"{lid}_curve must start at the inner corner, closer to X=0.")
+    if abs(abs(cvs[0].x) - abs(cvs[-1].x)) <= 1e-5:
+        raise ValueError(f"{lid}_curve needs a distinct inner corner closer to X=0.")
 
-    sign = 1 if cvs[-1].x > 0 else -1
+    reverseDirections[lid] = abs(cvs[0].x) > abs(cvs[-1].x)
+    outer = cvs[0] if reverseDirections[lid] else cvs[-1]
+    sign = 1 if outer.x > 0 else -1
     if any(point.x * sign < -1e-5 for point in cvs):
         raise ValueError(f"{lid}_curve must stay on one side of X=0.")
 
@@ -68,7 +71,10 @@ for lid, name in [("upper", ch("../upper_curve")), ("lower", ch("../lower_curve"
     params = {0, 1} | {param for name, curveLid, param in TUNER_POSITIONS
                        if curveLid == lid}
     points[lid] = {
-        param: fn.getPointAtParam(start + param * (end - start), om.MSpace.kWorld)
+        param: fn.getPointAtParam(
+            start + (1 - param if reverseDirections[lid] else param) * (end - start),
+            om.MSpace.kWorld,
+        )
         for param in params
     }
 
@@ -114,6 +120,13 @@ try:
                 knot=list(fn.knots()),
             ))
             temporary.append(duplicate)
+
+            if reverseDirections[lid]:
+                cmds.reverseCurve(
+                    duplicate,
+                    constructionHistory=False,
+                    replaceOriginal=True,
+                )
 
             if side == "R":
                 duplicate.scaleX.set(-1)
@@ -170,10 +183,10 @@ Fits the eyelid template through its tuner curves and locator tuners.
 
 ## Inputs
 - Parent `leftEyeJoint`: positions the left eye transform tuner; the template mirrors it to the right.
-- Parent `upper_curve` and `lower_curve`: open degree-1 curves on the same side of X=0, sharing their inner start point.
+- Parent `upper_curve` and `lower_curve`: open degree-1 curves on the same side of X=0, sharing an inner corner. Either curve direction is accepted.
 
 ## Outputs
-Updates the L/R detailed eyelid curve Origs. Rebuilds the input curves to six spans and copies them into the L upper/lower tuner curves, which drive both main curves and BaseWire shapes through the template. Positions the transform, main and corner tuners, refreshes the main-curve skin binding.
+Updates the L/R detailed eyelid curve Origs, orienting them from the inner corner toward the outer corner without changing the input curves. Rebuilds temporary copies of the input curves to six spans and copies them into the L upper/lower tuner curves, which drive both main curves and BaseWire shapes through the template. Positions the transform, main and corner tuners, refreshes the main-curve skin binding.
 
 ## Usage
 Import face_eyelids with the parent button, set the input curves and left eye joint, then run Eyelids. The template handles right-side mirroring.]]></doc>
@@ -242,8 +255,7 @@ The **bindMode** module toggles the binding state of selected joints to their sk
 </children>
 </module>
 <module name="BuildEyelids" muted="0" uid="">
-<run><![CDATA[import maya.api.OpenMaya as om
-from rigsystem import proxy, rig_utils
+<run><![CDATA[from rigsystem import proxy, rig_utils
 
 cmds = proxy.cmds
 
@@ -265,14 +277,21 @@ for side in "LR":
         curve = proxy.node(f"{side}_eyelid_{direction}_curve")
         curveShape = curve.getShapes(type="nurbsCurve")[0] if curve.type() == "transform" else curve
         curveFn = curveShape.mfn(shape=True)
+        if curveFn.degree != 1:
+            raise ValueError(f"{curve} must be a degree-1 curve.")
+        parameters = curveFn.knots()
         
         makeJointsMod.attr.name = f"{side}_eyelid_{direction}"
         makeJointsMod.attr.curve = str(curve)
+        makeJointsMod.attr.numAsCVs = True
         makeJointsMod.run()
         
         joints = proxy.nodes(makeJointsMod.attr.out_joints.get())
         
-        for j in joints:
+        if len(joints) != len(parameters):
+            raise ValueError(f"{curve} must have one joint per CV.")
+
+        for i, j in enumerate(joints):
             aimj = proxy.create(
                 "joint",
                 j.localName().replace("_joint", "_aim"),
@@ -292,10 +311,7 @@ for side in "LR":
                 str(t),
             )
             curveShape.worldSpace[0] >> pointOnCurve.inputCurve
-            coords = cmds.xform(t, q=True, ws=True, t=True)
-            position = om.MPoint(coords[0], coords[1], coords[2])
-            _, parameter = curveFn.closestPoint(position, 1e-6, om.MSpace.kWorld)
-            pointOnCurve.parameter.set(parameter)
+            pointOnCurve.parameter.set(parameters[i])
             
             nearestPointOnCurve = proxy.create(
                 "nearestPointOnCurve",
