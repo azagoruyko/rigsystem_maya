@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: face_eyelids.ma
-//Last modified: Fri, Nov 06, 2026 05:00:06 PM
+//Last modified: Wed, Nov 11, 2026 04:17:55 PM
 //Codeset: 1251
 requires maya "2026";
 requires -nodeType "skeleposer" "skeleposer" "Unknown";
@@ -14,15 +14,15 @@ fileInfo "application" "maya";
 fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
-fileInfo "osv" "Windows 11 Home v2009 (Build: 26200)";
-fileInfo "UUID" "A1AA4281-4C10-6552-03D8-D3B0E964A3B7";
+fileInfo "osv" "Windows 11 Home v2009 (Build: 26300)";
+fileInfo "UUID" "96356F9F-412B-8CFD-8BB2-2E84C27F2A2D";
 createNode transform -s -n "persp";
 	rename -uid "8DCF4356-4D3E-3DFF-4277-379CE6A38D01";
 	setAttr ".v" no;
 	setAttr -s 3 ".rlio";
 	setAttr -s 3 ".rlio";
-	setAttr ".t" -type "double3" 1.193922241746928 161.94583561959863 19.291429604897587 ;
-	setAttr ".r" -type "double3" -10.660585098910081 -7.7119827447728238 7.0209669134023485e-16 ;
+	setAttr ".t" -type "double3" 0.74813379439514449 164.00393975106917 22.454905325549685 ;
+	setAttr ".r" -type "double3" -14.260585098910358 -2.111982744772924 0 ;
 	setAttr ".s" -type "double3" 0.00095447319492794331 0.00095447319492794331 0.00095447319492794331 ;
 	setAttr ".rp" -type "double3" 1.6845304834877758e-15 6.2791705623511449e-14 1.2873024250788868e-14 ;
 	setAttr ".rpt" -type "double3" -4.3822704679452255e-14 1.2879062013619588e-14 -4.4159604867783264e-14 ;
@@ -31,7 +31,7 @@ createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "A6BC27AA-453E-F4CE-2D57-C0A1FFD6CDEF";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
-	setAttr ".coi" 9.7055251361344599;
+	setAttr ".coi" 13.005264854004684;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -1520,100 +1520,6 @@ createNode parentConstraint -n "R_eyelids_corner_outer_joint_parentConstraint1" 
 	setAttr ".rdta" -type "double3" 1.9379938935069587e-08 3.8098265498913679e-16 -1.6402327230917535e-08 ;
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
-createNode transform -n "L_eyelid_upper_tuner_curve";
-	rename -uid "DEF11193-4207-EDDB-D54B-69BB65A8366E";
-	setAttr -l on ".tx";
-	setAttr -l on ".ty";
-	setAttr -l on ".tz";
-	setAttr -l on ".rx";
-	setAttr -l on ".ry";
-	setAttr -l on ".rz";
-	setAttr -l on ".sx";
-	setAttr -l on ".sy";
-	setAttr -l on ".sz";
-createNode nurbsCurve -n "L_eyelid_upper_tuner_curveShape" -p "L_eyelid_upper_tuner_curve";
-	rename -uid "25EABA52-4A56-2E94-3A62-649D4DFE03B1";
-	setAttr -k off ".v";
-	setAttr -s 5 ".gtag";
-	setAttr ".gtag[0].gtagnm" -type "string" "L_eyelids_inner_cluster";
-	setAttr ".gtag[0].gtagcmp" -type "componentList" 1 "cv[0:4]";
-	setAttr ".gtag[1].gtagnm" -type "string" "L_eyelids_inner_cluster_1";
-	setAttr ".gtag[1].gtagcmp" -type "componentList" 1 "cv[0:5]";
-	setAttr ".gtag[2].gtagnm" -type "string" "L_eyelids_outer_cluster";
-	setAttr ".gtag[2].gtagcmp" -type "componentList" 1 "cv[4:8]";
-	setAttr ".gtag[3].gtagnm" -type "string" "softMod1";
-	setAttr ".gtag[3].gtagcmp" -type "componentList" 1 "cv[0]";
-	setAttr ".gtag[4].gtagnm" -type "string" "softMod1_1";
-	setAttr ".gtag[4].gtagcmp" -type "componentList" 1 "cv[0]";
-	setAttr ".cc" -type "nurbsCurve" 
-		3 6 0 no 3
-		11 0 0 0 0.16666666666666666 0.33333333333333331 0.5 0.66666666666666663 0.83333333333333326
-		 1 1 1
-		9
-		1.9300700418724068 159.01676940921843 9.7134771348066451
-		1.9522235353830046 159.29714446999623 9.7532028557144415
-		2.1194226979658901 159.80640169187151 9.9162642924790561
-		2.6726453979937355 160.44202536228636 10.12472640585316
-		3.460149948559712 160.7745795119456 10.190155590632214
-		4.2880023705688224 160.76953475575667 9.9001806850165224
-		4.9251766195076456 160.55574765558649 9.396592192485544
-		5.2449330130202449 160.28025262357016 9.0106509372831507
-		5.3948798169094276 160.14125061927874 8.8234472226864895
-		
-
-		"gtag" 5
-		"L_eyelids_inner_cluster" 1 "cv[0:4]"
-		"L_eyelids_inner_cluster_1" 1 "cv[0:5]"
-		"L_eyelids_outer_cluster" 1 "cv[4:8]"
-		"softMod1" 1 "cv[0]"
-		"softMod1_1" 1 "cv[0]";
-createNode transform -n "L_eyelid_lower_tuner_curve";
-	rename -uid "BE2702C5-425F-9EE6-FD4F-D1AEDFAAEEA8";
-	setAttr -l on ".tx";
-	setAttr -l on ".ty";
-	setAttr -l on ".tz";
-	setAttr -l on ".rx";
-	setAttr -l on ".ry";
-	setAttr -l on ".rz";
-	setAttr -l on ".sx";
-	setAttr -l on ".sy";
-	setAttr -l on ".sz";
-createNode nurbsCurve -n "L_eyelid_lower_tuner_curveShape" -p "L_eyelid_lower_tuner_curve";
-	rename -uid "292B1472-4CD6-2F2E-00BF-60A1FE8A9DA3";
-	setAttr -k off ".v";
-	setAttr -s 5 ".gtag";
-	setAttr ".gtag[0].gtagnm" -type "string" "L_eyelids_inner_cluster";
-	setAttr ".gtag[0].gtagcmp" -type "componentList" 1 "cv[0:4]";
-	setAttr ".gtag[1].gtagnm" -type "string" "L_eyelids_inner_cluster_1";
-	setAttr ".gtag[1].gtagcmp" -type "componentList" 1 "cv[0:5]";
-	setAttr ".gtag[2].gtagnm" -type "string" "L_eyelids_outer_cluster";
-	setAttr ".gtag[2].gtagcmp" -type "componentList" 1 "cv[4:8]";
-	setAttr ".gtag[3].gtagnm" -type "string" "softMod1";
-	setAttr ".gtag[3].gtagcmp" -type "componentList" 1 "cv[0]";
-	setAttr ".gtag[4].gtagnm" -type "string" "softMod1_1";
-	setAttr ".gtag[4].gtagcmp" -type "componentList" 1 "cv[0]";
-	setAttr ".cc" -type "nurbsCurve" 
-		3 6 0 no 3
-		11 0 0 0 0.16666666666666666 0.33333333333333331 0.5 0.66666666666666663 0.83333333333333337
-		 1 1 1
-		9
-		1.930070041872407 159.01676940921843 9.7134771348066451
-		2.1540565547755355 158.9295306840929 9.6861462243846574
-		2.610962007128343 158.7544041560752 9.6639334194161677
-		3.3274988070880478 158.64489492357106 9.5800592687150168
-		4.0468171739197185 158.6642956371694 9.4287430031091777
-		4.6920474107190593 158.92975460206037 9.1780340844962289
-		5.1559520461524144 159.46051551037891 8.9322760391011506
-		5.3298366339203964 159.90797725201776 8.845472106311707
-		5.394880134804497 160.14125061543496 8.823446716032878
-		
-
-		"gtag" 5
-		"L_eyelids_inner_cluster" 1 "cv[0:4]"
-		"L_eyelids_inner_cluster_1" 1 "cv[0:5]"
-		"L_eyelids_outer_cluster" 1 "cv[4:8]"
-		"softMod1" 1 "cv[0]"
-		"softMod1_1" 1 "cv[0]";
 createNode transform -n "eyelids_controls";
 	rename -uid "65042F44-4842-4FF5-12CA-CA808BF6414A";
 	setAttr -k on ".t";
@@ -2937,15 +2843,6 @@ createNode parentConstraint -n "L_eyelids_corner_inner_control_transform_parentC
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
 	setAttr -k on ".w1" 0.45;
-createNode transform -n "L_eyelids_corner_inner_tuner" -p "L_eyelids_corner_inner_control_transform";
-	rename -uid "3B7C92FD-431F-F261-2A2F-BCA884EB45AA";
-	setAttr ".t" -type "double3" -1.1834927922805254 -1.1740413347538947 2.4608616976402802 ;
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode locator -n "L_eyelids_corner_inner_tunerShape" -p "L_eyelids_corner_inner_tuner";
-	rename -uid "DFDC8683-4DDF-6A4B-D96D-E4AB29BC97A0";
-	setAttr -k off ".v";
 createNode transform -n "L_eyelids_corner_outer_control_transform" -p "L_eye_transform_control";
 	rename -uid "9E9C0508-4C3F-15F5-25C2-E5972489E34A";
 	setAttr ".t" -type "double3" 4.4408920985006262e-16 0.0012176680029938325 -8.8817841970012523e-16 ;
@@ -3008,36 +2905,6 @@ createNode parentConstraint -n "L_eyelids_corner_outer_control_transform_parentC
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
 	setAttr -k on ".w1" 0.75;
-createNode transform -n "L_eyelids_corner_outer_tuner" -p "L_eyelids_corner_outer_control_transform";
-	rename -uid "D74BA923-4452-A333-5A08-7E9FAEAB109F";
-	setAttr ".t" -type "double3" 2.7408803575913026 0.071731980675792784 1.3554740099571783 ;
-	setAttr ".r" -type "double3" 0 22.107368731061026 0 ;
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode locator -n "L_eyelids_corner_outer_tunerShape" -p "L_eyelids_corner_outer_tuner";
-	rename -uid "44375340-4E69-1AA3-4B08-6881F7582D1B";
-	setAttr -k off ".v";
-createNode transform -n "L_eyelids_upper_main_tuner" -p "L_eye_transform_control";
-	rename -uid "43ACA018-4781-C57E-54E6-46BE818BF546";
-	setAttr ".t" -type "double3" 0.86948333915867915 0.61683696114457121 2.6781077532433208 ;
-	setAttr ".r" -type "double3" 0 14.228647417799271 0 ;
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode locator -n "L_eyelids_upper_main_tunerShape" -p "L_eyelids_upper_main_tuner";
-	rename -uid "8D9DB780-4439-4A8E-72A1-D7B5A566ADE1";
-	setAttr -k off ".v";
-createNode transform -n "L_eyelids_lower_main_tuner" -p "L_eye_transform_control";
-	rename -uid "6BCB8B06-4922-2F0F-0AFE-0EBFFB4E5240";
-	setAttr ".t" -type "double3" 1.048713075486801 -1.4458156267460254 2.0522437243126532 ;
-	setAttr ".r" -type "double3" 0 17.215550802426399 0 ;
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode locator -n "L_eyelids_lower_main_tunerShape" -p "L_eyelids_lower_main_tuner";
-	rename -uid "5C5E3E96-4E40-A59C-E907-D1B999EED58B";
-	setAttr -k off ".v";
 createNode transform -n "R_eye_transform_control" -p "eyelids_controls";
 	rename -uid "BAB13040-48EF-55FF-CFC8-8699E4F27476";
 	setAttr -l on -k off ".v";
@@ -3518,6 +3385,100 @@ createNode parentConstraint -n "R_eyelids_corner_outer_control_transform_parentC
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
 	setAttr -k on ".w1";
+createNode transform -n "L_eyelid_upper_tuner_curve";
+	rename -uid "DEF11193-4207-EDDB-D54B-69BB65A8366E";
+	setAttr -l on ".tx";
+	setAttr -l on ".ty";
+	setAttr -l on ".tz";
+	setAttr -l on ".rx";
+	setAttr -l on ".ry";
+	setAttr -l on ".rz";
+	setAttr -l on ".sx";
+	setAttr -l on ".sy";
+	setAttr -l on ".sz";
+createNode nurbsCurve -n "L_eyelid_upper_tuner_curveShape" -p "L_eyelid_upper_tuner_curve";
+	rename -uid "25EABA52-4A56-2E94-3A62-649D4DFE03B1";
+	setAttr -k off ".v";
+	setAttr -s 5 ".gtag";
+	setAttr ".gtag[0].gtagnm" -type "string" "L_eyelids_inner_cluster";
+	setAttr ".gtag[0].gtagcmp" -type "componentList" 1 "cv[0:4]";
+	setAttr ".gtag[1].gtagnm" -type "string" "L_eyelids_inner_cluster_1";
+	setAttr ".gtag[1].gtagcmp" -type "componentList" 1 "cv[0:5]";
+	setAttr ".gtag[2].gtagnm" -type "string" "L_eyelids_outer_cluster";
+	setAttr ".gtag[2].gtagcmp" -type "componentList" 1 "cv[4:8]";
+	setAttr ".gtag[3].gtagnm" -type "string" "softMod1";
+	setAttr ".gtag[3].gtagcmp" -type "componentList" 1 "cv[0]";
+	setAttr ".gtag[4].gtagnm" -type "string" "softMod1_1";
+	setAttr ".gtag[4].gtagcmp" -type "componentList" 1 "cv[0]";
+	setAttr ".cc" -type "nurbsCurve" 
+		3 6 0 no 3
+		11 0 0 0 0.16666666666666666 0.33333333333333331 0.5 0.66666666666666663 0.83333333333333326
+		 1 1 1
+		9
+		1.9300700418724068 159.01676940921843 9.7134771348066451
+		1.9522235353830046 159.29714446999623 9.7532028557144415
+		2.1194226979658901 159.80640169187151 9.9162642924790561
+		2.6726453979937355 160.44202536228636 10.12472640585316
+		3.460149948559712 160.7745795119456 10.190155590632214
+		4.2880023705688224 160.76953475575667 9.9001806850165224
+		4.9251766195076456 160.55574765558649 9.396592192485544
+		5.2449330130202449 160.28025262357016 9.0106509372831507
+		5.3948798169094276 160.14125061927874 8.8234472226864895
+		
+
+		"gtag" 5
+		"L_eyelids_inner_cluster" 1 "cv[0:4]"
+		"L_eyelids_inner_cluster_1" 1 "cv[0:5]"
+		"L_eyelids_outer_cluster" 1 "cv[4:8]"
+		"softMod1" 1 "cv[0]"
+		"softMod1_1" 1 "cv[0]";
+createNode transform -n "L_eyelid_lower_tuner_curve";
+	rename -uid "BE2702C5-425F-9EE6-FD4F-D1AEDFAAEEA8";
+	setAttr -l on ".tx";
+	setAttr -l on ".ty";
+	setAttr -l on ".tz";
+	setAttr -l on ".rx";
+	setAttr -l on ".ry";
+	setAttr -l on ".rz";
+	setAttr -l on ".sx";
+	setAttr -l on ".sy";
+	setAttr -l on ".sz";
+createNode nurbsCurve -n "L_eyelid_lower_tuner_curveShape" -p "L_eyelid_lower_tuner_curve";
+	rename -uid "292B1472-4CD6-2F2E-00BF-60A1FE8A9DA3";
+	setAttr -k off ".v";
+	setAttr -s 5 ".gtag";
+	setAttr ".gtag[0].gtagnm" -type "string" "L_eyelids_inner_cluster";
+	setAttr ".gtag[0].gtagcmp" -type "componentList" 1 "cv[0:4]";
+	setAttr ".gtag[1].gtagnm" -type "string" "L_eyelids_inner_cluster_1";
+	setAttr ".gtag[1].gtagcmp" -type "componentList" 1 "cv[0:5]";
+	setAttr ".gtag[2].gtagnm" -type "string" "L_eyelids_outer_cluster";
+	setAttr ".gtag[2].gtagcmp" -type "componentList" 1 "cv[4:8]";
+	setAttr ".gtag[3].gtagnm" -type "string" "softMod1";
+	setAttr ".gtag[3].gtagcmp" -type "componentList" 1 "cv[0]";
+	setAttr ".gtag[4].gtagnm" -type "string" "softMod1_1";
+	setAttr ".gtag[4].gtagcmp" -type "componentList" 1 "cv[0]";
+	setAttr ".cc" -type "nurbsCurve" 
+		3 6 0 no 3
+		11 0 0 0 0.16666666666666666 0.33333333333333331 0.5 0.66666666666666663 0.83333333333333337
+		 1 1 1
+		9
+		1.930070041872407 159.01676940921843 9.7134771348066451
+		2.1540565547755355 158.9295306840929 9.6861462243846574
+		2.610962007128343 158.7544041560752 9.6639334194161677
+		3.3274988070880478 158.64489492357106 9.5800592687150168
+		4.0468171739197185 158.6642956371694 9.4287430031091777
+		4.6920474107190593 158.92975460206037 9.1780340844962289
+		5.1559520461524144 159.46051551037891 8.9322760391011506
+		5.3298366339203964 159.90797725201776 8.845472106311707
+		5.394880134804497 160.14125061543496 8.823446716032878
+		
+
+		"gtag" 5
+		"L_eyelids_inner_cluster" 1 "cv[0:4]"
+		"L_eyelids_inner_cluster_1" 1 "cv[0:5]"
+		"L_eyelids_outer_cluster" 1 "cv[4:8]"
+		"softMod1" 1 "cv[0]"
+		"softMod1_1" 1 "cv[0]";
 createNode transform -n "L_eyelids_transform_tuner";
 	rename -uid "1D86E294-4D41-38AE-BD84-7CA60E4112BB";
 	setAttr ".t" -type "double3" 3.0255651473999023 160.14830017089844 7.3534097671508789 ;
@@ -3543,12 +3504,51 @@ createNode transform -n "R_eyelids_transform_tuner";
 createNode locator -n "R_eyelids_transform_tunerShape" -p "R_eyelids_transform_tuner";
 	rename -uid "998E0529-49B0-EA80-B313-75BCA9D1466A";
 	setAttr -k off ".v";
+createNode transform -n "L_eyelids_upper_main_tuner";
+	rename -uid "43ACA018-4781-C57E-54E6-46BE818BF546";
+	setAttr ".t" -type "double3" 0.86948333915867915 0.61683696114457121 2.6781077532433208 ;
+	setAttr ".r" -type "double3" 0 14.228647417799271 0 ;
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode locator -n "L_eyelids_upper_main_tunerShape" -p "L_eyelids_upper_main_tuner";
+	rename -uid "8D9DB780-4439-4A8E-72A1-D7B5A566ADE1";
+	setAttr -k off ".v";
+createNode transform -n "L_eyelids_lower_main_tuner";
+	rename -uid "6BCB8B06-4922-2F0F-0AFE-0EBFFB4E5240";
+	setAttr ".t" -type "double3" 1.048713075486801 -1.4458156267460254 2.0522437243126532 ;
+	setAttr ".r" -type "double3" 0 17.215550802426399 0 ;
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode locator -n "L_eyelids_lower_main_tunerShape" -p "L_eyelids_lower_main_tuner";
+	rename -uid "5C5E3E96-4E40-A59C-E907-D1B999EED58B";
+	setAttr -k off ".v";
+createNode transform -n "L_eyelids_corner_inner_tuner";
+	rename -uid "3B7C92FD-431F-F261-2A2F-BCA884EB45AA";
+	setAttr ".t" -type "double3" -1.1834927922805254 -1.1740413347538947 2.4608616976402802 ;
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode locator -n "L_eyelids_corner_inner_tunerShape" -p "L_eyelids_corner_inner_tuner";
+	rename -uid "DFDC8683-4DDF-6A4B-D96D-E4AB29BC97A0";
+	setAttr -k off ".v";
+createNode transform -n "L_eyelids_corner_outer_tuner";
+	rename -uid "D74BA923-4452-A333-5A08-7E9FAEAB109F";
+	setAttr ".t" -type "double3" 2.7408803575913026 0.071731980675792784 1.3554740099571783 ;
+	setAttr ".r" -type "double3" 0 22.107368731061026 0 ;
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode locator -n "L_eyelids_corner_outer_tunerShape" -p "L_eyelids_corner_outer_tuner";
+	rename -uid "44375340-4E69-1AA3-4B08-6881F7582D1B";
+	setAttr -k off ".v";
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "BC852A75-4C39-8F2C-FBC6-E58C29D668FF";
+	rename -uid "194FD309-41EF-D925-4DD4-50ACF233B572";
 	setAttr -s 2 ".lnk";
 	setAttr -s 2 ".slnk";
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "0B7EEFD5-4F3B-2EC7-54AB-D88454E53A77";
+	rename -uid "E0BE0988-4E01-B76E-544F-ECB507F3BEFB";
 	setAttr -s 9 ".bsdt";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 2 4 5 ;
 	setAttr ".bsdt[1].bscd" -type "Int32Array" 0 ;
@@ -3569,18 +3569,18 @@ createNode shapeEditorManager -n "shapeEditorManager";
 	setAttr -s 2 ".bspr";
 	setAttr -s 2 ".obsv";
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "581E1D96-43EC-1310-9230-D5A15311323B";
+	rename -uid "80E6B846-4BF6-E6F1-D488-CFA000396B45";
 	setAttr -s 2 ".tpdt";
 	setAttr ".tpdt[0].tpcd" -type "Int32Array" 1 -1 ;
 	setAttr ".tpdt[1].tpcd" -type "Int32Array" 0 ;
 	setAttr ".tpdt[1].tpdn" -type "string" "chr_abendis_MDL_Model_v010_fix";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "F51FE934-4756-245E-E719-C58C1619B27C";
+	rename -uid "86F96F09-4A1A-DE5C-980C-36BFD4C62930";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "9E8B42AB-4BF5-DAB9-7C6A-E5AA0822CA3A";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "362237DD-4180-E386-2EB5-688BA8462C91";
+	rename -uid "DBD13B5C-4731-B300-6EC1-F8ABB596CE14";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "4CFE04FF-4860-69A8-4D68-BD989CFA5CAF";
 	setAttr ".g" yes;
@@ -6900,6 +6900,12 @@ connectAttr "L_eyelids_transform_tuner.ty" "R_eyelids_transform_tuner.ty";
 connectAttr "L_eyelids_transform_tuner.tz" "R_eyelids_transform_tuner.tz";
 connectAttr "R_eyelids_transform_tuner_tx_multDL.o" "R_eyelids_transform_tuner.tx"
 		;
+connectAttr "L_eye_transform_control.wm" "L_eyelids_upper_main_tuner.opm";
+connectAttr "L_eye_transform_control.wm" "L_eyelids_lower_main_tuner.opm";
+connectAttr "L_eyelids_corner_inner_control_transform.wm" "L_eyelids_corner_inner_tuner.opm"
+		;
+connectAttr "L_eyelids_corner_outer_control_transform.wm" "L_eyelids_corner_outer_tuner.opm"
+		;
 relationship "link" ":lightLinker1" ":initialShadingGroup.message" ":defaultLightSet.message";
 relationship "link" ":lightLinker1" ":initialParticleSE.message" ":defaultLightSet.message";
 relationship "shadowLink" ":lightLinker1" ":initialShadingGroup.message" ":defaultLightSet.message";
@@ -7445,15 +7451,15 @@ connectAttr "rs_lines1.msg" ":defaultRenderingList1.r" -na;
 connectAttr "defaultRenderLayer2.msg" ":defaultRenderingList1.r" -na;
 connectAttr "template_Nose_System_dummy_defaultRenderLayer.msg" ":defaultRenderingList1.r"
 		 -na;
-dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
-dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
 dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
+dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
+dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
 dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
 dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
-dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
-dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
-dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
+dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
 dataStructure -fmt "raw" -as "name=DiffArea:float=value";
 // End of face_eyelids.ma
