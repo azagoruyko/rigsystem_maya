@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: face_eyelids.ma
-//Last modified: Wed, Nov 11, 2026 05:55:51 PM
+//Last modified: Wed, Nov 11, 2026 09:24:44 PM
 //Codeset: 1251
 requires maya "2026";
 requires -nodeType "skeleposer" "skeleposer" "Unknown";
@@ -9,20 +9,21 @@ requires -nodeType "simpleSelector" -nodeType "renderSetupLayer" -nodeType "rend
 		 -nodeType "collection" -nodeType "renderSettingsCollection" -nodeType "absOverride"
 		 -nodeType "absUniqueOverride" "renderSetup.py" "1.0";
 requires "Mayatomr" "2013.0 - 3.10.1.11 ";
+requires "stereoCamera" "10.0";
 currentUnit -l centimeter -a degree -t ntsc;
 fileInfo "application" "maya";
 fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
 fileInfo "osv" "Windows 11 Home v2009 (Build: 26300)";
-fileInfo "UUID" "76CCAE8B-4306-41E1-D100-669E71CC15A4";
+fileInfo "UUID" "312FD254-4423-CE86-89F4-BA85B0F7BE51";
 createNode transform -s -n "persp";
 	rename -uid "8DCF4356-4D3E-3DFF-4277-379CE6A38D01";
 	setAttr ".v" no;
 	setAttr -s 3 ".rlio";
 	setAttr -s 3 ".rlio";
-	setAttr ".t" -type "double3" -3.2023598361940477 160.8978377891118 24.407058289256121 ;
-	setAttr ".r" -type "double3" -2.2605850989115392 -11.311982744773202 -1.0136141539296694e-16 ;
+	setAttr ".t" -type "double3" -0.73386084569435062 159.89875696079935 25.388827776370864 ;
+	setAttr ".r" -type "double3" 3.7394149010885585 -3.3119827447732519 0 ;
 	setAttr ".s" -type "double3" 0.00095447319492794331 0.00095447319492794331 0.00095447319492794331 ;
 	setAttr ".rp" -type "double3" 1.6845304834877758e-15 6.2791705623511449e-14 1.2873024250788868e-14 ;
 	setAttr ".rpt" -type "double3" -4.3822704679452255e-14 1.2879062013619588e-14 -4.4159604867783264e-14 ;
@@ -31,7 +32,7 @@ createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "A6BC27AA-453E-F4CE-2D57-C0A1FFD6CDEF";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
-	setAttr ".coi" 14.77901317240139;
+	setAttr ".coi" 15.920849054214877;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -1371,7 +1372,7 @@ createNode parentConstraint -n "R_eyelid_upper_fold_main_1_joint_parentConstrain
 	setAttr ".tg[0].tot" -type "double3" -1.4210854715202004e-14 0 0 ;
 	setAttr ".tg[0].tor" -type "double3" 1.6473266021800016e-07 -2.2263882770244617e-14 
 		-3.4290355159528539e-15 ;
-	setAttr ".lr" -type "double3" -0.017065367856130338 0.039139612645856865 0.064172607221834405 ;
+	setAttr ".lr" -type "double3" -0.017065367855867913 0.039139612645255402 0.064172607220578465 ;
 	setAttr ".rst" -type "double3" 1.8415022461961534 -0.53911528116228169 -2.1606993876421363 ;
 	setAttr ".rsrr" -type "double3" -1.6473265842893804e-07 1.7493050760765905e-14 8.845917682673028e-15 ;
 	setAttr ".udt" yes;
@@ -1408,7 +1409,7 @@ createNode parentConstraint -n "R_eyelid_upper_fold_main_2_joint_parentConstrain
 		-1.7763568394002505e-15 ;
 	setAttr ".tg[0].tor" -type "double3" 1.5902773407317584e-15 -1.7493050748049341e-14 
 		5.963540027744093e-16 ;
-	setAttr ".lr" -type "double3" -1.887420053276819e-07 -1.2373043780355106e-05 -1.5859609373769218e-07 ;
+	setAttr ".lr" -type "double3" -1.8874200661978235e-07 -1.2373043757991828e-05 -1.5859609274376871e-07 ;
 	setAttr ".rst" -type "double3" -0.08973154882366785 -1.3906480294552921 -2.6439320792761247 ;
 	setAttr ".rsrr" -type "double3" -1.0933156717530838e-15 2.0574213095717126e-14 3.3793393490549872e-15 ;
 	setAttr ".rdta" -type "double3" -1.9081958235744875e-17 3.5908775952719912e-16 5.8980598183211454e-17 ;
@@ -1445,7 +1446,7 @@ createNode parentConstraint -n "R_eyelid_upper_fold_main_3_joint_parentConstrain
 	setAttr ".tg[0].tot" -type "double3" 0 -5.6843418860808015e-14 3.1974423109204508e-14 ;
 	setAttr ".tg[0].tor" -type "double3" -3.1946740701526174e-07 1.5902773407317587e-14 
 		-3.5681847832668833e-14 ;
-	setAttr ".lr" -type "double3" -0.028657148023682206 -0.027181880583743514 -0.07268463959779578 ;
+	setAttr ".lr" -type "double3" -0.02865714802329793 -0.027181880583332846 -0.072684639596486897 ;
 	setAttr ".rst" -type "double3" -1.8941274663621677 -0.27952518339156995 -2.211819451739478 ;
 	setAttr ".rsrr" -type "double3" 3.1946740781040042e-07 -1.1529510847629854e-14 4.5670777346997302e-14 ;
 	setAttr ".udt" yes;
@@ -3206,9 +3207,6 @@ createNode transform -n "R_eyelid_upper_fold_main_2_control" -p "R_eyelid_upper_
 	setAttr -l on -k off ".rx";
 	setAttr ".s" -type "double3" 0.99999999999999989 0.99999999999999978 1 ;
 	setAttr -l on -k off ".sz";
-	setAttr ".opm" -type "matrix" 0.9841848991720793 0.017002205393616614 -0.1763264281195446 0
-		 -0.017272840607519772 0.99985081336034665 2.1684043449710084e-19 0 0.17630012257225139 0.0030456582878021863 0.9843317483179147 0
-		 0.82953368362584534 0.96999999999999997 2.703455462899071 1;
 createNode nurbsCurve -n "R_eyelid_upper_fold_main_main_2_controlShape" -p "R_eyelid_upper_fold_main_2_control";
 	rename -uid "E6149193-44BA-758A-1339-4E833AF621EE";
 	setAttr -k off ".v";
@@ -3557,11 +3555,11 @@ createNode locator -n "L_eyelids_corner_outer_tunerShape" -p "L_eyelids_corner_o
 	rename -uid "44375340-4E69-1AA3-4B08-6881F7582D1B";
 	setAttr -k off ".v";
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "1D7DD250-4656-7528-9CF3-069BC57105F0";
+	rename -uid "4F2C963C-4195-85E5-D88F-F797C4A4EBBE";
 	setAttr -s 2 ".lnk";
 	setAttr -s 2 ".slnk";
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "D8F45D21-433E-81F4-EAD8-8483AE997B75";
+	rename -uid "85EC71E1-41CA-B35B-5B9B-36ABEAADC155";
 	setAttr -s 9 ".bsdt";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 2 4 5 ;
 	setAttr ".bsdt[1].bscd" -type "Int32Array" 0 ;
@@ -3582,18 +3580,18 @@ createNode shapeEditorManager -n "shapeEditorManager";
 	setAttr -s 2 ".bspr";
 	setAttr -s 2 ".obsv";
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "2AB2FA4A-47FD-E853-23DA-5A9D092587D7";
+	rename -uid "589060B1-40F9-B189-92BE-C7A210F5B8FB";
 	setAttr -s 2 ".tpdt";
 	setAttr ".tpdt[0].tpcd" -type "Int32Array" 1 -1 ;
 	setAttr ".tpdt[1].tpcd" -type "Int32Array" 0 ;
 	setAttr ".tpdt[1].tpdn" -type "string" "chr_abendis_MDL_Model_v010_fix";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "25FB3102-47BC-E01D-2D71-64A50E8CE9EE";
+	rename -uid "DDE57583-4AF6-DFD0-672A-B49E1BD96BAE";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "9E8B42AB-4BF5-DAB9-7C6A-E5AA0822CA3A";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "165EF668-4396-8698-B373-66B72C4126EB";
+	rename -uid "3CAC6634-442B-9440-9D38-3D9A540B84B6";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "4CFE04FF-4860-69A8-4D68-BD989CFA5CAF";
 	setAttr ".g" yes;
@@ -6755,6 +6753,8 @@ connectAttr "R_eyelid_upper_fold_main_1_control_aimConstraint1.crz" "R_eyelid_up
 		;
 connectAttr "L_eyelid_upper_fold_main_1_control_transform.t" "R_eyelid_upper_fold_main_1_control_transform.t"
 		;
+connectAttr "L_eyelid_upper_fold_main_1_control.opm" "R_eyelid_upper_fold_main_1_control.opm"
+		;
 connectAttr "R_eyelid_upper_fold_main_1_control_transform.pim" "R_eyelid_upper_fold_main_1_control_aimConstraint1.cpim"
 		;
 connectAttr "R_eyelid_upper_fold_main_1_control_transform.t" "R_eyelid_upper_fold_main_1_control_aimConstraint1.ct"
@@ -6787,6 +6787,8 @@ connectAttr "R_eyelid_upper_fold_main_3_control_aimConstraint1.crz" "R_eyelid_up
 		;
 connectAttr "L_eyelid_upper_fold_main_3_control_transform.t" "R_eyelid_upper_fold_main_3_control_transform.t"
 		;
+connectAttr "L_eyelid_upper_fold_main_3_control.opm" "R_eyelid_upper_fold_main_3_control.opm"
+		;
 connectAttr "R_eyelid_upper_fold_main_3_control_transform.pim" "R_eyelid_upper_fold_main_3_control_aimConstraint1.cpim"
 		;
 connectAttr "R_eyelid_upper_fold_main_3_control_transform.t" "R_eyelid_upper_fold_main_3_control_aimConstraint1.ct"
@@ -6813,6 +6815,8 @@ connectAttr "L_eyelid_upper_fold_main_3_control_aimConstraint1.o" "R_eyelid_uppe
 		;
 connectAttr "L_eyelid_lower_main_control.opm" "R_eyelid_lower_main_control.opm";
 connectAttr "L_eyelid_upper_main_control.opm" "R_eyelid_upper_main_control.opm";
+connectAttr "L_eyelid_upper_fold_main_2_control.opm" "R_eyelid_upper_fold_main_2_control.opm"
+		;
 connectAttr "R_eyelids_corner_inner_control_transform_parentConstraint1.cty" "R_eyelids_corner_inner_control_transform.ty"
 		;
 connectAttr "L_eyelids_corner_inner_control.opm" "R_eyelids_corner_inner_control.opm"
@@ -7464,15 +7468,15 @@ connectAttr "rs_lines1.msg" ":defaultRenderingList1.r" -na;
 connectAttr "defaultRenderLayer2.msg" ":defaultRenderingList1.r" -na;
 connectAttr "template_Nose_System_dummy_defaultRenderLayer.msg" ":defaultRenderingList1.r"
 		 -na;
-dataStructure -fmt "raw" -as "name=DiffArea:float=value";
 dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
 dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
-dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
-dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
-dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
-dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
+dataStructure -fmt "raw" -as "name=DiffArea:float=value";
+dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
+dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
 // End of face_eyelids.ma
