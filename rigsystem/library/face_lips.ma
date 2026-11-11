@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: face_lips.ma
-//Last modified: Wed, Nov 11, 2026 04:18:44 PM
+//Last modified: Wed, Nov 11, 2026 05:42:07 PM
 //Codeset: 1251
 requires maya "2026";
 requires -nodeType "floatConstant" "lookdevKit" "1.0";
@@ -13,17 +13,17 @@ fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
 fileInfo "osv" "Windows 11 Home v2009 (Build: 26300)";
-fileInfo "UUID" "D9941124-4146-7306-E397-55AA9EB72876";
+fileInfo "UUID" "EBC0EBB0-46AF-74E6-88AC-27ACE7D116FC";
 createNode transform -s -n "persp";
 	rename -uid "66DF1CF3-4AD1-BA24-7FE7-BA97AE1DEADD";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 5.0374410874621249 156.31133838767826 17.828526262415505 ;
+	setAttr ".t" -type "double3" 6.2293936106326022 156.9906741452611 19.781257966956804 ;
 	setAttr ".r" -type "double3" -16.538352729600987 31.400000000000418 -1.8631314572116722e-15 ;
 createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "5D80243C-4C3C-CF10-338F-0CB3D4B37C01";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999993;
-	setAttr ".coi" 9.7387333007780548;
+	setAttr ".coi" 12.125238904991857;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -750,15 +750,9 @@ createNode pointConstraint -n "M_mouth_root_joint_pointConstraint1" -p "M_mouth_
 	setAttr -k on ".w0";
 createNode transform -n "mouth_controls";
 	rename -uid "0ADE8EB1-4E9E-957B-ECBB-FFAA80576FC8";
-	setAttr -l on -k off ".tx";
-	setAttr -l on -k off ".ty";
-	setAttr -l on -k off ".tz";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
+	setAttr -k on ".t";
+	setAttr -k on ".r";
+	setAttr -k on ".s";
 createNode transform -n "lips_main_transform" -p "mouth_controls";
 	rename -uid "A03D26F6-451E-8C73-2F55-72BBBD2685E7";
 	setAttr -k on ".t";
@@ -2188,6 +2182,52 @@ createNode parentConstraint -n "R_lips_corner_minor_control_transform_parentCons
 	setAttr ".rdta" -type "double3" 0 -0.63831942523608809 7.6739997548654234e-33 ;
 	setAttr ".udt" yes;
 	setAttr -k on ".w0";
+createNode transform -n "M_jaw_control" -p "mouth_controls";
+	rename -uid "D0B8332E-4186-436D-35A5-8A81B32222B0";
+	addAttr -ci true -sn "drop" -ln "drop" -min 0 -at "double";
+	setAttr -l on -k off ".v";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -l on -k off ".rz";
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+	setAttr ".opm" -type "matrix" 1 0 0 0 0 0.5 0 0 0 0 1.0000000000000002 0 -2.7263458898228372e-07 150.54582214355469 10.795009070775674 1;
+	setAttr -k on ".drop";
+createNode nurbsCurve -n "M_jaw_controlShape1" -p "M_jaw_control";
+	rename -uid "64947A29-470F-683C-9568-74AA5C628C05";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 17;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 4 0 no 3
+		9 2 2 2 3 4 5 6 6 6
+		7
+		-1.6440039858826432 -0.47424094388149196 -0.031146042672554691
+		-1.290031322428385 -0.47424466670787629 0.39212026757722673
+		-0.75101180671246703 -0.47424761544914196 0.651047962992234
+		-0.10898269480777618 -0.47424933377206585 0.70515971131900357
+		0.53830545634083116 -0.47424956255465867 0.54657082568052739
+		1.0923189264553808 -0.47424826449365426 0.19907148027737204
+		1.4686854402881702 -0.47424564461336544 -0.28337634308489057
+		;
+createNode nurbsCurve -n "M_jaw_controlShape2" -p "M_jaw_control";
+	rename -uid "7130F4B4-4497-8BA7-6905-809F24B4B1F2";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 17;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 4 0 no 3
+		9 2 2 2 3 4 5 6 6 6
+		7
+		-1.7421716368547677 -0.47424103141803159 0.010232672803521886
+		-1.3660602073006596 -0.47424498708381591 0.45997163139039399
+		-0.79332840751952705 -0.47424812025032087 0.73509362731896533
+		-0.11114440851409824 -0.47424994604354748 0.79258972552115081
+		0.57662754959757523 -0.47425018913505407 0.62408210149500942
+		1.1652910814184263 -0.4742488098884895 0.2548488553644469
+		1.5651969559923782 -0.47424602615114919 -0.25777304814448931
+		;
 createNode transform -n "lips_others";
 	rename -uid "5ACDBB17-4BAF-C952-1A03-2690584F0F7A";
 	setAttr -k on ".t";
@@ -2532,52 +2572,6 @@ createNode nurbsCurve -n "lip_lower_tuner_curveShapeOrig" -p "lip_lower_tuner_cu
 		-1.0553262114862259 153.29748316803534 10.464107968024242
 		-1.3650803564201108 153.38793547721986 10.235894620626791
 		-1.5584299564361572 153.43620300292969 10.208477020263672
-		;
-createNode transform -n "M_jaw_control";
-	rename -uid "D0B8332E-4186-436D-35A5-8A81B32222B0";
-	addAttr -ci true -sn "drop" -ln "drop" -min 0 -at "double";
-	setAttr -l on -k off ".v";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-	setAttr ".opm" -type "matrix" 1 0 0 0 0 0.5 0 0 0 0 1.0000000000000002 0 -2.7263458898228372e-07 150.54582214355469 10.795009070775674 1;
-	setAttr -k on ".drop";
-createNode nurbsCurve -n "M_jaw_controlShape1" -p "M_jaw_control";
-	rename -uid "64947A29-470F-683C-9568-74AA5C628C05";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 17;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 4 0 no 3
-		9 2 2 2 3 4 5 6 6 6
-		7
-		-1.6440039858826432 -0.47424094388149196 -0.031146042672554691
-		-1.290031322428385 -0.47424466670787629 0.39212026757722673
-		-0.75101180671246703 -0.47424761544914196 0.651047962992234
-		-0.10898269480777618 -0.47424933377206585 0.70515971131900357
-		0.53830545634083116 -0.47424956255465867 0.54657082568052739
-		1.0923189264553808 -0.47424826449365426 0.19907148027737204
-		1.4686854402881702 -0.47424564461336544 -0.28337634308489057
-		;
-createNode nurbsCurve -n "M_jaw_controlShape2" -p "M_jaw_control";
-	rename -uid "7130F4B4-4497-8BA7-6905-809F24B4B1F2";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 17;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 4 0 no 3
-		9 2 2 2 3 4 5 6 6 6
-		7
-		-1.7421716368547677 -0.47424103141803159 0.010232672803521886
-		-1.3660602073006596 -0.47424498708381591 0.45997163139039399
-		-0.79332840751952705 -0.47424812025032087 0.73509362731896533
-		-0.11114440851409824 -0.47424994604354748 0.79258972552115081
-		0.57662754959757523 -0.47425018913505407 0.62408210149500942
-		1.1652910814184263 -0.4742488098884895 0.2548488553644469
-		1.5651969559923782 -0.47424602615114919 -0.25777304814448931
 		;
 createNode transform -n "lips_internal";
 	rename -uid "FA9052FC-45EA-C835-3EEE-4A992728FF72";
@@ -13168,21 +13162,21 @@ createNode wire -n "lip_lower_curve_wire";
 	setAttr ".dds[0]"  100;
 	setAttr ".sc[0]"  1;
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "33BBC52F-42B1-9FD8-6483-B0B933927B82";
+	rename -uid "36D12C07-4011-BF6A-F048-06A16CACE04B";
 	setAttr -s 3 ".lnk";
 	setAttr -s 3 ".slnk";
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "E89032A6-47CF-F080-7DD1-B6AC37258F6A";
+	rename -uid "036747AE-4B50-3455-0FBA-3EB5B8FA14D1";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 0 ;
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "3C79E248-473B-DEDE-7254-B7A9BD0A2154";
+	rename -uid "B69078A8-4FFC-BDEB-BB10-A0B9DB7F9930";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "73DFD3FF-40CE-1C4B-1787-48A35BC1D59C";
+	rename -uid "A4D54A13-4D46-D29B-AE0C-A291C472CA8D";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "761CFCC2-4D9E-FF03-27B9-2A947D716C98";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "0F84F99C-4739-DBE7-F866-0C8CFA126675";
+	rename -uid "967BFE70-402F-D24B-2050-508A8F1BEF94";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "FE2C4F7A-4122-F262-98BB-2FBAEB323E1A";
 	setAttr ".g" yes;
@@ -16571,15 +16565,15 @@ connectAttr "lip_upper_jaw_open_drop_remapValue.msg" ":defaultRenderUtilityList1
 		 -na;
 connectAttr "defaultRenderLayer.msg" ":defaultRenderingList1.r" -na;
 connectAttr "tex_viewport.msg" ":defaultTextureList1.tx" -na;
-dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
 dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
-dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
-dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
-dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
-dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
-dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
 dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
 dataStructure -fmt "raw" -as "name=DiffArea:float=value";
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
+dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
+dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
+dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
+dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
 dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 // End of face_lips.ma
