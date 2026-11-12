@@ -466,7 +466,7 @@ def create(nodeType, name=None, parent=None, skipSelection=False, suffix=True):
         nodeName = f"{base}{typeSuffix}"
         index = 1
         while cmds.objExists(nodeName):
-            nodeName = f"{base}_{index}{typeSuffix}"
+            nodeName = f"{base}{typeSuffix}{index}"
             index += 1
         kwargs["name"] = nodeName
 
