@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: face_brows.ma
-//Last modified: Fri, Nov 06, 2026 03:01:27 PM
+//Last modified: Thu, Nov 12, 2026 01:17:28 PM
 //Codeset: 1251
 requires maya "2026";
 requires "stereoCamera" "10.0";
@@ -10,20 +10,20 @@ fileInfo "application" "maya";
 fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
-fileInfo "osv" "Windows 11 Home v2009 (Build: 26200)";
-fileInfo "UUID" "A1FF7C7E-40DD-E023-6B2B-CEA5F6C0AF47";
+fileInfo "osv" "Windows 11 Home v2009 (Build: 26300)";
+fileInfo "UUID" "A4D67F48-4404-F4F7-FBED-D3A8EB2EB012";
 createNode transform -s -n "persp";
 	rename -uid "77AE9653-40B9-4F94-7B80-3F95FE3E7DFF";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 2.8149824007021462 164.967508780499 27.481861202308224 ;
-	setAttr ".r" -type "double3" -8.1383527296060567 7.7999999999992431 1.0032051520641137e-16 ;
+	setAttr ".t" -type "double3" 6.0335058255002618 170.30783939069858 29.38456416230478 ;
+	setAttr ".r" -type "double3" -21.938352729606098 16.599999999999266 -4.1485961593342693e-16 ;
 	setAttr ".rp" -type "double3" -9.3258734068513149e-15 2.8421709430404007e-14 0 ;
 	setAttr ".rpt" -type "double3" -3.2444650141844978e-15 -3.0391213835245794e-15 -1.2206279012975552e-14 ;
 createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "65C3BDD6-45B3-50A3-1670-8AB70A156D08";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999993;
-	setAttr ".coi" 16.777056364533571;
+	setAttr ".coi" 20.650896639989497;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -76,693 +76,6 @@ createNode camera -s -n "sideShape" -p "side";
 	setAttr ".man" -type "string" "side_mask";
 	setAttr ".hc" -type "string" "viewSet -s %camera";
 	setAttr ".o" yes;
-createNode transform -n "L_brow_main_control";
-	rename -uid "7C35260D-4E62-F47E-B141-F9B572CFBBE7";
-	setAttr -l on -k off ".v";
-	setAttr -l on -k off ".tz";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-	setAttr ".mxtl" -type "double3" 0 1 1 ;
-	setAttr ".mtxe" yes;
-	setAttr ".mtye" yes;
-	setAttr ".xtxe" yes;
-	setAttr ".xtye" yes;
-createNode nurbsCurve -n "L_brow_main_controlShape" -p "L_brow_main_control";
-	rename -uid "E064081D-46CF-97FD-4D66-D4A058554944";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".ls" 2;
-	setAttr ".cc" -type "nurbsCurve" 
-		1 4 0 no 3
-		5 0 1 2 3 4
-		5
-		-1.6363585654888109 -0.18028873271248358 0.45562558078935689
-		1.6363590021691681 -0.18028854169611858 0.36639425960558936
-		1.636358565488816 0.18028873271246548 0.36187965344066186
-		-1.6363590021691632 0.18028854169610045 0.45111097462442939
-		-1.6363585654888109 -0.18028873271248358 0.45562558078935689
-		;
-createNode transform -n "L_brow_major_inner_control_transform";
-	rename -uid "56FF4FFE-4F5F-87A5-C308-4AB2AC14AEF7";
-	setAttr ".r" -type "double3" 8.1817546857800796 -2.4749779958950639e-05 3.7915166395471256e-22 ;
-	setAttr ".sh" -type "double3" 0 0 0.35275066147230716 ;
-createNode transform -n "L_brow_major_inner_control" -p "L_brow_major_inner_control_transform";
-	rename -uid "E909F33F-4186-09B3-8A69-56807BFA1D3B";
-	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -2.5030331811132928e-16 -3.1308289294429414e-14 0 ;
-	setAttr -l on -k off ".tz";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "L_brow_major_inner_controlShape" -p "L_brow_major_inner_control";
-	rename -uid "0D125787-498B-1C8A-6326-9EA7196C2FB6";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
-		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		-0.27330017230924097 4.8493286914347377e-33 -7.9195453639315792e-17
-		-0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
-		-8.2350785335842731e-17 -1.6734800062070489e-17 0.27330017230924097
-		0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
-		0.27330017230924097 -8.9882840984847358e-33 1.4678996650018188e-16
-		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
-		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		;
-createNode nurbsCurve -n "L_brow_major_inner_controlShape1" -p "L_brow_major_inner_control";
-	rename -uid "0BEEDC7C-4A91-B8E0-BB72-18867B8DBAC4";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		-3.1180271039546686e-17 -0.27330017230924097 0
-		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		-0.27330017230924097 -1.202254283396718e-16 4.1029598083903049e-17
-		-0.19325249968547878 0.19325249968547878 8.2059567893256332e-17
-		-8.2350785335842731e-17 0.27330017230924097 0
-		0.19325249968547878 0.19325249968547878 4.1029598083903049e-17
-		0.27330017230924097 1.0576036352502626e-16 4.1029598083903049e-17
-		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		-3.1180271039546686e-17 -0.27330017230924097 0
-		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		;
-createNode nurbsCurve -n "L_brow_major_inner_controlShape2" -p "L_brow_major_inner_control";
-	rename -uid "F47127A4-45C5-52E8-86F0-B9BBAAAEA42C";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
-		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
-		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
-		-5.894895571485172e-34 -0.27330017230924097 -7.9195453639315792e-17
-		-5.894895571485172e-34 -0.19325249968547878 0.19325249968547878
-		1.6734800062070489e-17 -8.2350785335842731e-17 0.27330017230924097
-		-1.0257436204408037e-17 0.19325249968547878 0.19325249968547878
-		-5.894895571485172e-34 0.27330017230924097 1.4678996650018188e-16
-		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
-		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
-		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
-		;
-createNode transform -n "L_brow_major_inner_joint_basis" -p "L_brow_major_inner_control_transform";
-	rename -uid "893E3A98-41CD-2F00-16B6-B4A93DC82245";
-	setAttr ".t" -type "double3" 6.6613381477509392e-16 -8.5265128291212022e-14 1.7763568394002505e-15 ;
-	setAttr ".s" -type "double3" 1.0000000000000002 1 1 ;
-createNode transform -n "L_brow_major_mid_control_transform";
-	rename -uid "3F1652EC-4CB3-50C0-8AC8-6CA5F14EC02B";
-	setAttr ".r" -type "double3" 0 23.574424774437006 0 ;
-createNode transform -n "L_brow_major_mid_control" -p "L_brow_major_mid_control_transform";
-	rename -uid "C340E0EE-4E1F-6D04-1423-A7869139EFD3";
-	setAttr -l on -k off ".v";
-	setAttr -k on ".t" -type "double3" 0 0 3.5521838806727473e-16 ;
-	setAttr -k on ".t";
-	setAttr -l on -k off ".tz";
-	setAttr -k on ".r";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -k on ".s";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "L_brow_major_mid_controlShape" -p "L_brow_major_mid_control";
-	rename -uid "275F6EC2-4E64-4EC1-851F-B4980CEDCE3C";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
-		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		-0.27330017230924097 4.8493286914347377e-33 -7.9195453639315792e-17
-		-0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
-		-8.2350785335842731e-17 -1.6734800062070489e-17 0.27330017230924097
-		0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
-		0.27330017230924097 -8.9882840984847358e-33 1.4678996650018188e-16
-		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
-		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		;
-createNode nurbsCurve -n "L_brow_major_mid_controlShape1" -p "L_brow_major_mid_control";
-	rename -uid "789BD57E-4453-EB3A-25FE-F396816513AF";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		-3.1180271039546686e-17 -0.27330017230924097 0
-		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		-0.27330017230924097 -1.202254283396718e-16 4.1029598083903049e-17
-		-0.19325249968547878 0.19325249968547878 8.2059567893256332e-17
-		-8.2350785335842731e-17 0.27330017230924097 0
-		0.19325249968547878 0.19325249968547878 4.1029598083903049e-17
-		0.27330017230924097 1.0576036352502626e-16 4.1029598083903049e-17
-		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		-3.1180271039546686e-17 -0.27330017230924097 0
-		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		;
-createNode nurbsCurve -n "L_brow_major_mid_controlShape2" -p "L_brow_major_mid_control";
-	rename -uid "97A63059-4E0E-7B1F-C234-21818CFB008F";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
-		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
-		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
-		-5.894895571485172e-34 -0.27330017230924097 -7.9195453639315792e-17
-		-5.894895571485172e-34 -0.19325249968547878 0.19325249968547878
-		1.6734800062070489e-17 -8.2350785335842731e-17 0.27330017230924097
-		-1.0257436204408037e-17 0.19325249968547878 0.19325249968547878
-		-5.894895571485172e-34 0.27330017230924097 1.4678996650018188e-16
-		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
-		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
-		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
-		;
-createNode transform -n "L_brow_major_mid_joint_basis" -p "L_brow_major_mid_control_transform";
-	rename -uid "4FEC8B4B-4AAD-BDFD-B2C2-9F9EB3E384DF";
-createNode transform -n "L_brow_major_outer_control_transform";
-	rename -uid "53036B71-4748-B7CF-D753-5E9A68A55BBB";
-	setAttr ".r" -type "double3" 0 60.570847151931446 0 ;
-createNode transform -n "L_brow_major_outer_control" -p "L_brow_major_outer_control_transform";
-	rename -uid "030511DD-4083-8358-9BBF-778C698192AB";
-	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0 -2.8421709430404007e-14 0 ;
-	setAttr -l on -k off ".tz";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "L_brow_major_outer_controlShape" -p "L_brow_major_outer_control";
-	rename -uid "400409AD-49C4-E4C6-6B95-7A893831CA77";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547883
-		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
-		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547883
-		-0.27330017230924097 4.8493286914347377e-33 -1.4122106414096674e-15
-		-0.19325249968547878 -1.1833289891669146e-17 0.1932524996854787
-		-8.2350785335842731e-17 -1.6734800062070489e-17 0.27330017230924097
-		0.19325249968547878 -1.1833289891669146e-17 0.1932524996854787
-		0.27330017230924097 -8.9882840984847358e-33 -1.1862252212701708e-15
-		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547883
-		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
-		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547883
-		;
-createNode nurbsCurve -n "L_brow_major_outer_controlShape1" -p "L_brow_major_outer_control";
-	rename -uid "1F638B51-422E-2BCC-FA52-57BC239E5CA1";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325249968547878 -0.19325249968547878 -1.2919855896864482e-15
-		-3.1180271039546686e-17 -0.27330017230924097 -1.3330151877703519e-15
-		-0.19325249968547878 -0.19325249968547878 -1.2919855896864482e-15
-		-0.27330017230924097 -1.202254283396718e-16 -1.2919855896864482e-15
-		-0.19325249968547878 0.19325249968547878 -1.2509556198770946e-15
-		-8.2350785335842731e-17 0.27330017230924097 -1.3330151877703519e-15
-		0.19325249968547878 0.19325249968547878 -1.2919855896864482e-15
-		0.27330017230924097 1.0576036352502626e-16 -1.2919855896864482e-15
-		0.19325249968547878 -0.19325249968547878 -1.2919855896864482e-15
-		-3.1180271039546686e-17 -0.27330017230924097 -1.3330151877703519e-15
-		-0.19325249968547878 -0.19325249968547878 -1.2919855896864482e-15
-		;
-createNode nurbsCurve -n "L_brow_major_outer_controlShape2" -p "L_brow_major_outer_control";
-	rename -uid "4372EFB7-4636-5D8F-78EE-6DA3147C234D";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547883
-		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
-		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547883
-		-5.894895571485172e-34 -0.27330017230924097 -1.4122106414096674e-15
-		-5.894895571485172e-34 -0.19325249968547878 0.1932524996854787
-		1.6734800062070489e-17 -8.2350785335842731e-17 0.27330017230924097
-		-1.0257436204408037e-17 0.19325249968547878 0.1932524996854787
-		-5.894895571485172e-34 0.27330017230924097 -1.1862252212701708e-15
-		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547883
-		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
-		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547883
-		;
-createNode transform -n "L_brow_major_outer_joint_basis" -p "L_brow_major_outer_control_transform";
-	rename -uid "20C5B4B8-49E6-8A50-2511-4CB7F05F73C2";
-createNode transform -n "L_brow_curv_control_transform";
-	rename -uid "F3579412-4998-7476-7325-0A92654036F5";
-	setAttr ".r" -type "double3" 0 13.275611973175454 0 ;
-	setAttr ".s" -type "double3" 0.99999999999999989 1 0.99999999999999989 ;
-	setAttr ".sh" -type "double3" 0 0 0.23775602012661454 ;
-createNode transform -n "L_brow_curv_control" -p "L_brow_curv_control_transform";
-	rename -uid "C65F6A50-4103-A24B-A79C-E39CC7D02E1F";
-	setAttr -l on -k off ".v";
-	setAttr -k on ".t";
-	setAttr -l on -k off ".tz";
-	setAttr -k on ".r";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -k on ".s";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "L_brow_curv_controlShape1" -p "L_brow_curv_control";
-	rename -uid "2BF7F6AF-438F-B4CE-2890-11B2369BC723";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 6;
-	setAttr ".cc" -type "nurbsCurve" 
-		1 4 0 no 3
-		5 0 1 2 3 4
-		5
-		-0.02130907551171984 0.62129788072718017 0.12807507062398235
-		0.128871099337732 0.11790953835115937 0.15057789250912995
-		-0.02130907551171984 -0.38839537368280613 0.12807507062398235
-		-0.17034302606034676 0.11115094392951798 0.10574399764848706
-		-0.021004016093825944 0.62027535325408756 0.12812078037063929
-		;
-createNode transform -n "L_brow_curv_compensation_transform" -p "L_brow_curv_control";
-	rename -uid "583839FE-4163-2381-6669-3484E27556BF";
-	setAttr ".t" -type "double3" -6.2172489379008766e-15 5.6843418860808015e-14 6.4392935428259079e-15 ;
-	setAttr -l on ".tx";
-	setAttr -l on ".ty";
-	setAttr -l on ".tz";
-	setAttr -l on ".rx";
-	setAttr -l on ".ry";
-	setAttr -l on ".rz";
-	setAttr -l on ".sx";
-	setAttr -l on ".sy";
-	setAttr -l on ".sz";
-createNode transform -n "L_brow_curv_transform" -p "L_brow_curv_compensation_transform";
-	rename -uid "DA530C69-4AA5-DB92-A877-1EA08CB85FBA";
-createNode pointConstraint -n "L_brow_curv_control_pointConstraint1" -p "L_brow_curv_control_transform";
-	rename -uid "2712ECB9-4C55-E11C-D863-CC9267D217F8";
-	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "L_brow_major_mid_controlW0" -dv 1 
-		-min 0 -at "double";
-	addAttr -dcb 0 -ci true -k true -sn "w1" -ln "L_brow_major_inner_controlW1" -dv 
-		1 -min 0 -at "double";
-	setAttr -k on ".nds";
-	setAttr -k off ".v";
-	setAttr -k off ".tx";
-	setAttr -k off ".ty";
-	setAttr -k off ".tz";
-	setAttr -k off ".rx";
-	setAttr -k off ".ry";
-	setAttr -k off ".rz";
-	setAttr -k off ".sx";
-	setAttr -k off ".sy";
-	setAttr -k off ".sz";
-	setAttr ".erp" yes;
-	setAttr -s 2 ".tg";
-	setAttr ".o" -type "double3" -0.20129318415968678 0.05737053691908045 0.37946501728637827 ;
-	setAttr ".rst" -type "double3" 2.2919741965719096 161.40818660509368 11.523748405732167 ;
-	setAttr -k on ".w0";
-	setAttr -k on ".w1";
-createNode transform -n "R_brow_main_control";
-	rename -uid "D714A8DE-41F7-DFA8-E085-87A787D72894";
-	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -2.588913115886271e-06 -2.5437429940211587e-12 0 ;
-	setAttr -l on -k off ".tz";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-	setAttr ".mxtl" -type "double3" 0 1 1 ;
-	setAttr ".mtxe" yes;
-	setAttr ".mtye" yes;
-	setAttr ".xtxe" yes;
-	setAttr ".xtye" yes;
-createNode nurbsCurve -n "R_brow_main_controlShape" -p "R_brow_main_control";
-	rename -uid "92446B52-4D43-2955-8DE9-D8AEDAD7A8F5";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".ls" 2;
-	setAttr ".cc" -type "nurbsCurve" 
-		1 4 0 no 3
-		5 0 1 2 3 4
-		5
-		-1.6363585654888109 -0.18028873271248358 0.45562558078935689
-		1.6363590021691681 -0.18028854169611858 0.36639425960558936
-		1.636358565488816 0.18028873271246548 0.36187965344066186
-		-1.6363590021691632 0.18028854169610045 0.45111097462442939
-		-1.6363585654888109 -0.18028873271248358 0.45562558078935689
-		;
-createNode transform -n "R_brow_major_inner_control_transform";
-	rename -uid "0603A8C7-4641-5895-515A-53A2C401BBE0";
-	setAttr ".opm" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
-createNode transform -n "R_brow_major_inner_control" -p "R_brow_major_inner_control_transform";
-	rename -uid "E4F7F46F-430C-8AF6-C852-928193A95F24";
-	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -2.5030331811132928e-16 -3.1308289294429414e-14 0 ;
-	setAttr -l on -k off ".tz";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "R_brow_major_inner_controlShape" -p "R_brow_major_inner_control";
-	rename -uid "565FC4FD-476C-94C7-0DF5-3A98B1DAA8C5";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325744633591291 0.068170343101968456 0.19325287809213521
-		4.9466504346007412e-06 0.096407347234361396 0.27330050321257637
-		-0.19324755303504459 0.068170343101968456 0.19325287809213521
-		-0.27329522565880682 7.0895907811063807e-08 4.9309001504127536e-07
-		-0.19324755303504482 -0.068170201310124412 -0.19325189191210512
-		4.9466504339346073e-06 -0.096407205442517352 -0.27329951703254984
-		0.19325744633591269 -0.068170201310124412 -0.19325189191210512
-		0.27330511895967513 7.0895907811063807e-08 4.9309001148856169e-07
-		0.19325744633591291 0.068170343101968456 0.19325287809213521
-		4.9466504346007412e-06 0.096407347234361396 0.27330050321257637
-		-0.19324755303504459 0.068170343101968456 0.19325287809213521
-		;
-createNode nurbsCurve -n "R_brow_major_inner_controlShape1" -p "R_brow_major_inner_control";
-	rename -uid "CD94DBF5-4075-F1B0-3728-9590453AE4FD";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325744633591291 0.19325257058110878 1.6797911861488046e-07
-		4.9466504343786966e-06 0.27330024320474422 3.3314000447148828e-08
-		-0.19324755303504471 0.19325257058113721 1.679791203912373e-07
-		-0.27329522565880682 7.0895907811063807e-08 4.9309001504127536e-07
-		-0.19324755303504471 -0.19325242878926474 8.1820091146767027e-07
-		4.946650434156652e-06 -0.27330010141290018 9.5286602608268822e-07
-		0.19325744633591291 -0.19325242878929316 8.1820090969131343e-07
-		0.27330511895967513 7.0895907811063807e-08 4.9309001148856169e-07
-		0.19325744633591291 0.19325257058110878 1.6797911861488046e-07
-		4.9466504343786966e-06 0.27330024320474422 3.3314000447148828e-08
-		-0.19324755303504471 0.19325257058113721 1.679791203912373e-07
-		;
-createNode nurbsCurve -n "R_brow_major_inner_controlShape2" -p "R_brow_major_inner_control";
-	rename -uid "770A0F10-47FC-ECF7-E507-D8B6268A7C81";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		4.9466504343786966e-06 -0.12508215658326094 0.19325320320303341
-		4.9466504346007412e-06 0.096407347234361396 0.27330050321257637
-		4.9466504343786966e-06 0.26142284278716943 0.19325255298123878
-		4.9466504343786966e-06 0.27330024320474422 3.3314000447148828e-08
-		4.946650434156652e-06 0.12508229837510498 -0.19325221702300688
-		4.9466504339346073e-06 -0.096407205442517352 -0.27329951703254984
-		4.946650434156652e-06 -0.26142270099529696 -0.19325156680121047
-		4.946650434156652e-06 -0.27330010141290018 9.5286602608268822e-07
-		4.9466504343786966e-06 -0.12508215658326094 0.19325320320303341
-		4.9466504346007412e-06 0.096407347234361396 0.27330050321257637
-		4.9466504343786966e-06 0.26142284278716943 0.19325255298123878
-		;
-createNode transform -n "R_brow_major_inner_joint_basis" -p "R_brow_major_inner_control_transform";
-	rename -uid "9BE2A011-4C2E-F944-EE0E-9499D82D53A0";
-	setAttr ".t" -type "double3" 1.1940002986321474e-08 -0.0004967041015788709 -7.5561523420475396e-06 ;
-	setAttr ".r" -type "double3" 0 0 180 ;
-	setAttr ".s" -type "double3" 1 1 -1 ;
-createNode transform -n "R_brow_major_mid_control_transform";
-	rename -uid "B344BA6B-4827-6501-FBF7-37AF4E25CE84";
-	setAttr ".opm" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
-createNode transform -n "R_brow_major_mid_control" -p "R_brow_major_mid_control_transform";
-	rename -uid "FEAB850D-40B5-0849-8655-49B7E9DD7585";
-	setAttr -l on -k off ".v";
-	setAttr -k on ".t" -type "double3" 0 0 3.5521838806727473e-16 ;
-	setAttr -k on ".t";
-	setAttr -l on -k off ".tz";
-	setAttr -k on ".r";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -k on ".s";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "R_brow_major_mid_controlShape" -p "R_brow_major_mid_control";
-	rename -uid "19D9928F-4384-8DFE-DA5A-3F8C9C7915B4";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
-		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		-0.27330017230924097 4.8493286914347377e-33 -7.9195453639315792e-17
-		-0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
-		-8.2350785335842731e-17 -1.6734800062070489e-17 0.27330017230924097
-		0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
-		0.27330017230924097 -8.9882840984847358e-33 1.4678996650018188e-16
-		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
-		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
-		;
-createNode nurbsCurve -n "R_brow_major_mid_controlShape1" -p "R_brow_major_mid_control";
-	rename -uid "243F09BF-4EDF-EB8C-7894-828DECEA8867";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		-3.1180271039546686e-17 -0.27330017230924097 0
-		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		-0.27330017230924097 -1.202254283396718e-16 4.1029598083903049e-17
-		-0.19325249968547878 0.19325249968547878 8.2059567893256332e-17
-		-8.2350785335842731e-17 0.27330017230924097 0
-		0.19325249968547878 0.19325249968547878 4.1029598083903049e-17
-		0.27330017230924097 1.0576036352502626e-16 4.1029598083903049e-17
-		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		-3.1180271039546686e-17 -0.27330017230924097 0
-		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
-		;
-createNode nurbsCurve -n "R_brow_major_mid_controlShape2" -p "R_brow_major_mid_control";
-	rename -uid "CF5F73E1-460B-2953-763C-E19BD465CEFA";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
-		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
-		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
-		-5.894895571485172e-34 -0.27330017230924097 -7.9195453639315792e-17
-		-5.894895571485172e-34 -0.19325249968547878 0.19325249968547878
-		1.6734800062070489e-17 -8.2350785335842731e-17 0.27330017230924097
-		-1.0257436204408037e-17 0.19325249968547878 0.19325249968547878
-		-5.894895571485172e-34 0.27330017230924097 1.4678996650018188e-16
-		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
-		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
-		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
-		;
-createNode transform -n "R_brow_major_mid_joint_basis" -p "R_brow_major_mid_control_transform";
-	rename -uid "703530D1-4F7D-FA6E-A83E-8DA182FD599F";
-	setAttr ".t" -type "double3" -2.0684292375450219e-05 -0.00013543224756062955 3.5466794825467218e-05 ;
-	setAttr ".r" -type "double3" 0 0 180 ;
-	setAttr ".s" -type "double3" 1 1 -0.99999999999999944 ;
-createNode transform -n "R_brow_major_outer_control_transform";
-	rename -uid "1483E8A0-44D9-13D4-F82E-79925F668BE7";
-	setAttr ".opm" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
-createNode transform -n "R_brow_major_outer_control" -p "R_brow_major_outer_control_transform";
-	rename -uid "8C0C6EFE-4B81-A321-DCE0-93AAC06C65EE";
-	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0 -2.8421709430404007e-14 0 ;
-	setAttr -l on -k off ".tz";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -l on -k off ".sx";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "R_brow_major_outer_controlShape" -p "R_brow_major_outer_control";
-	rename -uid "CD964CF1-49B8-08FD-CE70-27B9A8380EA6";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		-0.19325685068073906 -2.8421709430404007e-14 0.19325022227086563
-		-4.4201509412644668e-06 -2.8421709430404007e-14 0.27329806185128902
-		0.19324814869007501 -2.8421709430404007e-14 0.19325055618424614
-		0.27329598827049573 -2.8421709430404007e-14 -1.8743455498793082e-06
-		0.19324848260345373 -2.8421709430404007e-14 -0.19325444318656793
-		-3.9479263431729805e-06 -2.8421709430404007e-14 -0.27330228276698776
-		-0.19325651676735944 -2.8421709430404007e-14 -0.19325477709994665
-		-0.27330435634778194 -2.8421709430404007e-14 -2.346570148858973e-06
-		-0.19325685068073906 -2.8421709430404007e-14 0.19325022227086563
-		-4.4201509412644668e-06 -2.8421709430404007e-14 0.27329806185128902
-		0.19324814869007501 -2.8421709430404007e-14 0.19325055618424614
-		;
-createNode nurbsCurve -n "R_brow_major_outer_controlShape1" -p "R_brow_major_outer_control";
-	rename -uid "25A9E341-4E59-B240-CFD7-0A87C8EDC1CB";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		-0.19325668372404881 0.19325249968545677 -2.2774145396198264e-06
-		-4.1840386417746345e-06 0.27330017230920589 -2.1104578493691406e-06
-		0.19324831564676526 0.19325249968545677 -1.9435011608948116e-06
-		0.27329598827049573 -2.8421709430404007e-14 -1.8743455498793082e-06
-		0.19324831564676526 -0.19325249968551361 -1.9435011608948116e-06
-		-4.1840386417746345e-06 -0.27330017230926273 -2.1104578493691406e-06
-		-0.19325668372404881 -0.19325249968551361 -2.2774145396198264e-06
-		-0.27330435634778194 -2.8421709430404007e-14 -2.346570148858973e-06
-		-0.19325668372404881 0.19325249968545677 -2.2774145396198264e-06
-		-4.1840386417746345e-06 0.27330017230920589 -2.1104578493691406e-06
-		0.19324831564676526 0.19325249968545677 -1.9435011608948116e-06
-		;
-createNode nurbsCurve -n "R_brow_major_outer_controlShape2" -p "R_brow_major_outer_control";
-	rename -uid "C653A04E-4297-C5FA-7490-D39ED466E1EE";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		3 8 0 no 3
-		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
-		11
-		-4.3509953320253203e-06 -0.19325249968551361 0.19325038922755589
-		-4.4201509412644668e-06 -2.8421709430404007e-14 0.27329806185128902
-		-4.3509953320253203e-06 0.19325249968545677 0.19325038922755589
-		-4.1840386417746345e-06 0.27330017230920589 -2.1104578493691406e-06
-		-4.0170819533003055e-06 0.19325249968545677 -0.1932546101432564
-		-3.9479263431729805e-06 -2.8421709430404007e-14 -0.27330228276698776
-		-4.0170819533003055e-06 -0.19325249968551361 -0.1932546101432564
-		-4.1840386417746345e-06 -0.27330017230926273 -2.1104578493691406e-06
-		-4.3509953320253203e-06 -0.19325249968551361 0.19325038922755589
-		-4.4201509412644668e-06 -2.8421709430404007e-14 0.27329806185128902
-		-4.3509953320253203e-06 0.19325249968545677 0.19325038922755589
-		;
-createNode transform -n "R_brow_major_outer_joint_basis" -p "R_brow_major_outer_control_transform";
-	rename -uid "2BF0D699-43ED-20FD-3DB6-DF900BCC4F2B";
-	setAttr ".t" -type "double3" -3.6660285616108013e-06 -0.00011230468740563992 1.6907887481210082e-06 ;
-	setAttr ".r" -type "double3" 0 0 180 ;
-	setAttr ".s" -type "double3" 0.99999999999999978 1 -1.0000000000000004 ;
-createNode transform -n "R_brow_curv_control_transform";
-	rename -uid "CD090CCC-476B-FD4A-6612-9BBAF0802F4C";
-	setAttr ".opm" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
-createNode transform -n "R_brow_curv_control" -p "R_brow_curv_control_transform";
-	rename -uid "BB33FA4F-4CA9-5580-95EE-54B554CD0F2C";
-	setAttr -l on -k off ".v";
-	setAttr -k on ".t";
-	setAttr -l on -k off ".tz";
-	setAttr -k on ".r";
-	setAttr -l on -k off ".rx";
-	setAttr -l on -k off ".ry";
-	setAttr -l on -k off ".rz";
-	setAttr -k on ".s";
-	setAttr -l on -k off ".sy";
-	setAttr -l on -k off ".sz";
-createNode nurbsCurve -n "R_brow_curv_controlShape" -p "R_brow_curv_control";
-	rename -uid "D43DD3FD-4957-BFBA-72BA-5FB544F8604E";
-	setAttr -k off ".v";
-	setAttr ".ove" yes;
-	setAttr ".ovc" 13;
-	setAttr ".cc" -type "nurbsCurve" 
-		1 4 0 no 3
-		5 0 1 2 3 4
-		5
-		-0.021304144102891442 0.65174849979615601 0.12807512783836827
-		0.12887603074656012 0.15371033879316087 0.15057794972351424
-		-0.021304144102891442 -0.35794475461383968 0.12807512783836827
-		-0.170338094651519 0.13629221596266916 0.1057440548628712
-		-0.02099908468499817 0.65073684009050226 0.12812083758502446
-		;
-createNode transform -n "R_brow_curv_compensation_transform" -p "R_brow_curv_control";
-	rename -uid "CA8BDD3F-4D45-E975-E8CC-D5924F73585C";
-	setAttr -l on ".tx";
-	setAttr -l on ".ty";
-	setAttr -l on ".tz";
-	setAttr -l on ".rx";
-	setAttr -l on ".ry";
-	setAttr -l on ".rz";
-	setAttr -l on ".sx";
-	setAttr -l on ".sy";
-	setAttr -l on ".sz";
-createNode transform -n "R_brow_curv_transform" -p "R_brow_curv_compensation_transform";
-	rename -uid "058ACBCF-43A8-FD9C-1DC2-8DB01A8585FE";
-createNode pointConstraint -n "R_brow_curv_control_pointConstraint1" -p "R_brow_curv_control_transform";
-	rename -uid "EC341EA4-421F-A18F-CD10-B1BD4D4C2CF6";
-	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "R_brow_major_inner_controlW0" -dv 
-		1 -min 0 -at "double";
-	addAttr -dcb 0 -ci true -k true -sn "w1" -ln "R_brow_major_mid_controlW1" -dv 1 
-		-min 0 -at "double";
-	setAttr -k on ".nds";
-	setAttr -k off ".v";
-	setAttr -k off ".tx";
-	setAttr -k off ".ty";
-	setAttr -k off ".tz";
-	setAttr -k off ".rx";
-	setAttr -k off ".ry";
-	setAttr -k off ".rz";
-	setAttr -k off ".sx";
-	setAttr -k off ".sy";
-	setAttr -k off ".sz";
-	setAttr ".erp" yes;
-	setAttr -s 2 ".tg";
-	setAttr ".rst" -type "double3" -2.2919766855007082 161.4081866050937 11.523747910705415 ;
-	setAttr -k on ".w0";
-	setAttr -k on ".w1";
 createNode transform -n "brows_others";
 	rename -uid "374AFC09-4B6C-D0B3-38DD-998FC5741504";
 	setAttr ".v" no;
@@ -1310,6 +623,696 @@ createNode transform -n "R_brow_main_tuner";
 createNode locator -n "R_brow_main_tunerShape" -p "R_brow_main_tuner";
 	rename -uid "4FE12ABC-4596-54FA-7663-7B93D9AFDFD2";
 	setAttr -k off ".v";
+createNode transform -n "brows_controls";
+	rename -uid "B943CDA4-4A0A-5982-179B-7085A19894AE";
+createNode transform -n "L_brow_main_control" -p "brows_controls";
+	rename -uid "7C35260D-4E62-F47E-B141-F9B572CFBBE7";
+	setAttr -l on -k off ".v";
+	setAttr -l on -k off ".tz";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -l on -k off ".rz";
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+	setAttr ".mxtl" -type "double3" 0 1 1 ;
+	setAttr ".mtxe" yes;
+	setAttr ".mtye" yes;
+	setAttr ".xtxe" yes;
+	setAttr ".xtye" yes;
+createNode nurbsCurve -n "L_brow_main_controlShape" -p "L_brow_main_control";
+	rename -uid "E064081D-46CF-97FD-4D66-D4A058554944";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".ls" 2;
+	setAttr ".cc" -type "nurbsCurve" 
+		1 4 0 no 3
+		5 0 1 2 3 4
+		5
+		-1.6363585654888109 -0.18028873271248358 0.45562558078935689
+		1.6363590021691681 -0.18028854169611858 0.36639425960558936
+		1.636358565488816 0.18028873271246548 0.36187965344066186
+		-1.6363590021691632 0.18028854169610045 0.45111097462442939
+		-1.6363585654888109 -0.18028873271248358 0.45562558078935689
+		;
+createNode transform -n "L_brow_major_inner_control_transform" -p "brows_controls";
+	rename -uid "56FF4FFE-4F5F-87A5-C308-4AB2AC14AEF7";
+	setAttr ".r" -type "double3" 8.1817546857800796 -2.4749779958950639e-05 3.7915166395471256e-22 ;
+	setAttr ".sh" -type "double3" 0 0 0.35275066147230716 ;
+createNode transform -n "L_brow_major_inner_control" -p "L_brow_major_inner_control_transform";
+	rename -uid "E909F33F-4186-09B3-8A69-56807BFA1D3B";
+	setAttr -l on -k off ".v";
+	setAttr ".t" -type "double3" -2.5030331811132928e-16 -3.1308289294429414e-14 0 ;
+	setAttr -l on -k off ".tz";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -l on -k off ".rz";
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode nurbsCurve -n "L_brow_major_inner_controlShape" -p "L_brow_major_inner_control";
+	rename -uid "0D125787-498B-1C8A-6326-9EA7196C2FB6";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
+		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		-0.27330017230924097 4.8493286914347377e-33 -7.9195453639315792e-17
+		-0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
+		-8.2350785335842731e-17 -1.6734800062070489e-17 0.27330017230924097
+		0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
+		0.27330017230924097 -8.9882840984847358e-33 1.4678996650018188e-16
+		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
+		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		;
+createNode nurbsCurve -n "L_brow_major_inner_controlShape1" -p "L_brow_major_inner_control";
+	rename -uid "0BEEDC7C-4A91-B8E0-BB72-18867B8DBAC4";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		-3.1180271039546686e-17 -0.27330017230924097 0
+		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		-0.27330017230924097 -1.202254283396718e-16 4.1029598083903049e-17
+		-0.19325249968547878 0.19325249968547878 8.2059567893256332e-17
+		-8.2350785335842731e-17 0.27330017230924097 0
+		0.19325249968547878 0.19325249968547878 4.1029598083903049e-17
+		0.27330017230924097 1.0576036352502626e-16 4.1029598083903049e-17
+		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		-3.1180271039546686e-17 -0.27330017230924097 0
+		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		;
+createNode nurbsCurve -n "L_brow_major_inner_controlShape2" -p "L_brow_major_inner_control";
+	rename -uid "F47127A4-45C5-52E8-86F0-B9BBAAAEA42C";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
+		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
+		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
+		-5.894895571485172e-34 -0.27330017230924097 -7.9195453639315792e-17
+		-5.894895571485172e-34 -0.19325249968547878 0.19325249968547878
+		1.6734800062070489e-17 -8.2350785335842731e-17 0.27330017230924097
+		-1.0257436204408037e-17 0.19325249968547878 0.19325249968547878
+		-5.894895571485172e-34 0.27330017230924097 1.4678996650018188e-16
+		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
+		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
+		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
+		;
+createNode transform -n "L_brow_major_inner_joint_basis" -p "L_brow_major_inner_control_transform";
+	rename -uid "893E3A98-41CD-2F00-16B6-B4A93DC82245";
+	setAttr ".t" -type "double3" 6.6613381477509392e-16 -8.5265128291212022e-14 1.7763568394002505e-15 ;
+	setAttr ".s" -type "double3" 1.0000000000000002 1 1 ;
+createNode transform -n "L_brow_major_mid_control_transform" -p "brows_controls";
+	rename -uid "3F1652EC-4CB3-50C0-8AC8-6CA5F14EC02B";
+	setAttr ".r" -type "double3" 0 23.574424774437006 0 ;
+createNode transform -n "L_brow_major_mid_control" -p "L_brow_major_mid_control_transform";
+	rename -uid "C340E0EE-4E1F-6D04-1423-A7869139EFD3";
+	setAttr -l on -k off ".v";
+	setAttr -k on ".t" -type "double3" 0 0 3.5521838806727473e-16 ;
+	setAttr -k on ".t";
+	setAttr -l on -k off ".tz";
+	setAttr -k on ".r";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -k on ".s";
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode nurbsCurve -n "L_brow_major_mid_controlShape" -p "L_brow_major_mid_control";
+	rename -uid "275F6EC2-4E64-4EC1-851F-B4980CEDCE3C";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
+		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		-0.27330017230924097 4.8493286914347377e-33 -7.9195453639315792e-17
+		-0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
+		-8.2350785335842731e-17 -1.6734800062070489e-17 0.27330017230924097
+		0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
+		0.27330017230924097 -8.9882840984847358e-33 1.4678996650018188e-16
+		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
+		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		;
+createNode nurbsCurve -n "L_brow_major_mid_controlShape1" -p "L_brow_major_mid_control";
+	rename -uid "789BD57E-4453-EB3A-25FE-F396816513AF";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		-3.1180271039546686e-17 -0.27330017230924097 0
+		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		-0.27330017230924097 -1.202254283396718e-16 4.1029598083903049e-17
+		-0.19325249968547878 0.19325249968547878 8.2059567893256332e-17
+		-8.2350785335842731e-17 0.27330017230924097 0
+		0.19325249968547878 0.19325249968547878 4.1029598083903049e-17
+		0.27330017230924097 1.0576036352502626e-16 4.1029598083903049e-17
+		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		-3.1180271039546686e-17 -0.27330017230924097 0
+		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		;
+createNode nurbsCurve -n "L_brow_major_mid_controlShape2" -p "L_brow_major_mid_control";
+	rename -uid "97A63059-4E0E-7B1F-C234-21818CFB008F";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
+		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
+		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
+		-5.894895571485172e-34 -0.27330017230924097 -7.9195453639315792e-17
+		-5.894895571485172e-34 -0.19325249968547878 0.19325249968547878
+		1.6734800062070489e-17 -8.2350785335842731e-17 0.27330017230924097
+		-1.0257436204408037e-17 0.19325249968547878 0.19325249968547878
+		-5.894895571485172e-34 0.27330017230924097 1.4678996650018188e-16
+		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
+		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
+		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
+		;
+createNode transform -n "L_brow_major_mid_joint_basis" -p "L_brow_major_mid_control_transform";
+	rename -uid "4FEC8B4B-4AAD-BDFD-B2C2-9F9EB3E384DF";
+createNode transform -n "L_brow_major_outer_control_transform" -p "brows_controls";
+	rename -uid "53036B71-4748-B7CF-D753-5E9A68A55BBB";
+	setAttr ".r" -type "double3" 0 60.570847151931446 0 ;
+createNode transform -n "L_brow_major_outer_control" -p "L_brow_major_outer_control_transform";
+	rename -uid "030511DD-4083-8358-9BBF-778C698192AB";
+	setAttr -l on -k off ".v";
+	setAttr ".t" -type "double3" 0 -2.8421709430404007e-14 0 ;
+	setAttr -l on -k off ".tz";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -l on -k off ".rz";
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode nurbsCurve -n "L_brow_major_outer_controlShape" -p "L_brow_major_outer_control";
+	rename -uid "400409AD-49C4-E4C6-6B95-7A893831CA77";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547883
+		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
+		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547883
+		-0.27330017230924097 4.8493286914347377e-33 -1.4122106414096674e-15
+		-0.19325249968547878 -1.1833289891669146e-17 0.1932524996854787
+		-8.2350785335842731e-17 -1.6734800062070489e-17 0.27330017230924097
+		0.19325249968547878 -1.1833289891669146e-17 0.1932524996854787
+		0.27330017230924097 -8.9882840984847358e-33 -1.1862252212701708e-15
+		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547883
+		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
+		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547883
+		;
+createNode nurbsCurve -n "L_brow_major_outer_controlShape1" -p "L_brow_major_outer_control";
+	rename -uid "1F638B51-422E-2BCC-FA52-57BC239E5CA1";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325249968547878 -0.19325249968547878 -1.2919855896864482e-15
+		-3.1180271039546686e-17 -0.27330017230924097 -1.3330151877703519e-15
+		-0.19325249968547878 -0.19325249968547878 -1.2919855896864482e-15
+		-0.27330017230924097 -1.202254283396718e-16 -1.2919855896864482e-15
+		-0.19325249968547878 0.19325249968547878 -1.2509556198770946e-15
+		-8.2350785335842731e-17 0.27330017230924097 -1.3330151877703519e-15
+		0.19325249968547878 0.19325249968547878 -1.2919855896864482e-15
+		0.27330017230924097 1.0576036352502626e-16 -1.2919855896864482e-15
+		0.19325249968547878 -0.19325249968547878 -1.2919855896864482e-15
+		-3.1180271039546686e-17 -0.27330017230924097 -1.3330151877703519e-15
+		-0.19325249968547878 -0.19325249968547878 -1.2919855896864482e-15
+		;
+createNode nurbsCurve -n "L_brow_major_outer_controlShape2" -p "L_brow_major_outer_control";
+	rename -uid "4372EFB7-4636-5D8F-78EE-6DA3147C234D";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547883
+		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
+		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547883
+		-5.894895571485172e-34 -0.27330017230924097 -1.4122106414096674e-15
+		-5.894895571485172e-34 -0.19325249968547878 0.1932524996854787
+		1.6734800062070489e-17 -8.2350785335842731e-17 0.27330017230924097
+		-1.0257436204408037e-17 0.19325249968547878 0.1932524996854787
+		-5.894895571485172e-34 0.27330017230924097 -1.1862252212701708e-15
+		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547883
+		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
+		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547883
+		;
+createNode transform -n "L_brow_major_outer_joint_basis" -p "L_brow_major_outer_control_transform";
+	rename -uid "20C5B4B8-49E6-8A50-2511-4CB7F05F73C2";
+createNode transform -n "L_brow_curv_control_transform" -p "brows_controls";
+	rename -uid "F3579412-4998-7476-7325-0A92654036F5";
+	setAttr ".r" -type "double3" 0 13.275611973175454 0 ;
+	setAttr ".s" -type "double3" 0.99999999999999989 1 0.99999999999999989 ;
+	setAttr ".sh" -type "double3" 0 0 0.23775602012661454 ;
+createNode transform -n "L_brow_curv_control" -p "L_brow_curv_control_transform";
+	rename -uid "C65F6A50-4103-A24B-A79C-E39CC7D02E1F";
+	setAttr -l on -k off ".v";
+	setAttr -k on ".t";
+	setAttr -l on -k off ".tz";
+	setAttr -k on ".r";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -l on -k off ".rz";
+	setAttr -k on ".s";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode nurbsCurve -n "L_brow_curv_controlShape1" -p "L_brow_curv_control";
+	rename -uid "2BF7F6AF-438F-B4CE-2890-11B2369BC723";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 6;
+	setAttr ".cc" -type "nurbsCurve" 
+		1 4 0 no 3
+		5 0 1 2 3 4
+		5
+		-0.02130907551171984 0.62129788072718017 0.12807507062398235
+		0.128871099337732 0.11790953835115937 0.15057789250912995
+		-0.02130907551171984 -0.38839537368280613 0.12807507062398235
+		-0.17034302606034676 0.11115094392951798 0.10574399764848706
+		-0.021004016093825944 0.62027535325408756 0.12812078037063929
+		;
+createNode transform -n "L_brow_curv_compensation_transform" -p "L_brow_curv_control";
+	rename -uid "583839FE-4163-2381-6669-3484E27556BF";
+	setAttr ".t" -type "double3" -6.2172489379008766e-15 5.6843418860808015e-14 6.4392935428259079e-15 ;
+	setAttr -l on ".tx";
+	setAttr -l on ".ty";
+	setAttr -l on ".tz";
+	setAttr -l on ".rx";
+	setAttr -l on ".ry";
+	setAttr -l on ".rz";
+	setAttr -l on ".sx";
+	setAttr -l on ".sy";
+	setAttr -l on ".sz";
+createNode transform -n "L_brow_curv_transform" -p "L_brow_curv_compensation_transform";
+	rename -uid "DA530C69-4AA5-DB92-A877-1EA08CB85FBA";
+createNode pointConstraint -n "L_brow_curv_control_pointConstraint1" -p "L_brow_curv_control_transform";
+	rename -uid "2712ECB9-4C55-E11C-D863-CC9267D217F8";
+	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "L_brow_major_mid_controlW0" -dv 1 
+		-min 0 -at "double";
+	addAttr -dcb 0 -ci true -k true -sn "w1" -ln "L_brow_major_inner_controlW1" -dv 
+		1 -min 0 -at "double";
+	setAttr -k on ".nds";
+	setAttr -k off ".v";
+	setAttr -k off ".tx";
+	setAttr -k off ".ty";
+	setAttr -k off ".tz";
+	setAttr -k off ".rx";
+	setAttr -k off ".ry";
+	setAttr -k off ".rz";
+	setAttr -k off ".sx";
+	setAttr -k off ".sy";
+	setAttr -k off ".sz";
+	setAttr ".erp" yes;
+	setAttr -s 2 ".tg";
+	setAttr ".o" -type "double3" -0.20129318415968678 0.05737053691908045 0.37946501728637827 ;
+	setAttr ".rst" -type "double3" 2.2919741965719096 161.40818660509368 11.523748405732167 ;
+	setAttr -k on ".w0";
+	setAttr -k on ".w1";
+createNode transform -n "R_brow_main_control" -p "brows_controls";
+	rename -uid "D714A8DE-41F7-DFA8-E085-87A787D72894";
+	setAttr -l on -k off ".v";
+	setAttr ".t" -type "double3" -2.588913115886271e-06 -2.5437429940211587e-12 0 ;
+	setAttr -l on -k off ".tz";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -l on -k off ".rz";
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+	setAttr ".mxtl" -type "double3" 0 1 1 ;
+	setAttr ".mtxe" yes;
+	setAttr ".mtye" yes;
+	setAttr ".xtxe" yes;
+	setAttr ".xtye" yes;
+createNode nurbsCurve -n "R_brow_main_controlShape" -p "R_brow_main_control";
+	rename -uid "92446B52-4D43-2955-8DE9-D8AEDAD7A8F5";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".ls" 2;
+	setAttr ".cc" -type "nurbsCurve" 
+		1 4 0 no 3
+		5 0 1 2 3 4
+		5
+		-1.6363585654888109 -0.18028873271248358 0.45562558078935689
+		1.6363590021691681 -0.18028854169611858 0.36639425960558936
+		1.636358565488816 0.18028873271246548 0.36187965344066186
+		-1.6363590021691632 0.18028854169610045 0.45111097462442939
+		-1.6363585654888109 -0.18028873271248358 0.45562558078935689
+		;
+createNode transform -n "R_brow_major_inner_control_transform" -p "brows_controls";
+	rename -uid "0603A8C7-4641-5895-515A-53A2C401BBE0";
+	setAttr ".s" -type "double3" 1 1 0.99999999999999989 ;
+	setAttr ".opm" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+createNode transform -n "R_brow_major_inner_control" -p "R_brow_major_inner_control_transform";
+	rename -uid "E4F7F46F-430C-8AF6-C852-928193A95F24";
+	setAttr -l on -k off ".v";
+	setAttr ".t" -type "double3" -2.5030331811132928e-16 -3.1308289294429414e-14 0 ;
+	setAttr -l on -k off ".tz";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -l on -k off ".rz";
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode nurbsCurve -n "R_brow_major_inner_controlShape" -p "R_brow_major_inner_control";
+	rename -uid "565FC4FD-476C-94C7-0DF5-3A98B1DAA8C5";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325744633591291 0.068170343101968456 0.19325287809213521
+		4.9466504346007412e-06 0.096407347234361396 0.27330050321257637
+		-0.19324755303504459 0.068170343101968456 0.19325287809213521
+		-0.27329522565880682 7.0895907811063807e-08 4.9309001504127536e-07
+		-0.19324755303504482 -0.068170201310124412 -0.19325189191210512
+		4.9466504339346073e-06 -0.096407205442517352 -0.27329951703254984
+		0.19325744633591269 -0.068170201310124412 -0.19325189191210512
+		0.27330511895967513 7.0895907811063807e-08 4.9309001148856169e-07
+		0.19325744633591291 0.068170343101968456 0.19325287809213521
+		4.9466504346007412e-06 0.096407347234361396 0.27330050321257637
+		-0.19324755303504459 0.068170343101968456 0.19325287809213521
+		;
+createNode nurbsCurve -n "R_brow_major_inner_controlShape1" -p "R_brow_major_inner_control";
+	rename -uid "CD94DBF5-4075-F1B0-3728-9590453AE4FD";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325744633591291 0.19325257058110878 1.6797911861488046e-07
+		4.9466504343786966e-06 0.27330024320474422 3.3314000447148828e-08
+		-0.19324755303504471 0.19325257058113721 1.679791203912373e-07
+		-0.27329522565880682 7.0895907811063807e-08 4.9309001504127536e-07
+		-0.19324755303504471 -0.19325242878926474 8.1820091146767027e-07
+		4.946650434156652e-06 -0.27330010141290018 9.5286602608268822e-07
+		0.19325744633591291 -0.19325242878929316 8.1820090969131343e-07
+		0.27330511895967513 7.0895907811063807e-08 4.9309001148856169e-07
+		0.19325744633591291 0.19325257058110878 1.6797911861488046e-07
+		4.9466504343786966e-06 0.27330024320474422 3.3314000447148828e-08
+		-0.19324755303504471 0.19325257058113721 1.679791203912373e-07
+		;
+createNode nurbsCurve -n "R_brow_major_inner_controlShape2" -p "R_brow_major_inner_control";
+	rename -uid "770A0F10-47FC-ECF7-E507-D8B6268A7C81";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		4.9466504343786966e-06 -0.12508215658326094 0.19325320320303341
+		4.9466504346007412e-06 0.096407347234361396 0.27330050321257637
+		4.9466504343786966e-06 0.26142284278716943 0.19325255298123878
+		4.9466504343786966e-06 0.27330024320474422 3.3314000447148828e-08
+		4.946650434156652e-06 0.12508229837510498 -0.19325221702300688
+		4.9466504339346073e-06 -0.096407205442517352 -0.27329951703254984
+		4.946650434156652e-06 -0.26142270099529696 -0.19325156680121047
+		4.946650434156652e-06 -0.27330010141290018 9.5286602608268822e-07
+		4.9466504343786966e-06 -0.12508215658326094 0.19325320320303341
+		4.9466504346007412e-06 0.096407347234361396 0.27330050321257637
+		4.9466504343786966e-06 0.26142284278716943 0.19325255298123878
+		;
+createNode transform -n "R_brow_major_inner_joint_basis" -p "R_brow_major_inner_control_transform";
+	rename -uid "9BE2A011-4C2E-F944-EE0E-9499D82D53A0";
+	setAttr ".t" -type "double3" 1.1940002986321474e-08 -0.0004967041015788709 -7.5561523420475396e-06 ;
+	setAttr ".r" -type "double3" 0 0 180 ;
+	setAttr ".s" -type "double3" 1 1 -1 ;
+createNode transform -n "R_brow_major_mid_control_transform" -p "brows_controls";
+	rename -uid "B344BA6B-4827-6501-FBF7-37AF4E25CE84";
+	setAttr ".opm" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+createNode transform -n "R_brow_major_mid_control" -p "R_brow_major_mid_control_transform";
+	rename -uid "FEAB850D-40B5-0849-8655-49B7E9DD7585";
+	setAttr -l on -k off ".v";
+	setAttr -k on ".t" -type "double3" 0 0 3.5521838806727473e-16 ;
+	setAttr -k on ".t";
+	setAttr -l on -k off ".tz";
+	setAttr -k on ".r";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -k on ".s";
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode nurbsCurve -n "R_brow_major_mid_controlShape" -p "R_brow_major_mid_control";
+	rename -uid "19D9928F-4384-8DFE-DA5A-3F8C9C7915B4";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
+		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		-0.27330017230924097 4.8493286914347377e-33 -7.9195453639315792e-17
+		-0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
+		-8.2350785335842731e-17 -1.6734800062070489e-17 0.27330017230924097
+		0.19325249968547878 -1.1833289891669146e-17 0.19325249968547878
+		0.27330017230924097 -8.9882840984847358e-33 1.4678996650018188e-16
+		0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		-3.1180271039546686e-17 1.6734800062070489e-17 -0.27330017230924097
+		-0.19325249968547878 1.1833289891669146e-17 -0.19325249968547878
+		;
+createNode nurbsCurve -n "R_brow_major_mid_controlShape1" -p "R_brow_major_mid_control";
+	rename -uid "243F09BF-4EDF-EB8C-7894-828DECEA8867";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		-3.1180271039546686e-17 -0.27330017230924097 0
+		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		-0.27330017230924097 -1.202254283396718e-16 4.1029598083903049e-17
+		-0.19325249968547878 0.19325249968547878 8.2059567893256332e-17
+		-8.2350785335842731e-17 0.27330017230924097 0
+		0.19325249968547878 0.19325249968547878 4.1029598083903049e-17
+		0.27330017230924097 1.0576036352502626e-16 4.1029598083903049e-17
+		0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		-3.1180271039546686e-17 -0.27330017230924097 0
+		-0.19325249968547878 -0.19325249968547878 4.1029598083903049e-17
+		;
+createNode nurbsCurve -n "R_brow_major_mid_controlShape2" -p "R_brow_major_mid_control";
+	rename -uid "CF5F73E1-460B-2953-763C-E19BD465CEFA";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
+		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
+		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
+		-5.894895571485172e-34 -0.27330017230924097 -7.9195453639315792e-17
+		-5.894895571485172e-34 -0.19325249968547878 0.19325249968547878
+		1.6734800062070489e-17 -8.2350785335842731e-17 0.27330017230924097
+		-1.0257436204408037e-17 0.19325249968547878 0.19325249968547878
+		-5.894895571485172e-34 0.27330017230924097 1.4678996650018188e-16
+		2.0514872408816074e-17 0.19325249968547878 -0.19325249968547878
+		-1.6734800062070489e-17 -3.1180271039546686e-17 -0.27330017230924097
+		-5.894895571485172e-34 -0.19325249968547878 -0.19325249968547878
+		;
+createNode transform -n "R_brow_major_mid_joint_basis" -p "R_brow_major_mid_control_transform";
+	rename -uid "703530D1-4F7D-FA6E-A83E-8DA182FD599F";
+	setAttr ".t" -type "double3" -2.0684292375450219e-05 -0.00013543224756062955 3.5466794825467218e-05 ;
+	setAttr ".r" -type "double3" 0 0 180 ;
+	setAttr ".s" -type "double3" 1 1 -0.99999999999999944 ;
+createNode transform -n "R_brow_major_outer_control_transform" -p "brows_controls";
+	rename -uid "1483E8A0-44D9-13D4-F82E-79925F668BE7";
+	setAttr ".opm" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+createNode transform -n "R_brow_major_outer_control" -p "R_brow_major_outer_control_transform";
+	rename -uid "8C0C6EFE-4B81-A321-DCE0-93AAC06C65EE";
+	setAttr -l on -k off ".v";
+	setAttr ".t" -type "double3" 0 -2.8421709430404007e-14 0 ;
+	setAttr -l on -k off ".tz";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -l on -k off ".rz";
+	setAttr -l on -k off ".sx";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode nurbsCurve -n "R_brow_major_outer_controlShape" -p "R_brow_major_outer_control";
+	rename -uid "CD964CF1-49B8-08FD-CE70-27B9A8380EA6";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		-0.19325685068073906 -2.8421709430404007e-14 0.19325022227086563
+		-4.4201509412644668e-06 -2.8421709430404007e-14 0.27329806185128902
+		0.19324814869007501 -2.8421709430404007e-14 0.19325055618424614
+		0.27329598827049573 -2.8421709430404007e-14 -1.8743455498793082e-06
+		0.19324848260345373 -2.8421709430404007e-14 -0.19325444318656793
+		-3.9479263431729805e-06 -2.8421709430404007e-14 -0.27330228276698776
+		-0.19325651676735944 -2.8421709430404007e-14 -0.19325477709994665
+		-0.27330435634778194 -2.8421709430404007e-14 -2.346570148858973e-06
+		-0.19325685068073906 -2.8421709430404007e-14 0.19325022227086563
+		-4.4201509412644668e-06 -2.8421709430404007e-14 0.27329806185128902
+		0.19324814869007501 -2.8421709430404007e-14 0.19325055618424614
+		;
+createNode nurbsCurve -n "R_brow_major_outer_controlShape1" -p "R_brow_major_outer_control";
+	rename -uid "25A9E341-4E59-B240-CFD7-0A87C8EDC1CB";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		-0.19325668372404881 0.19325249968545677 -2.2774145396198264e-06
+		-4.1840386417746345e-06 0.27330017230920589 -2.1104578493691406e-06
+		0.19324831564676526 0.19325249968545677 -1.9435011608948116e-06
+		0.27329598827049573 -2.8421709430404007e-14 -1.8743455498793082e-06
+		0.19324831564676526 -0.19325249968551361 -1.9435011608948116e-06
+		-4.1840386417746345e-06 -0.27330017230926273 -2.1104578493691406e-06
+		-0.19325668372404881 -0.19325249968551361 -2.2774145396198264e-06
+		-0.27330435634778194 -2.8421709430404007e-14 -2.346570148858973e-06
+		-0.19325668372404881 0.19325249968545677 -2.2774145396198264e-06
+		-4.1840386417746345e-06 0.27330017230920589 -2.1104578493691406e-06
+		0.19324831564676526 0.19325249968545677 -1.9435011608948116e-06
+		;
+createNode nurbsCurve -n "R_brow_major_outer_controlShape2" -p "R_brow_major_outer_control";
+	rename -uid "C653A04E-4297-C5FA-7490-D39ED466E1EE";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		3 8 0 no 3
+		13 -2 -1 0 1 2 3 4 5 6 7 8 9 10
+		11
+		-4.3509953320253203e-06 -0.19325249968551361 0.19325038922755589
+		-4.4201509412644668e-06 -2.8421709430404007e-14 0.27329806185128902
+		-4.3509953320253203e-06 0.19325249968545677 0.19325038922755589
+		-4.1840386417746345e-06 0.27330017230920589 -2.1104578493691406e-06
+		-4.0170819533003055e-06 0.19325249968545677 -0.1932546101432564
+		-3.9479263431729805e-06 -2.8421709430404007e-14 -0.27330228276698776
+		-4.0170819533003055e-06 -0.19325249968551361 -0.1932546101432564
+		-4.1840386417746345e-06 -0.27330017230926273 -2.1104578493691406e-06
+		-4.3509953320253203e-06 -0.19325249968551361 0.19325038922755589
+		-4.4201509412644668e-06 -2.8421709430404007e-14 0.27329806185128902
+		-4.3509953320253203e-06 0.19325249968545677 0.19325038922755589
+		;
+createNode transform -n "R_brow_major_outer_joint_basis" -p "R_brow_major_outer_control_transform";
+	rename -uid "2BF0D699-43ED-20FD-3DB6-DF900BCC4F2B";
+	setAttr ".t" -type "double3" -3.6660285616108013e-06 -0.00011230468740563992 1.6907887481210082e-06 ;
+	setAttr ".r" -type "double3" 0 0 180 ;
+	setAttr ".s" -type "double3" 0.99999999999999978 1 -1.0000000000000004 ;
+createNode transform -n "R_brow_curv_control_transform" -p "brows_controls";
+	rename -uid "CD090CCC-476B-FD4A-6612-9BBAF0802F4C";
+	setAttr ".opm" -type "matrix" -1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1;
+createNode transform -n "R_brow_curv_control" -p "R_brow_curv_control_transform";
+	rename -uid "BB33FA4F-4CA9-5580-95EE-54B554CD0F2C";
+	setAttr -l on -k off ".v";
+	setAttr -k on ".t";
+	setAttr -l on -k off ".tz";
+	setAttr -k on ".r";
+	setAttr -l on -k off ".rx";
+	setAttr -l on -k off ".ry";
+	setAttr -l on -k off ".rz";
+	setAttr -k on ".s";
+	setAttr -l on -k off ".sy";
+	setAttr -l on -k off ".sz";
+createNode nurbsCurve -n "R_brow_curv_controlShape" -p "R_brow_curv_control";
+	rename -uid "D43DD3FD-4957-BFBA-72BA-5FB544F8604E";
+	setAttr -k off ".v";
+	setAttr ".ove" yes;
+	setAttr ".ovc" 13;
+	setAttr ".cc" -type "nurbsCurve" 
+		1 4 0 no 3
+		5 0 1 2 3 4
+		5
+		-0.021304144102891442 0.65174849979615601 0.12807512783836827
+		0.12887603074656012 0.15371033879316087 0.15057794972351424
+		-0.021304144102891442 -0.35794475461383968 0.12807512783836827
+		-0.170338094651519 0.13629221596266916 0.1057440548628712
+		-0.02099908468499817 0.65073684009050226 0.12812083758502446
+		;
+createNode transform -n "R_brow_curv_compensation_transform" -p "R_brow_curv_control";
+	rename -uid "CA8BDD3F-4D45-E975-E8CC-D5924F73585C";
+	setAttr -l on ".tx";
+	setAttr -l on ".ty";
+	setAttr -l on ".tz";
+	setAttr -l on ".rx";
+	setAttr -l on ".ry";
+	setAttr -l on ".rz";
+	setAttr -l on ".sx";
+	setAttr -l on ".sy";
+	setAttr -l on ".sz";
+createNode transform -n "R_brow_curv_transform" -p "R_brow_curv_compensation_transform";
+	rename -uid "058ACBCF-43A8-FD9C-1DC2-8DB01A8585FE";
+createNode pointConstraint -n "R_brow_curv_control_pointConstraint1" -p "R_brow_curv_control_transform";
+	rename -uid "EC341EA4-421F-A18F-CD10-B1BD4D4C2CF6";
+	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "R_brow_major_inner_controlW0" -dv 
+		1 -min 0 -at "double";
+	addAttr -dcb 0 -ci true -k true -sn "w1" -ln "R_brow_major_mid_controlW1" -dv 1 
+		-min 0 -at "double";
+	setAttr -k on ".nds";
+	setAttr -k off ".v";
+	setAttr -k off ".tx";
+	setAttr -k off ".ty";
+	setAttr -k off ".tz";
+	setAttr -k off ".rx";
+	setAttr -k off ".ry";
+	setAttr -k off ".rz";
+	setAttr -k off ".sx";
+	setAttr -k off ".sy";
+	setAttr -k off ".sz";
+	setAttr ".erp" yes;
+	setAttr -s 2 ".tg";
+	setAttr ".rst" -type "double3" -2.2919766855007082 161.4081866050937 11.523747910705415 ;
+	setAttr -k on ".w0";
+	setAttr -k on ".w1";
 createNode wire -n "L_brow_curve_wire";
 	rename -uid "B66F26C8-4FD6-05D7-2955-D396B92D90BA";
 	setAttr ".ro" 0;
@@ -9626,26 +9629,26 @@ createNode pointMatrixMultDL -n "L_brow_major_inner_control_transform_parentInve
 createNode pointOnCurveInfo -n "L_brow_major_inner_control_pointOnCurveInfo";
 	rename -uid "AB1C7CD9-48CC-7CF5-1F64-AB945C1036FF";
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "1E18E11D-4374-0ACB-DAF3-A098547C26EB";
+	rename -uid "4039D459-40E3-6249-8E22-6A89199598F4";
 	setAttr -s 2 ".lnk";
 	setAttr -s 2 ".slnk";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "FAC10E99-47C5-A2ED-6E37-C9A38812F081";
+	rename -uid "2558D21F-4C93-24BD-DA87-B79EC15C012D";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "B91AB268-4C71-B40C-F933-38A8309F6C9A";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "34EE2C1A-4DC9-7FBE-F174-CC9859CEEC36";
+	rename -uid "D6616CEC-4A03-5728-57F8-AA8B3FBB76AB";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "9DC857DF-468D-382B-8CF9-6C9244293F04";
 	setAttr ".g" yes;
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "18F5FD14-4072-D579-6300-DAB8B695B3E9";
+	rename -uid "FAD10078-472A-2F6C-CC2D-C18D6124D75E";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 2 6 7 ;
 	setAttr -s 2 ".bspr";
 	setAttr -s 2 ".obsv";
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "4C509573-48FB-B48D-AC7F-DA961E42850E";
+	rename -uid "BF2AAD72-49CE-746F-8CC9-378C46224154";
 createNode script -n "sceneConfigurationScriptNode";
 	rename -uid "D609B326-476E-091A-88EB-4CB49AB78F96";
 	setAttr ".b" -type "string" "playbackOptions -min 0.625 -max 75 -ast 0.625 -aet 125 ";
@@ -10015,99 +10018,6 @@ select -ne :hardwareRenderGlobals;
 	setAttr -av -k on ".bswa";
 	setAttr -av -k on ".shml";
 	setAttr -av -k on ".hwel";
-connectAttr "L_brow_main_tuner.m" "L_brow_main_control.opm";
-connectAttr "L_brow_major_inner_control_transform_parentInverse_pointMatrixMultDL.o" "L_brow_major_inner_control_transform.t"
-		;
-connectAttr "L_brow_major_mid_control_transform_parentInverse_pointMatrixMultDL.o" "L_brow_major_mid_control_transform.t"
-		;
-connectAttr "L_brow_major_outer_control_transform_parentInverse_pointMatrixMultDL.o" "L_brow_major_outer_control_transform.t"
-		;
-connectAttr "L_brow_curv_control_pointConstraint1.ctx" "L_brow_curv_control_transform.tx"
-		;
-connectAttr "L_brow_curv_control_pointConstraint1.cty" "L_brow_curv_control_transform.ty"
-		;
-connectAttr "L_brow_curv_control_pointConstraint1.ctz" "L_brow_curv_control_transform.tz"
-		;
-connectAttr "L_brow_curv_control.t" "L_brow_curv_transform.t";
-connectAttr "L_brow_curv_control.r" "L_brow_curv_transform.r";
-connectAttr "L_brow_curv_control.s" "L_brow_curv_transform.s";
-connectAttr "L_brow_curv_control_transform.pim" "L_brow_curv_control_pointConstraint1.cpim"
-		;
-connectAttr "L_brow_curv_control_transform.rp" "L_brow_curv_control_pointConstraint1.crp"
-		;
-connectAttr "L_brow_curv_control_transform.rpt" "L_brow_curv_control_pointConstraint1.crt"
-		;
-connectAttr "L_brow_major_mid_control.t" "L_brow_curv_control_pointConstraint1.tg[0].tt"
-		;
-connectAttr "L_brow_major_mid_control.rp" "L_brow_curv_control_pointConstraint1.tg[0].trp"
-		;
-connectAttr "L_brow_major_mid_control.rpt" "L_brow_curv_control_pointConstraint1.tg[0].trt"
-		;
-connectAttr "L_brow_major_mid_control.pm" "L_brow_curv_control_pointConstraint1.tg[0].tpm"
-		;
-connectAttr "L_brow_curv_control_pointConstraint1.w0" "L_brow_curv_control_pointConstraint1.tg[0].tw"
-		;
-connectAttr "L_brow_major_inner_control.t" "L_brow_curv_control_pointConstraint1.tg[1].tt"
-		;
-connectAttr "L_brow_major_inner_control.rp" "L_brow_curv_control_pointConstraint1.tg[1].trp"
-		;
-connectAttr "L_brow_major_inner_control.rpt" "L_brow_curv_control_pointConstraint1.tg[1].trt"
-		;
-connectAttr "L_brow_major_inner_control.pm" "L_brow_curv_control_pointConstraint1.tg[1].tpm"
-		;
-connectAttr "L_brow_curv_control_pointConstraint1.w1" "L_brow_curv_control_pointConstraint1.tg[1].tw"
-		;
-connectAttr "R_brow_main_control_parent_multMatrix.o" "R_brow_main_control.opm";
-connectAttr "R_brow_major_inner_control_transform_parentInverse_pointMatrixMultDL.o" "R_brow_major_inner_control_transform.t"
-		;
-connectAttr "L_brow_major_inner_control_transform.r" "R_brow_major_inner_control_transform.r"
-		;
-connectAttr "R_brow_major_mid_control_transform_parentInverse_pointMatrixMultDL.o" "R_brow_major_mid_control_transform.t"
-		;
-connectAttr "L_brow_major_mid_control_transform.r" "R_brow_major_mid_control_transform.r"
-		;
-connectAttr "R_brow_major_outer_control_transform_parentInverse_pointMatrixMultDL.o" "R_brow_major_outer_control_transform.t"
-		;
-connectAttr "L_brow_major_outer_control_transform.r" "R_brow_major_outer_control_transform.r"
-		;
-connectAttr "R_brow_curv_control_pointConstraint1.ctx" "R_brow_curv_control_transform.tx"
-		;
-connectAttr "R_brow_curv_control_pointConstraint1.cty" "R_brow_curv_control_transform.ty"
-		;
-connectAttr "R_brow_curv_control_pointConstraint1.ctz" "R_brow_curv_control_transform.tz"
-		;
-connectAttr "L_brow_curv_control_transform.r" "R_brow_curv_control_transform.r";
-connectAttr "R_brow_curv_control.t" "R_brow_curv_transform.t";
-connectAttr "R_brow_curv_control.r" "R_brow_curv_transform.r";
-connectAttr "R_brow_curv_control.s" "R_brow_curv_transform.s";
-connectAttr "R_brow_curv_control_transform.pim" "R_brow_curv_control_pointConstraint1.cpim"
-		;
-connectAttr "R_brow_curv_control_transform.rp" "R_brow_curv_control_pointConstraint1.crp"
-		;
-connectAttr "R_brow_curv_control_transform.rpt" "R_brow_curv_control_pointConstraint1.crt"
-		;
-connectAttr "R_brow_major_inner_control.t" "R_brow_curv_control_pointConstraint1.tg[0].tt"
-		;
-connectAttr "R_brow_major_inner_control.rp" "R_brow_curv_control_pointConstraint1.tg[0].trp"
-		;
-connectAttr "R_brow_major_inner_control.rpt" "R_brow_curv_control_pointConstraint1.tg[0].trt"
-		;
-connectAttr "R_brow_major_inner_control.pm" "R_brow_curv_control_pointConstraint1.tg[0].tpm"
-		;
-connectAttr "R_brow_curv_control_pointConstraint1.w0" "R_brow_curv_control_pointConstraint1.tg[0].tw"
-		;
-connectAttr "R_brow_major_mid_control.t" "R_brow_curv_control_pointConstraint1.tg[1].tt"
-		;
-connectAttr "R_brow_major_mid_control.rp" "R_brow_curv_control_pointConstraint1.tg[1].trp"
-		;
-connectAttr "R_brow_major_mid_control.rpt" "R_brow_curv_control_pointConstraint1.tg[1].trt"
-		;
-connectAttr "R_brow_major_mid_control.pm" "R_brow_curv_control_pointConstraint1.tg[1].tpm"
-		;
-connectAttr "R_brow_curv_control_pointConstraint1.w1" "R_brow_curv_control_pointConstraint1.tg[1].tw"
-		;
-connectAttr "L_brow_curv_control_pointConstraint1.o" "R_brow_curv_control_pointConstraint1.o"
-		;
 connectAttr "L_brow_main_blendShape.og[0]" "L_brow_main_curveShape.cr";
 connectAttr "L_brow_tuner_curveShape.l" "L_brow_main_curveShapeOrig1.cr";
 connectAttr "L_brow_curv_cluster.og[0]" "L_brow_major_curveShape.cr";
@@ -10354,6 +10264,99 @@ connectAttr "R_brow_major_outer_joint_parentConstraint1.w0" "R_brow_major_outer_
 connectAttr "L_brow_main_tuner.t" "R_brow_main_tuner.t";
 connectAttr "L_brow_main_tuner.r" "R_brow_main_tuner.r";
 connectAttr "L_brow_main_tuner.s" "R_brow_main_tuner.s";
+connectAttr "L_brow_main_tuner.m" "L_brow_main_control.opm";
+connectAttr "L_brow_major_inner_control_transform_parentInverse_pointMatrixMultDL.o" "L_brow_major_inner_control_transform.t"
+		;
+connectAttr "L_brow_major_mid_control_transform_parentInverse_pointMatrixMultDL.o" "L_brow_major_mid_control_transform.t"
+		;
+connectAttr "L_brow_major_outer_control_transform_parentInverse_pointMatrixMultDL.o" "L_brow_major_outer_control_transform.t"
+		;
+connectAttr "L_brow_curv_control_pointConstraint1.ctx" "L_brow_curv_control_transform.tx"
+		;
+connectAttr "L_brow_curv_control_pointConstraint1.cty" "L_brow_curv_control_transform.ty"
+		;
+connectAttr "L_brow_curv_control_pointConstraint1.ctz" "L_brow_curv_control_transform.tz"
+		;
+connectAttr "L_brow_curv_control.t" "L_brow_curv_transform.t";
+connectAttr "L_brow_curv_control.r" "L_brow_curv_transform.r";
+connectAttr "L_brow_curv_control.s" "L_brow_curv_transform.s";
+connectAttr "L_brow_curv_control_transform.pim" "L_brow_curv_control_pointConstraint1.cpim"
+		;
+connectAttr "L_brow_curv_control_transform.rp" "L_brow_curv_control_pointConstraint1.crp"
+		;
+connectAttr "L_brow_curv_control_transform.rpt" "L_brow_curv_control_pointConstraint1.crt"
+		;
+connectAttr "L_brow_major_mid_control.t" "L_brow_curv_control_pointConstraint1.tg[0].tt"
+		;
+connectAttr "L_brow_major_mid_control.rp" "L_brow_curv_control_pointConstraint1.tg[0].trp"
+		;
+connectAttr "L_brow_major_mid_control.rpt" "L_brow_curv_control_pointConstraint1.tg[0].trt"
+		;
+connectAttr "L_brow_major_mid_control.pm" "L_brow_curv_control_pointConstraint1.tg[0].tpm"
+		;
+connectAttr "L_brow_curv_control_pointConstraint1.w0" "L_brow_curv_control_pointConstraint1.tg[0].tw"
+		;
+connectAttr "L_brow_major_inner_control.t" "L_brow_curv_control_pointConstraint1.tg[1].tt"
+		;
+connectAttr "L_brow_major_inner_control.rp" "L_brow_curv_control_pointConstraint1.tg[1].trp"
+		;
+connectAttr "L_brow_major_inner_control.rpt" "L_brow_curv_control_pointConstraint1.tg[1].trt"
+		;
+connectAttr "L_brow_major_inner_control.pm" "L_brow_curv_control_pointConstraint1.tg[1].tpm"
+		;
+connectAttr "L_brow_curv_control_pointConstraint1.w1" "L_brow_curv_control_pointConstraint1.tg[1].tw"
+		;
+connectAttr "R_brow_main_control_parent_multMatrix.o" "R_brow_main_control.opm";
+connectAttr "R_brow_major_inner_control_transform_parentInverse_pointMatrixMultDL.o" "R_brow_major_inner_control_transform.t"
+		;
+connectAttr "L_brow_major_inner_control_transform.r" "R_brow_major_inner_control_transform.r"
+		;
+connectAttr "R_brow_major_mid_control_transform_parentInverse_pointMatrixMultDL.o" "R_brow_major_mid_control_transform.t"
+		;
+connectAttr "L_brow_major_mid_control_transform.r" "R_brow_major_mid_control_transform.r"
+		;
+connectAttr "R_brow_major_outer_control_transform_parentInverse_pointMatrixMultDL.o" "R_brow_major_outer_control_transform.t"
+		;
+connectAttr "L_brow_major_outer_control_transform.r" "R_brow_major_outer_control_transform.r"
+		;
+connectAttr "R_brow_curv_control_pointConstraint1.ctx" "R_brow_curv_control_transform.tx"
+		;
+connectAttr "R_brow_curv_control_pointConstraint1.cty" "R_brow_curv_control_transform.ty"
+		;
+connectAttr "R_brow_curv_control_pointConstraint1.ctz" "R_brow_curv_control_transform.tz"
+		;
+connectAttr "L_brow_curv_control_transform.r" "R_brow_curv_control_transform.r";
+connectAttr "R_brow_curv_control.t" "R_brow_curv_transform.t";
+connectAttr "R_brow_curv_control.r" "R_brow_curv_transform.r";
+connectAttr "R_brow_curv_control.s" "R_brow_curv_transform.s";
+connectAttr "R_brow_curv_control_transform.pim" "R_brow_curv_control_pointConstraint1.cpim"
+		;
+connectAttr "R_brow_curv_control_transform.rp" "R_brow_curv_control_pointConstraint1.crp"
+		;
+connectAttr "R_brow_curv_control_transform.rpt" "R_brow_curv_control_pointConstraint1.crt"
+		;
+connectAttr "R_brow_major_inner_control.t" "R_brow_curv_control_pointConstraint1.tg[0].tt"
+		;
+connectAttr "R_brow_major_inner_control.rp" "R_brow_curv_control_pointConstraint1.tg[0].trp"
+		;
+connectAttr "R_brow_major_inner_control.rpt" "R_brow_curv_control_pointConstraint1.tg[0].trt"
+		;
+connectAttr "R_brow_major_inner_control.pm" "R_brow_curv_control_pointConstraint1.tg[0].tpm"
+		;
+connectAttr "R_brow_curv_control_pointConstraint1.w0" "R_brow_curv_control_pointConstraint1.tg[0].tw"
+		;
+connectAttr "R_brow_major_mid_control.t" "R_brow_curv_control_pointConstraint1.tg[1].tt"
+		;
+connectAttr "R_brow_major_mid_control.rp" "R_brow_curv_control_pointConstraint1.tg[1].trp"
+		;
+connectAttr "R_brow_major_mid_control.rpt" "R_brow_curv_control_pointConstraint1.tg[1].trt"
+		;
+connectAttr "R_brow_major_mid_control.pm" "R_brow_curv_control_pointConstraint1.tg[1].tpm"
+		;
+connectAttr "R_brow_curv_control_pointConstraint1.w1" "R_brow_curv_control_pointConstraint1.tg[1].tw"
+		;
+connectAttr "L_brow_curv_control_pointConstraint1.o" "R_brow_curv_control_pointConstraint1.o"
+		;
 connectAttr "L_brow_curveShapeOrig.ws" "L_brow_curve_wire.ip[0].ig";
 connectAttr "L_brow_curveShapeOrig.l" "L_brow_curve_wire.orggeom[0]";
 connectAttr "L_brow_mid_curveBaseWireShape.ws" "L_brow_curve_wire.bw[0]";
@@ -11578,15 +11581,15 @@ connectAttr "L_brow_tuner_curveShape.ws" "L_brow_tuner_curve_transformGeometry.i
 connectAttr "R_brow_main_control_parent_multMatrix.msg" ":defaultRenderUtilityList1.u"
 		 -na;
 connectAttr "defaultRenderLayer.msg" ":defaultRenderingList1.r" -na;
-dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
 dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 dataStructure -fmt "raw" -as "name=DiffArea:float=value";
 dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
-dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
 dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
+dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
 dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
 dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
-dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
 // End of face_brows.ma
