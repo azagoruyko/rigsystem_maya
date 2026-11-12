@@ -36,21 +36,27 @@ class Plug:
 
     def __init__(self, value):
         if isinstance(value, om.MPlug):
-            self._mplug = value
+            self._handle = value
         else:
             plugName = str(value)
             selection = om.MSelectionList()
             try:
                 selection.add(plugName)
-                self._mplug = selection.getPlug(0)
+                self._handle = selection.getPlug(0)
             except RuntimeError as error:
                 raise RuntimeError(f"Could not find plug '{plugName}': {error}") from error
-            if self._mplug.isElement and "[" not in plugName:
-                self._mplug = self._mplug.array()
+            if self._handle.isElement and "[" not in plugName:
+                self._handle = self._handle.array()
 
 
     def __str__(self):
-        return self._mplug.name()
+        name = self._handle.name()
+        node = self._handle.node()
+        if node.hasFn(om.MFn.kDagNode):
+            path = om.MDagPath.getAPathTo(node).partialPathName()
+            return path + name[name.index("."):]
+
+        return name
 
 
     def __add__(self, other):
@@ -74,12 +80,12 @@ class Plug:
     def __eq__(self, other):
         if not isinstance(other, Plug):
             return NotImplemented
-        return self._mplug == other._mplug
+        return self._handle == other._handle
 
 
     def __hash__(self):
         parts = []
-        current = self._mplug
+        current = self._handle
         while True:
             attribute = om.MObjectHandle(current.attribute())
             index = current.logicalIndex() if current.isElement else None
@@ -91,7 +97,7 @@ class Plug:
             else:
                 break
 
-        node = om.MObjectHandle(self._mplug.node())
+        node = om.MObjectHandle(self._handle.node())
         return hash((node.hashCode(), tuple(parts)))
 
 
@@ -169,13 +175,13 @@ class Plug:
     @property
     def node(self):
         """Return the node that owns this plug."""
-        name = om.MFnDependencyNode(self._mplug.node()).name()
+        name = om.MFnDependencyNode(self._handle.node()).name()
         return Node(name)
 
 
     def name(self):
-        """Return the full plug path, including the node and parent attributes."""
-        return self._mplug.name()
+        """Return the plug's shortest unambiguous name."""
+        return str(self)
 
 
     def partialName(self, **kwargs):
@@ -190,7 +196,7 @@ class Plug:
         }
         for key, value in defaults.items():
             kwargs.setdefault(key, value)
-        return self._mplug.partialName(**kwargs)
+        return self._handle.partialName(**kwargs)
 
 
     def listConnections(self, **kwargs):
@@ -202,25 +208,25 @@ class Plug:
     @property
     def mplug(self):
         """Return the Maya API MPlug for this attribute."""
-        return self._mplug
+        return self._handle
 
 
     def index(self):
         """Return this array element's logical index."""
-        return self._mplug.logicalIndex()
+        return self._handle.logicalIndex()
 
 
     def __iter__(self):
         """Iterate over existing elements of an array plug."""
-        if not self._mplug.isArray:
+        if not self._handle.isArray:
             raise TypeError("Plug is not an array")
 
-        for index in range(self._mplug.evaluateNumElements()):
-            yield Plug(self._mplug.elementByPhysicalIndex(index))
+        for index in range(self._handle.evaluateNumElements()):
+            yield Plug(self._handle.elementByPhysicalIndex(index))
 
 
     def __getitem__(self, index):
-        return Plug(self._mplug.elementByLogicalIndex(index))
+        return Plug(self._handle.elementByLogicalIndex(index))
 
 
     def __rshift__(self, destination):
