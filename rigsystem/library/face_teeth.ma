@@ -1,18 +1,17 @@
 //Maya ASCII 2026 scene
 //Name: face_teeth.ma
-//Last modified: Tue, Nov 03, 2026 03:40:52 PM
+//Last modified: Fri, Nov 13, 2026 03:09:36 PM
 //Codeset: 1251
 requires maya "2026";
 requires "stereoCamera" "10.0";
 requires "Mayatomr" "2013.0 - 3.10.1.11 ";
-requires "stereoCamera" "10.0";
 currentUnit -l centimeter -a degree -t ntsc;
 fileInfo "application" "maya";
 fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
-fileInfo "osv" "Windows 11 Pro v2009 (Build: 26200)";
-fileInfo "UUID" "FFF7C4EB-4276-30AE-ECDA-5DB2F256C8EC";
+fileInfo "osv" "Windows 11 Home v2009 (Build: 26300)";
+fileInfo "UUID" "CFD27F5D-49DC-940F-D264-8A9899DD09F5";
 createNode joint -n "M_teeth_upper_main_joint";
 	rename -uid "E558E710-459C-ABF6-05BE-A7AA37FF65D0";
 	addAttr -ci true -sn "liw" -ln "lockInfluenceWeights" -min 0 -max 1 -at "bool";
@@ -45,7 +44,7 @@ createNode parentConstraint -n "M_teeth_upper_main_joint_parentConstraint1" -p "
 	setAttr ".tg[0].tot" -type "double3" 2.0328790734103196e-20 -5.6955559273319523e-06 
 		8.9308679207533714e-07 ;
 	setAttr ".tg[0].tor" -type "double3" 0 3.108024484755642e-15 -6.7538740882243379e-16 ;
-	setAttr ".lr" -type "double3" 10.845672838542272 -1.2377918851510936e-05 7.4749822132879652e-11 ;
+	setAttr ".lr" -type "double3" 10.845672838542031 -2.4749779945035053e-05 0 ;
 	setAttr ".rst" -type "double3" -0.57788721563676404 -6.3299602678278033 1.2064490031995882e-05 ;
 	setAttr ".rsrr" -type "double3" -6.3611093629270335e-15 0 0 ;
 	setAttr ".udt" yes;
@@ -80,7 +79,7 @@ createNode parentConstraint -n "L_teeth_upper_joint_parentConstraint1" -p "L_tee
 	setAttr ".tg[0].tot" -type "double3" -0.00017872159528620202 -0.0025182916439234759 
 		0.0084561173489685615 ;
 	setAttr ".tg[0].tor" -type "double3" 0 0 -3.7915166395467729e-22 ;
-	setAttr ".lr" -type "double3" 8.3236876883995765e-14 1.237488996550501e-05 1.2283096378810989e-07 ;
+	setAttr ".lr" -type "double3" 10.845672838542109 1.2374889965505012e-05 1.2283096378810949e-07 ;
 	setAttr ".rst" -type "double3" 2.7626215920786636 0.13552840490550011 -1.602801627686528 ;
 	setAttr ".rsrr" -type "double3" 1.5902773407317811e-15 -1.1848489498583665e-23 1.895758319773386e-22 ;
 	setAttr ".udt" yes;
@@ -114,7 +113,7 @@ createNode parentConstraint -n "M_teeth_upper_joint_parentConstraint2" -p "M_tee
 	setAttr ".erp" yes;
 	setAttr ".tg[0].tot" -type "double3" -9.0247420034647831e-22 0 -3.5527136788005009e-15 ;
 	setAttr ".tg[0].tor" -type "double3" 0 0 -3.7915166395467729e-22 ;
-	setAttr ".lr" -type "double3" -9.6136624083042261e-14 1.2283635219788278e-05 -1.5050896621792245e-06 ;
+	setAttr ".lr" -type "double3" 3.2914638811631236 1.2283635219788276e-05 -1.5050896621792243e-06 ;
 	setAttr ".rst" -type "double3" -3.7837818010787271e-07 -0.078015704372916161 1.7945141948880554 ;
 	setAttr ".rsrr" -type "double3" 1.5902773407317811e-15 -1.1848489498583665e-23 1.895758319773386e-22 ;
 	setAttr ".udt" yes;
@@ -151,7 +150,7 @@ createNode parentConstraint -n "R_teeth_upper_joint_parentConstraint1" -p "R_tee
 		0.0084603744506761558 ;
 	setAttr ".tg[0].tor" -type "double3" 2.5444437451708134e-14 -1.5166066558187092e-21 
 		0 ;
-	setAttr ".lr" -type "double3" 3.2348001980578386e-14 -1.2374889965505002e-05 -1.2283096378810229e-07 ;
+	setAttr ".lr" -type "double3" 10.845672838543532 -3.1868202067138413e-05 -3.857485954243951e-06 ;
 	setAttr ".rst" -type "double3" -2.7626196645826409 0.13572391534100348 -1.6028359653749362 ;
 	setAttr ".rsrr" -type "double3" -2.3854160110976693e-14 1.5166066558187088e-21 -3.1570718036057119e-37 ;
 	setAttr ".udt" yes;
@@ -221,7 +220,7 @@ createNode parentConstraint -n "L_teeth_lower_joint_parentConstraint1" -p "L_tee
 	setAttr ".tg[0].tot" -type "double3" 0 0 1.7763568394002505e-15 ;
 	setAttr ".tg[0].tor" -type "double3" 6.3611093629270335e-15 -3.2846909608786526e-15 
 		0 ;
-	setAttr ".lr" -type "double3" 5.1431330751193682e-14 1.2374889968841498e-05 1.2283097006877272e-07 ;
+	setAttr ".lr" -type "double3" 15.038309434652277 1.2374889968841498e-05 1.2283097006877293e-07 ;
 	setAttr ".rst" -type "double3" 2.6266441606523854 0.070830992156373895 -1.2832055548383892 ;
 	setAttr ".rsrr" -type "double3" -3.1805546849843817e-15 3.2846907476058415e-15 3.7915166386350877e-22 ;
 	setAttr ".udt" yes;
@@ -258,7 +257,7 @@ createNode parentConstraint -n "M_teeth_lower_joint_parentConstraint1" -p "M_tee
 		1.0658141036401503e-14 ;
 	setAttr ".tg[0].tor" -type "double3" 6.3611093629270335e-15 -3.2846909608786526e-15 
 		0 ;
-	setAttr ".lr" -type "double3" 23.392231786177863 1.23748899688415e-05 1.2283097006877295e-07 ;
+	setAttr ".lr" -type "double3" 15.038309434652289 1.2374889968841498e-05 1.2283097006877274e-07 ;
 	setAttr ".rst" -type "double3" -4.2003025306726135e-07 0.143966072446716 1.9711992067807778 ;
 	setAttr ".rsrr" -type "double3" -3.1805546849843817e-15 3.2846907476058415e-15 3.7915166386350877e-22 ;
 	setAttr ".udt" yes;
@@ -293,7 +292,7 @@ createNode parentConstraint -n "R_teeth_lower_joint_parentConstraint1" -p "R_tee
 	setAttr ".erp" yes;
 	setAttr ".tg[0].tot" -type "double3" 4.4408920985006262e-16 0 7.9936057773011271e-15 ;
 	setAttr ".tg[0].tor" -type "double3" 0 -3.4917153524311856e-15 -1.8205892274843877e-15 ;
-	setAttr ".lr" -type "double3" 4.1889666706802731e-14 -1.2374889968841495e-05 -1.2283097006876959e-07 ;
+	setAttr ".lr" -type "double3" 15.038309434654252 -3.154299492881081e-05 -5.2726481350782268e-06 ;
 	setAttr ".rst" -type "double3" -2.626643631553097 0.070830461194134386 -1.2832075745347211 ;
 	setAttr ".rsrr" -type "double3" -1.9286500992246977e-22 3.4917138358245294e-15 1.8205892274843877e-15 ;
 	setAttr ".udt" yes;
@@ -302,9 +301,6 @@ createNode transform -n "M_teeth_upper_main_control";
 	rename -uid "A524EA68-4FD0-FF87-D8EB-8DA59C8BC3C1";
 	addAttr -ci true -sn "hideTeeth" -ln "hideTeeth" -min 0 -max 1 -at "bool";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 1.8687813495057507e-06 -2.8421709430404007e-14 -1.4210854715202004e-13 ;
-	setAttr ".r" -type "double3" 0 1.2150883646731173e-05 -2.3278688808960444e-06 ;
-	setAttr ".s" -type "double3" 1 1 1.0000000000000002 ;
 	setAttr ".opm" -type "matrix" 0.99999999999997669 0 2.1598257471388972e-07 0 -4.0640204975436734e-08 0.98213756924939655 0.18816427681386574 0
 		 -2.1212460092972584e-07 -0.18816427681387013 0.98213756924937368 0 -1.8694407660278548e-06 154.70310974121097 8.6555166244504811 1;
 	setAttr -k on ".hideTeeth";
@@ -328,8 +324,7 @@ createNode nurbsCurve -n "M_teeth_upper_main_controlShape" -p "M_teeth_upper_mai
 createNode transform -n "L_teeth_upper_control" -p "M_teeth_upper_main_control";
 	rename -uid "E1D469AB-4FE0-86E8-44DE-8DA052B1C096";
 	setAttr -l on -k off ".v";
-	setAttr ".opm" -type "matrix" 1 0 0 0 0 0.98213756924939655 -0.18816427681387016 0
-		 0 0.18816427681387016 0.98213756924939655 0 2.7627999782562256 0.13640477252099004 -1.611580244798489 1;
+	setAttr ".opm" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 2.7627999782562256 0.13640477252099004 -1.611580244798489 1;
 createNode nurbsCurve -n "L_teeth_upper_controlShape" -p "L_teeth_upper_control";
 	rename -uid "AD0E0E81-494F-C7E7-9A7D-4FB583F73DE2";
 	setAttr -k off ".v";
@@ -396,8 +391,7 @@ createNode nurbsCurve -n "L_teeth_upper_controlShape2" -p "L_teeth_upper_control
 createNode transform -n "M_teeth_upper_control" -p "M_teeth_upper_main_control";
 	rename -uid "C0F6D2D0-4E05-1178-52AC-328ACCB59E4A";
 	setAttr -l on -k off ".v";
-	setAttr ".opm" -type "matrix" 1 0 0 0 0 0.99835038161762335 -0.057415289983991251 0
-		 0 0.057415289983991251 0.99835038161762335 0 1.2024780870257992e-19 -0.078021399928871915 1.7945150879748937 1;
+	setAttr ".opm" -type "matrix" 1 0 0 0 0 1 0 0 0 0 1 0 1.2024780870257992e-19 -0.078021399928871915 1.7945150879748937 1;
 createNode nurbsCurve -n "M_teeth_upper_controlShape" -p "M_teeth_upper_control";
 	rename -uid "EE3571BE-48E2-1FE3-047B-D7BCFAF1E4DE";
 	setAttr -k off ".v";
@@ -464,8 +458,8 @@ createNode nurbsCurve -n "M_teeth_upper_controlShape3" -p "M_teeth_upper_control
 createNode transform -n "R_teeth_upper_control" -p "M_teeth_upper_main_control";
 	rename -uid "2143C1AF-438D-A74E-D8EB-56B7E36AF8C6";
 	setAttr -l on -k off ".v";
-	setAttr ".opm" -type "matrix" -1 0 -1.2246467991473532e-16 0 2.3043477931398317e-17 0.98213756924939644 -0.18816427681387063 0
-		 -1.2027716305036355e-16 0.18816427681387063 0.98213756924939677 0 -2.7627999782562256 0.13640477252099004 -1.611580244798489 1;
+	setAttr ".opm" -type "matrix" -0.99999999999994005 0 3.4641020661939347e-07 0 0 1 0 0
+		 3.4641020661939353e-07 -0 0.99999999999994027 0 -2.7627999782562256 0.13640477252099004 -1.611580244798489 1;
 createNode nurbsCurve -n "R_teeth_upper_controlShape" -p "R_teeth_upper_control";
 	rename -uid "A771BE7B-4290-3944-B8AF-12A975E46EA4";
 	setAttr -k off ".v";
@@ -553,13 +547,10 @@ createNode nurbsCurve -n "M_teeth_lower_main_controlShape" -p "M_teeth_lower_mai
 		-0.016587254924516771 -0.23104493083364283 2.968157563791519
 		-0.0072883511496554341 -0.41210740604789786 2.753161319159664
 		;
-createNode transform -n "M_teeth_lower_control_transform" -p "M_teeth_lower_main_control";
-	rename -uid "D9DF627F-47F1-9E6F-FD32-5AB498063AFA";
-	setAttr ".t" -type "double3" -1.1132799934039577e-16 0.14396607244665915 1.9711992067808382 ;
-	setAttr ".r" -type "double3" 8.3539223515255649 0 0 ;
-createNode transform -n "M_teeth_lower_control" -p "M_teeth_lower_control_transform";
+createNode transform -n "M_teeth_lower_control" -p "M_teeth_lower_main_control";
 	rename -uid "185297F9-4F60-014F-81B7-D2962EB478C3";
 	setAttr -l on -k off ".v";
+	setAttr ".opm" -type "matrix" 1 0 0 0 0 0.99999999999999989 0 0 0 0 1 0 -1.1132799934039577e-16 0.14396607244665915 1.9711992067808382 1;
 createNode nurbsCurve -n "M_teeth_lower_controlShape" -p "M_teeth_lower_control";
 	rename -uid "7D0B9980-4CB1-EBD1-C898-96894C6DFAF3";
 	setAttr -k off ".v";
@@ -626,8 +617,8 @@ createNode nurbsCurve -n "M_teeth_lower_controlShape3" -p "M_teeth_lower_control
 createNode transform -n "L_teeth_lower_control" -p "M_teeth_lower_main_control";
 	rename -uid "933292D3-4AC8-6369-9924-C5831BA66D1E";
 	setAttr -l on -k off ".v";
-	setAttr ".opm" -type "matrix" 1 0 0 0 0 0.96575255730523746 -0.25946483009917537 0
-		 0 0.25946483009917537 0.96575255730523746 0 2.6266438961029053 0.070830850397697986 -1.2832061041798681 1;
+	setAttr ".opm" -type "matrix" 1 0 0 0 0 0.99999999999999989 0 0 0 0 0.99999999999999989 0
+		 2.6266438961029053 0.070830850397697986 -1.2832061041798681 1;
 createNode nurbsCurve -n "L_teeth_lower_controlShape" -p "L_teeth_lower_control";
 	rename -uid "B7C5CE83-4A78-4351-6CE1-3BB8537C9CE9";
 	setAttr -k off ".v";
@@ -694,9 +685,8 @@ createNode nurbsCurve -n "L_teeth_lower_controlShape2" -p "L_teeth_lower_control
 createNode transform -n "R_teeth_lower_control" -p "M_teeth_lower_main_control";
 	rename -uid "F8BF4C2D-4BCB-D507-34B7-BD91C0982B5D";
 	setAttr -l on -k off ".v";
-	setAttr ".opm" -type "matrix" -1 -3.0814879110195774e-33 -1.2246467991473535e-16 0
-		 3.1775277367226681e-17 0.96575255730523757 -0.25946483009917526 0 -1.1827057780722301e-16 0.25946483009917526 0.96575255730523768 0
-		 -2.6266438961029053 0.070830602952753452 -1.2832070251932777 1;
+	setAttr ".opm" -type "matrix" -0.99999999999994005 0 3.4641020661939347e-07 0 0 1 0 0
+		 3.4641020661939347e-07 -0 0.99999999999994005 0 -2.6266438961029053 0.070830602952753452 -1.2832070251932777 1;
 createNode nurbsCurve -n "R_teeth_lower_controlShape" -p "R_teeth_lower_control";
 	rename -uid "143E1804-4AB6-1160-9DA2-BA85793086FD";
 	setAttr -k off ".v";
@@ -760,6 +750,90 @@ createNode nurbsCurve -n "R_teeth_lower_controlShape2" -p "R_teeth_lower_control
 		0.15430696621417228 -2.844963198115218e-14 -0.24474572145668524
 		0.15430696621417228 -0.17306144397640724 -0.17306144397637882
 		;
+createNode transform -s -n "persp";
+	rename -uid "0E2B495B-4088-A731-001C-3899DFECDFD4";
+	setAttr ".v" no;
+	setAttr ".t" -type "double3" 11.423938826818356 154.4848040538111 7.2676006509619846 ;
+	setAttr ".r" -type "double3" -3.3383527296031055 99.400000000000574 0 ;
+createNode camera -s -n "perspShape" -p "persp";
+	rename -uid "3D165A57-4216-641E-9D55-02B135F972F9";
+	setAttr -k off ".v" no;
+	setAttr ".fl" 34.999999999999993;
+	setAttr ".coi" 11.599107826994553;
+	setAttr ".imn" -type "string" "persp";
+	setAttr ".den" -type "string" "persp_depth";
+	setAttr ".man" -type "string" "persp_mask";
+	setAttr ".tp" -type "double3" 6.2766522312962536e-07 153.80936149569223 9.1588213559193665 ;
+	setAttr ".hc" -type "string" "viewSet -p %camera";
+createNode transform -s -n "top";
+	rename -uid "F2887BD8-4048-8490-471F-8990F0AA6962";
+	setAttr ".v" no;
+	setAttr ".t" -type "double3" 0 1000.1 0 ;
+	setAttr ".r" -type "double3" -90 0 0 ;
+createNode camera -s -n "topShape" -p "top";
+	rename -uid "7BA3CF88-49F3-FADA-3DA6-289019FFDF2C";
+	setAttr -k off ".v" no;
+	setAttr ".rnd" no;
+	setAttr ".coi" 1000.1;
+	setAttr ".ow" 30;
+	setAttr ".imn" -type "string" "top";
+	setAttr ".den" -type "string" "top_depth";
+	setAttr ".man" -type "string" "top_mask";
+	setAttr ".hc" -type "string" "viewSet -t %camera";
+	setAttr ".o" yes;
+createNode transform -s -n "front";
+	rename -uid "17F8B5C8-4817-1E8A-D986-C4BA7317DB7F";
+	setAttr ".v" no;
+	setAttr ".t" -type "double3" 0 0 1000.1 ;
+createNode camera -s -n "frontShape" -p "front";
+	rename -uid "FF463BEF-4457-344B-872C-8EAF5D290F69";
+	setAttr -k off ".v" no;
+	setAttr ".rnd" no;
+	setAttr ".coi" 1000.1;
+	setAttr ".ow" 30;
+	setAttr ".imn" -type "string" "front";
+	setAttr ".den" -type "string" "front_depth";
+	setAttr ".man" -type "string" "front_mask";
+	setAttr ".hc" -type "string" "viewSet -f %camera";
+	setAttr ".o" yes;
+createNode transform -s -n "side";
+	rename -uid "6E70DD5B-4214-A6A6-EB01-F9897A8AD3FD";
+	setAttr ".v" no;
+	setAttr ".t" -type "double3" 1000.1 0 0 ;
+	setAttr ".r" -type "double3" 0 90 0 ;
+createNode camera -s -n "sideShape" -p "side";
+	rename -uid "FA31C9D3-442D-BC42-956B-63973DBA80AB";
+	setAttr -k off ".v" no;
+	setAttr ".rnd" no;
+	setAttr ".coi" 1000.1;
+	setAttr ".ow" 30;
+	setAttr ".imn" -type "string" "side";
+	setAttr ".den" -type "string" "side_depth";
+	setAttr ".man" -type "string" "side_mask";
+	setAttr ".hc" -type "string" "viewSet -s %camera";
+	setAttr ".o" yes;
+createNode lightLinker -s -n "lightLinker1";
+	rename -uid "6AF1F0AD-470F-2515-805C-3091DFF9CA13";
+	setAttr -s 2 ".lnk";
+	setAttr -s 2 ".slnk";
+createNode displayLayerManager -n "layerManager";
+	rename -uid "BFCEA839-4B22-CCD1-98AF-DAB71BA41AA9";
+createNode displayLayer -n "defaultLayer";
+	rename -uid "20B05D6B-4E0E-1882-DDD9-27A41DD3F4E9";
+	setAttr ".ufem" -type "stringArray" 0  ;
+createNode renderLayerManager -n "renderLayerManager";
+	rename -uid "71E4DDE5-4CAB-DBFF-1746-B280A62C9E5C";
+createNode renderLayer -n "defaultRenderLayer";
+	rename -uid "9D79E510-43F5-6CC8-0012-C199CD7E23BF";
+	setAttr ".g" yes;
+createNode shapeEditorManager -n "shapeEditorManager";
+	rename -uid "FF220256-45F3-461A-DE0F-4A95472B7F8B";
+createNode poseInterpolatorManager -n "poseInterpolatorManager";
+	rename -uid "43A996E0-4A52-1CBF-187D-6DB44A1BE671";
+createNode script -n "sceneConfigurationScriptNode";
+	rename -uid "3420D544-4A0D-1B45-5EFE-C3A15FF9312F";
+	setAttr ".b" -type "string" "playbackOptions -min 0 -max 625 -ast 0 -aet 625 ";
+	setAttr ".st" 6;
 select -ne :time1;
 	setAttr -av -k on ".cch";
 	setAttr -av -k on ".fzn";
@@ -850,7 +924,7 @@ select -ne :renderPartition;
 	setAttr -cb on ".ihi";
 	setAttr -av -k on ".nds";
 	setAttr -cb on ".bnm";
-	setAttr -s 14 ".st";
+	setAttr -s 2 ".st";
 	setAttr -cb on ".an";
 	setAttr -cb on ".pt";
 select -ne :renderGlobalsList1;
@@ -863,29 +937,16 @@ select -ne :defaultShaderList1;
 	setAttr -cb on ".ihi";
 	setAttr -k on ".nds";
 	setAttr -cb on ".bnm";
-	setAttr -s 15 ".s";
+	setAttr -s 6 ".s";
 select -ne :postProcessList1;
 	setAttr -k on ".cch";
 	setAttr -cb on ".ihi";
 	setAttr -av -k on ".nds";
 	setAttr -cb on ".bnm";
 	setAttr -s 2 ".p";
-select -ne :defaultRenderUtilityList1;
-	setAttr -av -k on ".cch";
-	setAttr -cb on ".ihi";
-	setAttr -av -k on ".nds";
-	setAttr -cb on ".bnm";
-	setAttr -s 14 ".u";
 select -ne :defaultRenderingList1;
 	setAttr -av -k on ".cch";
 	setAttr -k on ".ihi";
-	setAttr -av -k on ".nds";
-	setAttr -cb on ".bnm";
-	setAttr -s 7 ".r";
-select -ne :defaultTextureList1;
-	setAttr -av -k on ".cch";
-	setAttr -k on ".fzn";
-	setAttr -cb on ".ihi";
 	setAttr -av -k on ".nds";
 	setAttr -cb on ".bnm";
 select -ne :standardSurface1;
@@ -1103,14 +1164,6 @@ select -ne :hardwareRenderGlobals;
 	setAttr -av -k on ".bswa";
 	setAttr -av -k on ".shml";
 	setAttr -av -k on ".hwel";
-select -ne :ikSystem;
-	setAttr -av -k on ".cch";
-	setAttr -av -k on ".ihi";
-	setAttr -av -k on ".nds";
-	setAttr -k on ".bnm";
-	setAttr -av -k on ".gsn";
-	setAttr -k on ".gsv";
-	setAttr -s 2 ".sol";
 connectAttr "M_teeth_upper_main_joint_parentConstraint1.ctx" "M_teeth_upper_main_joint.tx"
 		;
 connectAttr "M_teeth_upper_main_joint_parentConstraint1.cty" "M_teeth_upper_main_joint.ty"
@@ -1429,15 +1482,22 @@ connectAttr "R_teeth_lower_control.pm" "R_teeth_lower_joint_parentConstraint1.tg
 		;
 connectAttr "R_teeth_lower_joint_parentConstraint1.w0" "R_teeth_lower_joint_parentConstraint1.tg[0].tw"
 		;
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
-dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
-dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
-dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
+relationship "link" ":lightLinker1" ":initialShadingGroup.message" ":defaultLightSet.message";
+relationship "link" ":lightLinker1" ":initialParticleSE.message" ":defaultLightSet.message";
+relationship "shadowLink" ":lightLinker1" ":initialShadingGroup.message" ":defaultLightSet.message";
+relationship "shadowLink" ":lightLinker1" ":initialParticleSE.message" ":defaultLightSet.message";
+connectAttr "layerManager.dli[0]" "defaultLayer.id";
+connectAttr "renderLayerManager.rlmi[0]" "defaultRenderLayer.rlid";
+connectAttr "defaultRenderLayer.msg" ":defaultRenderingList1.r" -na;
 dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
-dataStructure -fmt "raw" -as "name=DiffArea:float=value";
 dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
+dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
 dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=DiffArea:float=value";
 dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
+dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
+dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
 // End of face_teeth.ma
