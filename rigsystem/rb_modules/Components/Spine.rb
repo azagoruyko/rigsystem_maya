@@ -184,10 +184,7 @@ elif @mode == 1:  # run
                     
                 rig_utils.lockTRS(hip_ctrl, [], [], scale_lock, 1)
         else:
-            if i == len(@fkControls) - 1:
-                rig_utils.lockTRS(ctrl, [], [], scale_lock, 1)
-            else:
-                rig_utils.lockTRS(ctrl, [1, 1, 1], [], scale_lock, 1)        
+            rig_utils.lockTRS(ctrl, [], [], scale_lock, 1)
         
         dynamicParent.makeDynamicParent(ctrl, ctrl)
 
