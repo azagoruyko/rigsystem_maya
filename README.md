@@ -22,6 +22,22 @@ After completing the installation steps below:
 
 The full featured bipedal rig is ready for animation.
 
+### Build a custom rig with BasePipeline
+
+[`Pipeline/BasePipeline`](rigsystem/rb_modules/Pipeline/BasePipeline.rb) collects reusable Rig Builder modules for creating custom biped, quadruped, prop, and other rigs. Insert it with Tab and choose the tools your rig needs from its groups.
+
+You can save `BasePipeline` in your own workspace and extend it with your own modules and settings.
+
+| Group | Tools for |
+| --- | --- |
+| **Fitting** | Creating a basic rig hierarchy, importing an optional biped template, and adjusting or mirroring fitting guides. |
+| **Controls** | Making control shapes, FK controls, and corrective controls. |
+| **Deform** | Working with skin weights, bind matrices, and blend shapes. |
+| **Attachments** | Attaching controls or other rig elements to curves, meshes, and surfaces. |
+| **Face** | Building specific lips, eyelids, brows, and teeth components when your rig needs them. |
+
+For a new scene, use `Fitting/RigHierarchy` to create a basic rig structure, or `Fitting/ImportBipedBodyTemplate` to start from the biped template.
+
 ## 📂 Source and build scenes
 
 Each rig should have two Maya scene files:
@@ -113,8 +129,7 @@ Create a dedicated Rig Builder workspace and add RigSystem as a module dependenc
 1. In Rig Builder, open **Manage Workspaces** using the gear button next to the workspace selector.
 2. Create a workspace named **RigSystem**.
 3. In the workspace settings, add this repository's `rigsystem/rb_modules` directory as a dependency module path.
-4. Keep the workspace's **Modules Path** for modules specific to your project; do not copy the RigSystem modules there.
-5. Select the RigSystem workspace to browse and use the dependency modules.
+4. Select the RigSystem workspace to browse and use the dependency modules.
 
 ## 🤖 AI and MCP
 
