@@ -15,7 +15,7 @@ def curveTransform(curve):
     curve = proxy.node(curve)
     return curve.getParent() if curve.type() == "nurbsCurve" else curve
 
-def generateJoints(curve, params, layerName):
+def generateJoints(curve, params, layerName, helpers):
     curveFn = curveShape(curve).mfn(shape=True)
     sizes = {"major": 0.5, "minor": 0.3}
     joints = []
@@ -23,6 +23,7 @@ def generateJoints(curve, params, layerName):
         joint = proxy.create("joint", f"{@prefix}_{layerName}_{i + 1}_joint", parent=internalGrp, suffix=False, skipSelection=True)
         point = curveFn.getPointAtParam(param, om.MSpace.kWorld)
         cmds.xform(joint, ws=True, t=(point.x, point.y, point.z))
+        cmds.matchTransform(joint, proxy.node(helpers[i]), position=False, rotation=True)
         joint.radius.set(sizes.get(layerName, 1.0))
         joints.append(joint)
     return joints
@@ -48,13 +49,14 @@ def generateControls(curve, joints, layerName, helpers, *, addTransform=False):
     controls = []
     for i, joint in enumerate(joints):
         ctrl = proxy.create("transform", f"{@prefix}_{layerName}_{i + 1}_control", parent=None if addTransform else controlsGrp, suffix=False)
-        cmds.matchTransform(str(ctrl), str(joint))
-        cmds.parentConstraint(str(ctrl), str(joint))
+        cmds.matchTransform(ctrl, joint, position=True, rotation=False)
+        cmds.matchTransform(ctrl, proxy.node(helpers[i]), position=False, rotation=True)
+        cmds.parentConstraint(ctrl, joint)
         ctrl.s >> joint.s
 
         if addTransform:
             transform = proxy.create("transform", f"{ctrl}_transform", parent=controlsGrp, suffix=False)
-            cmds.matchTransform(str(transform), str(ctrl))
+            cmds.matchTransform(transform, ctrl)
             transform | ctrl
 
         rig_utils.setToOffsetParentMatrix(ctrl)
@@ -68,7 +70,7 @@ def generateControls(curve, joints, layerName, helpers, *, addTransform=False):
     return controls
 
 def duplicateCurve(curve, layerName):
-    duplicate = proxy.node(cmds.duplicate(str(curveTransform(curve)))[0])
+    duplicate = proxy.node(cmds.duplicate(curveTransform(curve))[0])
     duplicate.rename(f"{@prefix}_{layerName}_curve")
     curveShape(curve).local >> curveShape(duplicate).create
     return duplicate
@@ -88,8 +90,9 @@ def makeLocal(curve, controls):
 if @mode == 0:  # helpers
     helpersGrp = proxy.create("transform", f"{@prefix}_helpers", parent=proxy.node("helpers"), suffix=False)
     @set_h_main(generateHelpers(mainCurve, @mainParams, "main", "rect"))
-    @set_h_major(generateHelpers(mainCurve, @majorParams, "major", "sphere"))
-    @set_h_minor(generateHelpers(mainCurve, @minorParams, "minor", "sphere"))
+    @set_h_major(generateHelpers(mainCurve, @majorParams, "major", "sphere") if @majorParams else [])
+    @set_h_minor(generateHelpers(mainCurve, @minorParams, "minor", "sphere") if @minorParams else [])
+    @set_out_finalCurve("")
 
 elif @mode == 1:  # run
     controlsGrp = proxy.create("transform", f"{@prefix}_controls_group", parent=proxy.node("controls"), suffix=False)
@@ -102,55 +105,72 @@ elif @mode == 1:  # run
     othersGrp.v.set(False)
 
     othersGrp | curveTransform(mainCurve)
-    internalGrp | curveTransform(@edgeCurve)
 
-    mainJoints = generateJoints(mainCurve, @mainParams, "main")
-    cmds.skinCluster([str(joint) for joint in mainJoints], str(curveTransform(mainCurve)), tsb=True, dr=3.0)
+    mainJoints = generateJoints(mainCurve, @mainParams, "main", @h_main)
+    skin = cmds.skinCluster(mainJoints, curveTransform(mainCurve), tsb=True, dr=3.0)[0]
+    if @mainWeights:
+        rig_utils.skinCluster.SkinClusterHelper(skin).fromJson(@mainWeights)
     mainControls = generateControls(mainCurve, mainJoints, "main", @h_main)
 
-    majorCurve = duplicateCurve(mainCurve, "major")
-    majorJoints = generateJoints(majorCurve, @majorParams, "major")
-    cmds.skinCluster([str(joint) for joint in majorJoints], str(majorCurve), tsb=True, dr=3.0)
-    majorControls = generateControls(majorCurve, majorJoints, "major", @h_major, addTransform=True)
-    attachControls(mainCurve, majorControls)
-    makeLocal(majorCurve, majorControls)
+    finalCurve = mainCurve
+    if @majorParams:
+        majorCurve = duplicateCurve(mainCurve, "major")
+        majorJoints = generateJoints(majorCurve, @majorParams, "major", @h_major)
+        skin = cmds.skinCluster(majorJoints, majorCurve, tsb=True, dr=3.0)[0]
+        if @majorWeights:
+            rig_utils.skinCluster.SkinClusterHelper(skin).fromJson(@majorWeights)
+        majorControls = generateControls(majorCurve, majorJoints, "major", @h_major, addTransform=True)
+        attachControls(mainCurve, majorControls)
+        makeLocal(majorCurve, majorControls)
+        finalCurve = majorCurve
+    if @minorParams:
+        minorCurve = duplicateCurve(finalCurve, "minor")
+        minorJoints = generateJoints(minorCurve, @minorParams, "minor", @h_minor)
+        skin = cmds.skinCluster(minorJoints, minorCurve, tsb=True, dr=3.0)[0]
+        if @minorWeights:
+            rig_utils.skinCluster.SkinClusterHelper(skin).fromJson(@minorWeights)
+        minorControls = generateControls(minorCurve, minorJoints, "minor", @h_minor, addTransform=True)
+        attachControls(finalCurve, minorControls)
+        makeLocal(minorCurve, minorControls)
+        finalCurve = minorCurve
 
-    minorCurve = duplicateCurve(majorCurve, "minor")
-    minorJoints = generateJoints(minorCurve, @minorParams, "minor")
-    cmds.skinCluster([str(joint) for joint in minorJoints], str(minorCurve), tsb=True, dr=3.0)
-    minorControls = generateControls(minorCurve, minorJoints, "minor", @h_minor, addTransform=True)
-    attachControls(majorCurve, minorControls)
-    makeLocal(minorCurve, minorControls)
+    inputCurve = str(@inputCurve).strip()
+    if inputCurve:
+        internalGrp | curveTransform(inputCurve)
+        wireNode = cmds.wire(inputCurve, gw=False, ce=0.0, li=0.0, dds=[0, 100], w=finalCurve, name=f"{inputCurve}_wire")[0]
+        baseWireShape = cmds.listConnections(f"{wireNode}.baseWire[0]", s=True, d=False, shapes=True)[0]
+        internalGrp | proxy.node(baseWireShape).getParent()
 
-    wireNode = cmds.wire(@edgeCurve, gw=False, ce=0.0, li=0.0, dds=[0, 100], w=str(minorCurve), name=f"{@edgeCurve}_wire")[0]
-    baseWireShape = cmds.listConnections(f"{wireNode}.baseWire[0]", s=True, d=False, shapes=True)[0]
-    internalGrp | proxy.node(baseWireShape).getParent()
+    @set_out_finalCurve(str(finalCurve))
 ]]></run>
 <doc><![CDATA[## Summary
-Builds three successive skin layers on a NURBS curve: main, major, and minor. In **Helpers** mode, the module creates control shape guides. In **Run** mode, it skins each curve to its controls, attaches the major controls to the main curve and the minor controls to the major curve, then uses the minor curve to wire-deform the edge curve.
+Builds a main skin layer on a NURBS curve, with optional major and minor layers. Helpers mode creates control guides. Run mode skins each enabled layer, attaches its controls to the preceding curve, and optionally wire-deforms the input curve from the last built layer.
 
 ## Inputs
 - **`mode`**: `Helpers` creates guides; `Run` builds the rig.
 - **`prefix`**: Prefix for generated nodes and groups.
 - **`mainCurve`**: Existing NURBS curve used as the first skin layer. Run mode moves it under `<prefix>_others_group`.
-- **`edgeCurve`**: Existing NURBS curve deformed by the final wire. Run mode moves it under `<prefix>_internal_group`.
-- **`mainParams`**, **`majorParams`**, **`minorParams`**: Curve parameter values for the joints and controls of each layer.
+- **`inputCurve`**: Optional NURBS curve deformed by the final wire. Leave empty to build the skin layers without a wire.
+- **`mainParams`**, **`majorParams`**, **`minorParams`**: Curve parameter values for each layer. `mainParams` is required; empty major or minor lists skip that layer.
 - **`h_main`**, **`h_major`**, **`h_minor`**: Ordered lists of control shape guides. Helpers mode fills these lists; Run mode uses the guides in the same order as the corresponding parameter lists.
+- **`mainWeights`**, **`majorWeights`**, **`minorWeights`**: Optional `SkinClusterHelper` JSON data for each layer; leave empty to keep the initial skin weights.
 
 ## Outputs
+- Joint and control rotations follow the corresponding helper transforms.
+- **`out_finalCurve`**: The last built curve: minor, major, or main, depending on which optional layers have parameters. Filled in Run mode.
 - **Helpers mode**: Rectangular main guides and spherical major and minor guides under `helpers/<prefix>_helpers`.
-- **Run mode**: Control transforms under `controls/<prefix>_controls_group`, joints and the edge curve under `internal/<prefix>_internal_group`, and the main, major, and minor curves under `others/<prefix>_others_group`. The wire base curve is placed in the internal group.
-- **Deformation chain**: The major curve receives the main curve's `local` output; the minor curve receives the major curve's `local` output. The minor curve drives a wire deformer on `edgeCurve`.
+- **Run mode**: Control transforms under `controls/<prefix>_controls_group`, joints and, when provided, the input curve under `internal/<prefix>_internal_group`, and the built layer curves under `others/<prefix>_others_group`. The wire base curve is placed in the internal group when created.
+- **Deformation chain**: Each optional layer receives the preceding curve's `local` output. When provided, `inputCurve` is driven by a wire deformer from the last built curve.
 - **Local skin bases**: Basis transforms for the major and minor skin clusters are parented under the corresponding control transforms.
 
 ## Usage
-1. Provide the existing `mainCurve` and `edgeCurve`, set `prefix`, and enter valid parameter values for each layer. The scene must contain the top-level `helpers`, `controls`, `internal`, and `others` groups.
+1. Provide the existing `mainCurve`, optionally set `inputCurve` and `prefix`, and enter valid parameter values for each layer. The scene must contain the top-level `helpers`, `controls`, `internal`, and `others` groups.
 2. Set `mode` to **Helpers** and run the module. Adjust the generated guide shapes as needed; their names are stored in `h_main`, `h_major`, and `h_minor`.
-3. Set `mode` to **Run** and run the module. It builds the three skin layers and the final wire deformer using those guide shapes.]]></doc>
+3. Set `mode` to **Run** and run the module. It builds the enabled skin layers using those guide shapes and adds the final wire deformer when `inputCurve` is set.]]></doc>
 <attributes>
 <attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"items": ["Helpers", "Run"], "current": 1, "columns": 2, "default": "current"}]]></attr>
 <attr name="prefix" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
-<attr name="edgeCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower_curve", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="inputCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="mainCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower_main_curve", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="mainParams" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": [0, 0.5, 1], "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="majorParams" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": [0, 0.3, 0.7, 1], "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
@@ -158,6 +178,10 @@ Builds three successive skin layers on a NURBS curve: main, major, and minor. In
 <attr name="h_main" template="listBox" category="Helpers" connect=""><![CDATA[{"items": ["lower_main_1_control_helper", "lower_main_2_control_helper", "lower_main_3_control_helper"], "default": "items"}]]></attr>
 <attr name="h_major" template="listBox" category="Helpers" connect=""><![CDATA[{"items": ["lower_major_1_control_helper", "lower_major_2_control_helper", "lower_major_3_control_helper", "lower_major_4_control_helper"], "default": "items"}]]></attr>
 <attr name="h_minor" template="listBox" category="Helpers" connect=""><![CDATA[{"items": ["lower_minor_1_control_helper", "lower_minor_2_control_helper", "lower_minor_3_control_helper", "lower_minor_4_control_helper", "lower_minor_5_control_helper"], "default": "items"}]]></attr>
+<attr name="mainWeights" template="lineEditAndButton" category="Weights" connect=""><![CDATA[{"value": {}, "placeholder": "SkinClusterHelper JSON", "buttonCommand": "", "buttonLabel": "", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="majorWeights" template="lineEditAndButton" category="Weights" connect=""><![CDATA[{"value": {}, "placeholder": "SkinClusterHelper JSON", "buttonCommand": "", "buttonLabel": "", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="minorWeights" template="lineEditAndButton" category="Weights" connect=""><![CDATA[{"value": {}, "placeholder": "SkinClusterHelper JSON", "buttonCommand": "", "buttonLabel": "", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="out_finalCurve" template="lineEditAndButton" category="Output" connect=""><![CDATA[{"value": "", "placeholder": "Final curve", "buttonCommand": "", "buttonLabel": "", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 </attributes>
 <children>
 <module name="makeSkinLocal" muted="1" uid="c3d086240a8642d5bcd762328d68df91">
