@@ -123,6 +123,7 @@ elif @mode == 1:  # run
         attachControls(mainCurve, majorControls)
         makeLocal(majorCurve, majorControls)
         finalCurve = majorCurve
+
     if @minorParams:
         minorCurve = duplicateCurve(finalCurve, "minor")
         minorJoints = generateJoints(minorCurve, @minorParams, "minor", @h_minor)
@@ -170,8 +171,8 @@ Builds a main skin layer on a NURBS curve, with optional major and minor layers.
 <attributes>
 <attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"items": ["Helpers", "Run"], "current": 1, "columns": 2, "default": "current"}]]></attr>
 <attr name="prefix" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
-<attr name="inputCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="mainCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower_main_curve", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="inputCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "", "placeholder": "This curve will be wired", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="mainParams" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": [0, 0.5, 1], "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="majorParams" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": [0, 0.3, 0.7, 1], "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="minorParams" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": [0, 0.1, 0.5, 0.9, 1], "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
@@ -239,35 +240,26 @@ Creates a local basis transform for each influence of a skin cluster, replacing 
 from rigsystem import proxy
 
 cmds = proxy.cmds
-
 curve = proxy.node(@curve)
 transforms = proxy.nodes(@transforms)
-
 curveShape = curve.getShapes(type="nurbsCurve")[0] if curve.type() == "transform" else curve
 curveFn = curveShape.mfn(shape=True)
 
 for t in transforms:
-    position = om.MPoint(cmds.xform(str(t), q=True, ws=True, t=True))
-    closest = curveFn.closestPoint(position, 1e-6, om.MSpace.kWorld)
-    param = curveFn.getParamAtPoint(closest, 1e-6, om.MSpace.kWorld)
-
-    # Create pointOnCurveInfo to drive position
-    poci = proxy.create(
-        "pointOnCurveInfo", f"{t}"
-    )
+    coords = cmds.xform(str(t), q=True, ws=True, t=True)
+    position = om.MPoint(coords[0], coords[1], coords[2])
+    _, param = curveFn.closestPoint(position, 1e-6, om.MSpace.kWorld)
+    poci = proxy.create("pointOnCurveInfo", f"{t}")
     curveShape.worldSpace[0] >> poci.inputCurve
     poci.parameter.set(param)
     poci.turnOnPercentage.set(False)
-    
-    pmm = proxy.create(
-        "pointMatrixMultDL", f"{t}_parentInverse"
-    )
+    pmm = proxy.create("pointMatrixMultDL", f"{t}_parentInverse")
     poci.position >> pmm.inPoint
-    t.parentInverseMatrix >> pmm.inMatrix    
+    t.parentInverseMatrix >> pmm.inMatrix
     pmm.output >> t.translate
     ]]></run>
 <doc><![CDATA[## Summary  
-The **attachToCurve** module snaps a list of transforms to a NURBS curve by projecting each transform’s world position onto the curve. It uses a `nearestPointOnCurve` node to find the closest curve parameter and a `pointOnCurveInfo` node to drive the transform’s translate, leaving rotation and scale untouched.
+The **attachToCurve** module snaps a list of transforms to a NURBS curve by projecting each transform’s world position onto the curve. It uses a `pointOnCurveInfo` node to drive the transform’s translation, leaving rotation and scale untouched.
 
 ## Inputs  
 - **`curve`** – Name or reference to the NURBS curve that will serve as the attachment surface.  
@@ -278,11 +270,10 @@ The **attachToCurve** module snaps a list of transforms to a NURBS curve by proj
 - The module directly modifies the **translate** attributes of each transform in the `transforms` list, aligning them to the nearest point on the specified curve.
 
 ## Usage  
-1. **Select the curve** you want to attach to and set the `curve` attribute (or use the button to pick the selected curve).  
-2. **Populate the `transforms` list** with the transforms you wish to snap (e.g., IK handles, control joints, helper objects).  
-3. **Run the module**. Each transform’s translate will be driven by a `pointOnCurveInfo` node that follows the curve’s shape.  
-4. **Optional**: After execution, the temporary `nearestPointOnCurve` node is automatically deleted, leaving only the `pointOnCurveInfo` nodes connected to the transforms.  
-5. **Adjust** the transforms in the viewport if needed; the connections will keep them attached to the curve as you move the curve or the transforms.]]></doc>
+1. **Select the curve** you want the transforms to follow and set the **`curve`** attribute (or use its button to pick the selected curve).  
+2. **Populate the `transforms` list** with the transforms to attach.  
+3. **Run the module**. Each transform is snapped to the curve and follows its shape.  
+4. **Adjust** the transforms as needed; their translate remains connected to the curve.]]></doc>
 <attributes>
 <attr name="" template="label" category="General" connect=""><![CDATA[{"default": "text", "text": "Attach <b>transforms</b> to <b>NURBS curve</b> using closest point (translate only)."}]]></attr>
 <attr name="curve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower_major_curve", "placeholder": "NURBS curve name", "buttonCommand": "import maya.cmds as cmds\nls = cmds.ls(sl=True)\nif ls: value = ls[0]", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
