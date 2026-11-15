@@ -20,35 +20,45 @@ def generateJoints(curve, params, layerName):
     sizes = {"major": 0.5, "minor": 0.3}
     joints = []
     for i, param in enumerate(params):
-        joint = proxy.create("joint", f"{@prefix}_{layerName}_{i + 1}_joint", suffix=False, skipSelection=True)
+        joint = proxy.create("joint", f"{@prefix}_{layerName}_{i + 1}_joint", parent=internalGrp, suffix=False, skipSelection=True)
         point = curveFn.getPointAtParam(param, om.MSpace.kWorld)
-        joint.t.set((point.x, point.y, point.z))
+        cmds.xform(joint, ws=True, t=(point.x, point.y, point.z))
         joint.radius.set(sizes.get(layerName, 1.0))
         joints.append(joint)
     return joints
 
-def generateControls(curve, joints, layerName, curveType, *, addTransform=False):
+def generateHelpers(curve, params, layerName, curveType):
+    """Create control shape guides at the layer's curve parameters."""
     sizes = {"major": 0.5, "minor": 0.3}
     curveFn = curveShape(curve).mfn(shape=True)
-    size = curveFn.length() / (len(joints) * 1.5) * sizes.get(layerName, 1.0)
+    size = curveFn.length() / (len(params) * 1.5) * sizes.get(layerName, 1.0)
+    helpers = []
+    for i, param in enumerate(params):
+        helper = rig_utils.curve.makeCurve(f"{@prefix}_{layerName}_{i + 1}_control_helper", curveType)
+        point = curveFn.getPointAtParam(param, om.MSpace.kWorld)
+        helper.t.set((point.x, point.y, point.z))
+        helper.s.set((size, size, size))
+        helpersGrp | helper
+        helpers.append(str(helper))
+
+    return helpers
+
+def generateControls(curve, joints, layerName, helpers, *, addTransform=False):
+    """Build controls using the corresponding helper curve shapes."""
     controls = []
     for i, joint in enumerate(joints):
-        ctrl = proxy.create("transform", f"{@prefix}_{layerName}_{i + 1}_control", suffix=False)
+        ctrl = proxy.create("transform", f"{@prefix}_{layerName}_{i + 1}_control", parent=None if addTransform else controlsGrp, suffix=False)
         cmds.matchTransform(str(ctrl), str(joint))
         cmds.parentConstraint(str(ctrl), str(joint))
         ctrl.s >> joint.s
 
         if addTransform:
-            transform = proxy.create("transform", f"{ctrl}_transform", suffix=False)
+            transform = proxy.create("transform", f"{ctrl}_transform", parent=controlsGrp, suffix=False)
             cmds.matchTransform(str(transform), str(ctrl))
             transform | ctrl
 
         rig_utils.setToOffsetParentMatrix(ctrl)
-        helper = rig_utils.curve.makeCurve("helper", curveType)
-        cmds.matchTransform(str(helper), str(ctrl))
-        helper.s.set((size, size, size))
-        rig_utils.curve.makeFromCurve(ctrl, helper)
-        cmds.delete(str(helper))
+        rig_utils.curve.makeFromCurve(ctrl, proxy.node(helpers[i]))
 
         if layerName in ("main", "major"):
             rig_utils.lockTRS(ctrl, [], [], [], 1)
@@ -75,33 +85,79 @@ def makeLocal(curve, controls):
     for ctrl, basisName in zip(controls, basis):
         ctrl.getParent() | proxy.node(basisName)
 
-mainJoints = generateJoints(mainCurve, @mainParams, "main")
-cmds.skinCluster([str(joint) for joint in mainJoints], str(curveTransform(mainCurve)), tsb=True, dr=3.0)
-mainControls = generateControls(mainCurve, mainJoints, "main", "rect")
+if @mode == 0:  # helpers
+    helpersGrp = proxy.create("transform", f"{@prefix}_helpers", parent=proxy.node("helpers"), suffix=False)
+    @set_h_main(generateHelpers(mainCurve, @mainParams, "main", "rect"))
+    @set_h_major(generateHelpers(mainCurve, @majorParams, "major", "sphere"))
+    @set_h_minor(generateHelpers(mainCurve, @minorParams, "minor", "sphere"))
 
-majorCurve = duplicateCurve(mainCurve, "major")
-majorJoints = generateJoints(majorCurve, @majorParams, "major")
-cmds.skinCluster([str(joint) for joint in majorJoints], str(majorCurve), tsb=True, dr=3.0)
-majorControls = generateControls(majorCurve, majorJoints, "major", "sphere", addTransform=True)
-attachControls(mainCurve, majorControls)
-makeLocal(majorCurve, majorControls)
+elif @mode == 1:  # run
+    controlsGrp = proxy.create("transform", f"{@prefix}_controls_group", parent=proxy.node("controls"), suffix=False)
+    internalGrp = proxy.create("transform", f"{@prefix}_internal_group", parent=proxy.node("internal"), suffix=False)
+    othersGrp = proxy.create("transform", f"{@prefix}_others_group", parent=proxy.node("others"), suffix=False)
+    rig_utils.lockTRS(controlsGrp, [1, 1, 1], [1, 1, 1], [1, 1, 1], 0.5)
+    rig_utils.lockTRS(internalGrp, [1, 1, 1], [1, 1, 1], [1, 1, 1], 0.5)
+    rig_utils.lockTRS(othersGrp, [1, 1, 1], [1, 1, 1], [1, 1, 1], 0.5)
+    internalGrp.v.set(False)
+    othersGrp.v.set(False)
 
-minorCurve = duplicateCurve(mainCurve, "minor")
-minorJoints = generateJoints(minorCurve, @minorParams, "minor")
-cmds.skinCluster([str(joint) for joint in minorJoints], str(minorCurve), tsb=True, dr=3.0)
-minorControls = generateControls(minorCurve, minorJoints, "minor", "sphere", addTransform=True)
-attachControls(majorCurve, minorControls)
-makeLocal(minorCurve, minorControls)
+    othersGrp | curveTransform(mainCurve)
+    internalGrp | curveTransform(@edgeCurve)
 
-cmds.wire(@edgeCurve, gw=False, ce=0.0, li=0.0, dds=[0, 100], w=str(minorCurve), name=f"{@edgeCurve}_wire")
+    mainJoints = generateJoints(mainCurve, @mainParams, "main")
+    cmds.skinCluster([str(joint) for joint in mainJoints], str(curveTransform(mainCurve)), tsb=True, dr=3.0)
+    mainControls = generateControls(mainCurve, mainJoints, "main", @h_main)
+
+    majorCurve = duplicateCurve(mainCurve, "major")
+    majorJoints = generateJoints(majorCurve, @majorParams, "major")
+    cmds.skinCluster([str(joint) for joint in majorJoints], str(majorCurve), tsb=True, dr=3.0)
+    majorControls = generateControls(majorCurve, majorJoints, "major", @h_major, addTransform=True)
+    attachControls(mainCurve, majorControls)
+    makeLocal(majorCurve, majorControls)
+
+    minorCurve = duplicateCurve(majorCurve, "minor")
+    minorJoints = generateJoints(minorCurve, @minorParams, "minor")
+    cmds.skinCluster([str(joint) for joint in minorJoints], str(minorCurve), tsb=True, dr=3.0)
+    minorControls = generateControls(minorCurve, minorJoints, "minor", @h_minor, addTransform=True)
+    attachControls(majorCurve, minorControls)
+    makeLocal(minorCurve, minorControls)
+
+    wireNode = cmds.wire(@edgeCurve, gw=False, ce=0.0, li=0.0, dds=[0, 100], w=str(minorCurve), name=f"{@edgeCurve}_wire")[0]
+    baseWireShape = cmds.listConnections(f"{wireNode}.baseWire[0]", s=True, d=False, shapes=True)[0]
+    internalGrp | proxy.node(baseWireShape).getParent()
 ]]></run>
+<doc><![CDATA[## Summary
+Builds three successive skin layers on a NURBS curve: main, major, and minor. In **Helpers** mode, the module creates control shape guides. In **Run** mode, it skins each curve to its controls, attaches the major controls to the main curve and the minor controls to the major curve, then uses the minor curve to wire-deform the edge curve.
+
+## Inputs
+- **`mode`**: `Helpers` creates guides; `Run` builds the rig.
+- **`prefix`**: Prefix for generated nodes and groups.
+- **`mainCurve`**: Existing NURBS curve used as the first skin layer. Run mode moves it under `<prefix>_others_group`.
+- **`edgeCurve`**: Existing NURBS curve deformed by the final wire. Run mode moves it under `<prefix>_internal_group`.
+- **`mainParams`**, **`majorParams`**, **`minorParams`**: Curve parameter values for the joints and controls of each layer.
+- **`h_main`**, **`h_major`**, **`h_minor`**: Ordered lists of control shape guides. Helpers mode fills these lists; Run mode uses the guides in the same order as the corresponding parameter lists.
+
+## Outputs
+- **Helpers mode**: Rectangular main guides and spherical major and minor guides under `helpers/<prefix>_helpers`.
+- **Run mode**: Control transforms under `controls/<prefix>_controls_group`, joints and the edge curve under `internal/<prefix>_internal_group`, and the main, major, and minor curves under `others/<prefix>_others_group`. The wire base curve is placed in the internal group.
+- **Deformation chain**: The major curve receives the main curve's `local` output; the minor curve receives the major curve's `local` output. The minor curve drives a wire deformer on `edgeCurve`.
+- **Local skin bases**: Basis transforms for the major and minor skin clusters are parented under the corresponding control transforms.
+
+## Usage
+1. Provide the existing `mainCurve` and `edgeCurve`, set `prefix`, and enter valid parameter values for each layer. The scene must contain the top-level `helpers`, `controls`, `internal`, and `others` groups.
+2. Set `mode` to **Helpers** and run the module. Adjust the generated guide shapes as needed; their names are stored in `h_main`, `h_major`, and `h_minor`.
+3. Set `mode` to **Run** and run the module. It builds the three skin layers and the final wire deformer using those guide shapes.]]></doc>
 <attributes>
+<attr name="mode" template="radioButton" category="General" connect=""><![CDATA[{"items": ["Helpers", "Run"], "current": 1, "columns": 2, "default": "current"}]]></attr>
 <attr name="prefix" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="edgeCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower_curve", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="mainCurve" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "lower_main_curve", "placeholder": "", "buttonCommand": "import maya.cmds as cmds \nls = cmds.ls(sl=True)\nvalue = ls[0] if ls else \"\"", "buttonLabel": "<", "buttonEnabled": true, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="mainParams" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": [0, 0.5, 1], "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="majorParams" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": [0, 0.3, 0.7, 1], "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 <attr name="minorParams" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": [0, 0.1, 0.5, 0.9, 1], "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
+<attr name="h_main" template="listBox" category="Helpers" connect=""><![CDATA[{"items": ["lower_main_1_control_helper", "lower_main_2_control_helper", "lower_main_3_control_helper"], "default": "items"}]]></attr>
+<attr name="h_major" template="listBox" category="Helpers" connect=""><![CDATA[{"items": ["lower_major_1_control_helper", "lower_major_2_control_helper", "lower_major_3_control_helper", "lower_major_4_control_helper"], "default": "items"}]]></attr>
+<attr name="h_minor" template="listBox" category="Helpers" connect=""><![CDATA[{"items": ["lower_minor_1_control_helper", "lower_minor_2_control_helper", "lower_minor_3_control_helper", "lower_minor_4_control_helper", "lower_minor_5_control_helper"], "default": "items"}]]></attr>
 </attributes>
 <children>
 <module name="makeSkinLocal" muted="1" uid="c3d086240a8642d5bcd762328d68df91">
