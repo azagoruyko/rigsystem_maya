@@ -22,11 +22,11 @@ After completing the installation steps below:
 
 The full featured bipedal rig is ready for animation.
 
-### Build a custom rig with BasePipeline
+### Build a custom rig with MyPipeline
 
-[`Pipeline/BasePipeline`](rigsystem/rb_modules/Pipeline/BasePipeline.rb) collects reusable Rig Builder modules for creating custom biped, quadruped, prop, and other rigs. Insert it with Tab and choose the tools your rig needs from its groups.
+[`Pipeline/MyPipeline`](rigsystem/rb_modules/Pipeline/MyPipeline.rb) collects reusable Rig Builder modules for creating custom biped, quadruped, prop, and other rigs. Insert it with Tab and choose the tools your rig needs from its groups.
 
-You can save `BasePipeline` in your own workspace and extend it with your own modules and settings.
+You can save `MyPipeline` in your own workspace and extend it with your own modules and settings.
 
 | Group | Tools for |
 | --- | --- |

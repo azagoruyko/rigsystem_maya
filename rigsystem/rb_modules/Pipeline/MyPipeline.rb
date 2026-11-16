@@ -1,4 +1,4 @@
-<module name="BasePipeline" muted="0" uid="316be58f77c24c2682d2652ef7c64088">
+<module name="MyPipeline" muted="0" uid="316be58f77c24c2682d2652ef7c64088">
 <doc><![CDATA[## Summary
 A collection of tools for fitting and building a rig. Run individual child modules as needed.
 
