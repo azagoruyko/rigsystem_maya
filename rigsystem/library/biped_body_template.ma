@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: biped_body_template.ma
-//Last modified: Wed, Sep 30, 2026 05:38:29 PM
+//Last modified: Tue, Nov 17, 2026 03:50:22 PM
 //Codeset: 1251
 requires maya "2026";
 requires -nodeType "skeleposer" "skeleposer" "Unknown";
@@ -8,20 +8,21 @@ requires "stereoCamera" "10.0";
 requires -nodeType "simpleSelector" -nodeType "renderSetupLayer" -nodeType "renderSetup"
 		 -nodeType "collection" -nodeType "renderSettingsCollection" -nodeType "absOverride"
 		 -nodeType "absUniqueOverride" "renderSetup.py" "1.0";
+requires "stereoCamera" "10.0";
 currentUnit -l centimeter -a degree -t ntsc;
 fileInfo "application" "maya";
 fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
-fileInfo "osv" "Windows 11 Pro v2009 (Build: 26200)";
-fileInfo "UUID" "ECF06372-43B7-DD76-B9B4-A1B6C3CDFE4F";
+fileInfo "osv" "Windows 11 Home v2009 (Build: 26300)";
+fileInfo "UUID" "6AE8B2B5-4E67-94EC-FED8-C493B7CEBF72";
 createNode transform -s -n "persp";
 	rename -uid "8DCF4356-4D3E-3DFF-4277-379CE6A38D01";
 	setAttr ".v" no;
 	setAttr -s 3 ".rlio";
 	setAttr -s 3 ".rlio";
-	setAttr ".t" -type "double3" 36.204116048308343 163.62927410132605 86.929410414140833 ;
-	setAttr ".r" -type "double3" -384.46058509129222 -2142.9119827365848 4.1593081350157773e-16 ;
+	setAttr ".t" -type "double3" 47.030971180502497 199.64964717462934 111.62802068860124 ;
+	setAttr ".r" -type "double3" -397.06058509098671 -2136.9119827350637 1.7287436009148007e-15 ;
 	setAttr ".s" -type "double3" 0.00095447319492794331 0.00095447319492794331 0.00095447319492794331 ;
 	setAttr ".rp" -type "double3" 3.8239801283091031e-16 7.2340535421518455e-15 4.1921411130764298e-15 ;
 	setAttr ".rpt" -type "double3" 4.1037838398213399e-14 -8.074836772898577e-15 -2.0555281800315892e-14 ;
@@ -30,11 +31,11 @@ createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "A6BC27AA-453E-F4CE-2D57-C0A1FFD6CDEF";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
-	setAttr ".coi" 102.03858121775806;
+	setAttr ".coi" 154.80784823185203;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
-	setAttr ".tp" -type "double3" 26.050671515747997 92.292117811668348 10.761176486122473 ;
+	setAttr ".tp" -type "double3" 25.257390686705698 95.396616066812385 2.7334170639745721 ;
 	setAttr ".hc" -type "string" "viewSet -p %camera";
 createNode transform -s -n "top";
 	rename -uid "E92F8C23-4F3A-E868-C85E-8B8043222547";
@@ -1345,7 +1346,8 @@ createNode transform -n "L_arm_1_average_pos_z_locator" -p "L_arm_1_average_grou
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -4.0096971783860766 -2.6440767100530973 5.3635796041784829 ;
+	setAttr ".t" -type "double3" -4.0096971783860713 0 5.3635796041784802 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -1387,7 +1389,8 @@ createNode transform -n "L_arm_1_average_neg_z_locator" -p "L_arm_1_average_grou
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.0018629065370703302 0.42095079760488829 -3.3806599602254437 ;
+	setAttr ".t" -type "double3" 0.0018629065370752151 0 -3.380659960225449 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -1463,6 +1466,7 @@ createNode transform -n "L_arm_2_average_pos_y_locator" -p "L_arm_2_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 0 3 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -1508,6 +1512,7 @@ createNode transform -n "L_arm_2_average_neg_y_locator" -p "L_arm_2_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 0 -3 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -1618,6 +1623,7 @@ createNode transform -n "L_arm_3_average_pos_y_locator" -p "L_arm_3_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 1.5876189252139739e-14 2.0829965361676752 3.039235529911366e-15 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -1663,6 +1669,7 @@ createNode transform -n "L_arm_3_average_neg_y_locator" -p "L_arm_3_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" -5.8009153036664429e-15 -2.042920571119851 -1.0033640585049852e-14 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -1708,6 +1715,7 @@ createNode transform -n "L_arm_3_average_pos_z_locator" -p "L_arm_3_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 1.7194579093882112e-14 -7.7993167479917279e-15 1.4323258302839079 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -1753,6 +1761,7 @@ createNode transform -n "L_arm_3_average_neg_z_locator" -p "L_arm_3_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" -9.783840404509192e-15 -1.0547118733938975e-15 -1.9007694850286756 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -1995,7 +2004,8 @@ createNode transform -n "R_arm_1_average_pos_z_locator" -p "R_arm_1_average_grou
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.0018629065370703302 -0.42095079760488829 3.3806599602254437 ;
+	setAttr ".t" -type "double3" -0.0018629065370703302 0 3.3806599602254437 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2037,7 +2047,8 @@ createNode transform -n "R_arm_1_average_neg_z_locator" -p "R_arm_1_average_grou
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 4.0096971783860766 2.6440767100530973 -5.3635796041784829 ;
+	setAttr ".t" -type "double3" 4.0096971783860766 0 -5.3635796041784829 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2113,6 +2124,7 @@ createNode transform -n "R_arm_2_average_pos_y_locator" -p "R_arm_2_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 0 3 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2158,6 +2170,7 @@ createNode transform -n "R_arm_2_average_neg_y_locator" -p "R_arm_2_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 0 -3 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2307,7 +2320,8 @@ createNode transform -n "R_arm_3_average_pos_y_locator" -p "R_arm_3_average_grou
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 5.8009153036664429e-15 2.042920571119851 1.0033640585049852e-14 ;
+	setAttr ".t" -type "double3" 5.8009153036664429e-15 2.042920571119851 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2352,7 +2366,8 @@ createNode transform -n "R_arm_3_average_neg_y_locator" -p "R_arm_3_average_grou
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -1.5876189252139739e-14 -2.0829965361676752 -3.039235529911366e-15 ;
+	setAttr ".t" -type "double3" -1.5876189252139739e-14 -2.0829965361676752 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2398,6 +2413,7 @@ createNode transform -n "R_arm_3_average_pos_z_locator" -p "R_arm_3_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 9.783840404509192e-15 1.0547118733938975e-15 1.9007694850286756 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2443,6 +2459,7 @@ createNode transform -n "R_arm_3_average_neg_z_locator" -p "R_arm_3_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" -1.7194579093882112e-14 7.7993167479917279e-15 -1.4323258302839079 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2520,6 +2537,7 @@ createNode transform -n "L_leg_1_average_pos_y_locator" -p "L_leg_1_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 0.8 8.877046232569306 -9.8965974304476786e-16 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2612,6 +2630,7 @@ createNode transform -n "L_leg_1_average_pos_z_locator" -p "L_leg_1_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 5.8347424114479938e-15 9.7491459349896519e-16 6.3939576252041581 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2732,6 +2751,7 @@ createNode transform -n "L_leg_2_average_pos_y_locator" -p "L_leg_2_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 1.5876189252139739e-14 4.5138442086209976 -5.8286708792820718e-16 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2776,6 +2796,7 @@ createNode transform -n "L_leg_2_average_neg_y_locator" -p "L_leg_2_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 1.0588752097362431e-14 -4.4705670068484107 -2.6124935548210715e-15 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2932,6 +2953,7 @@ createNode transform -n "R_leg_1_average_neg_y_locator" -p "R_leg_1_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" -0.8 -8.877046232569306 9.8965974304476786e-16 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -2977,6 +2999,7 @@ createNode transform -n "R_leg_1_average_neg_z_locator" -p "R_leg_1_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" -5.8347424114479938e-15 -9.7491459349896519e-16 -6.3939576252041581 ;
+	setAttr -l on ".ty";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -3096,6 +3119,7 @@ createNode transform -n "R_leg_2_average_pos_y_locator" -p "R_leg_2_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" -1.0588752097362431e-14 4.4705670068484107 2.6124935548210715e-15 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -3141,6 +3165,7 @@ createNode transform -n "R_leg_2_average_neg_y_locator" -p "R_leg_2_average_grou
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" -1.5876189252139739e-14 -4.5138442086209976 5.8286708792820718e-16 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -3292,6 +3317,7 @@ createNode transform -n "L_leg_heel_average_pos_y_locator" -p "L_leg_heel_averag
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 0.12671666296572903 2.51260872186187 -6.2580149395863316e-16 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -3405,6 +3431,7 @@ createNode transform -n "R_leg_heel_average_neg_y_locator" -p "R_leg_heel_averag
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" -0.12671666296572903 -2.51260872186187 6.2580149395863316e-16 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -3518,7 +3545,8 @@ createNode transform -n "M_spine_stomach_lower_average_neg_y_locator" -p "M_spin
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -2.2673264962384425 -7.0273743524981009 1.0838557460697193e-16 ;
+	setAttr ".t" -type "double3" -2.2673264962384425 -7.0273743524981009 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -3632,7 +3660,8 @@ createNode transform -n "M_spine_stomach_upper_average_neg_y_locator" -p "M_spin
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -1.0667469888291676 -6.9137587256522277 4.7365390486063648e-16 ;
+	setAttr ".t" -type "double3" -1.0667469888291676 -6.9137587256522277 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -3745,7 +3774,8 @@ createNode transform -n "L_thumb_2_average_neg_y_locator" -p "L_thumb_2_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.11090383621929334 -0.8211616936641164 0.10702653591186362 ;
+	setAttr ".t" -type "double3" -0.11090383621929334 -0.8211616936641164 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -3857,7 +3887,8 @@ createNode transform -n "L_thumb_3_average_neg_y_locator" -p "L_thumb_3_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.0017840724966049493 -0.75350936112642941 0.058108152353522513 ;
+	setAttr ".t" -type "double3" -0.0017840724966049493 -0.75350936112642941 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -3970,7 +4001,8 @@ createNode transform -n "L_index_1_average_neg_y_locator" -p "L_index_1_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.64530546362919949 -1.0337802002584784 -0.099179232870937994 ;
+	setAttr ".t" -type "double3" 0.64530546362919949 -1.0337802002584784 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -4082,7 +4114,8 @@ createNode transform -n "L_index_2_average_neg_y_locator" -p "L_index_2_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.12394246366829975 -0.69770538871084575 -0.020561623700061205 ;
+	setAttr ".t" -type "double3" 0.12394246366829975 -0.69770538871084575 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -4195,7 +4228,8 @@ createNode transform -n "L_index_3_average_neg_y_locator" -p "L_index_3_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.038658416637787241 -0.44512946568378453 0.0090325653106404502 ;
+	setAttr ".t" -type "double3" -0.038658416637787241 -0.44512946568378453 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -4311,7 +4345,8 @@ createNode transform -n "L_middle_1_average_neg_y_locator" -p "L_middle_1_averag
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.30736818617364747 -1.1821102825108074 0.012794821056598238 ;
+	setAttr ".t" -type "double3" 0.30736818617364747 -1.1821102825108074 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -4427,7 +4462,8 @@ createNode transform -n "L_middle_2_average_neg_y_locator" -p "L_middle_2_averag
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.05936371384328254 -0.66761551579369893 -0.010965767331033049 ;
+	setAttr ".t" -type "double3" 0.05936371384328254 -0.66761551579369893 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -4543,7 +4579,8 @@ createNode transform -n "L_middle_3_average_neg_y_locator" -p "L_middle_3_averag
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.11178224391687053 -0.6162972360797454 0.19072773034926982 ;
+	setAttr ".t" -type "double3" 0.11178224391687053 -0.6162972360797454 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -4655,7 +4692,8 @@ createNode transform -n "L_ring_1_average_neg_y_locator" -p "L_ring_1_average_gr
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.44262851688029059 -1.1674617349126999 -0.17441719489386109 ;
+	setAttr ".t" -type "double3" 0.44262851688029059 -1.1674617349126999 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -4767,7 +4805,8 @@ createNode transform -n "L_ring_2_average_neg_y_locator" -p "L_ring_2_average_gr
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.002156555556098283 -0.71485114192017818 0.059962946419281238 ;
+	setAttr ".t" -type "double3" -0.002156555556098283 -0.71485114192017818 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -4879,7 +4918,8 @@ createNode transform -n "L_ring_3_average_neg_y_locator" -p "L_ring_3_average_gr
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.2393277591380425 -0.59547923316716833 0.054605464536113146 ;
+	setAttr ".t" -type "double3" 0.2393277591380425 -0.59547923316716833 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -4992,7 +5032,8 @@ createNode transform -n "L_pinky_1_average_neg_y_locator" -p "L_pinky_1_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.35997225062986615 -1.0044903805282093 0.030306462594379191 ;
+	setAttr ".t" -type "double3" 0.35997225062986615 -1.0044903805282093 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -5105,7 +5146,8 @@ createNode transform -n "L_pinky_2_average_neg_y_locator" -p "L_pinky_2_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.17060329208322855 -0.67747346636244288 -0.18318987036045109 ;
+	setAttr ".t" -type "double3" 0.17060329208322855 -0.67747346636244288 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -5218,7 +5260,8 @@ createNode transform -n "L_pinky_3_average_neg_y_locator" -p "L_pinky_3_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.086662166600490309 -0.52696626109587896 -0.057093190566434471 ;
+	setAttr ".t" -type "double3" 0.086662166600490309 -0.52696626109587896 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -5331,7 +5374,8 @@ createNode transform -n "R_thumb_2_average_pos_y_locator" -p "R_thumb_2_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.11090383621929334 0.8211616936641164 -0.10702653591186362 ;
+	setAttr ".t" -type "double3" 0.11090383621929334 0.8211616936641164 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -5443,7 +5487,8 @@ createNode transform -n "R_thumb_3_average_pos_y_locator" -p "R_thumb_3_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.0017840724966049493 0.75350936112642941 -0.058108152353522513 ;
+	setAttr ".t" -type "double3" 0.0017840724966049493 0.75350936112642941 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -5557,7 +5602,8 @@ createNode transform -n "R_index_1_average_pos_y_locator" -p "R_index_1_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.64530546362919949 1.0337802002584784 0.099179232870937994 ;
+	setAttr ".t" -type "double3" -0.64530546362919949 1.0337802002584784 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -5669,7 +5715,8 @@ createNode transform -n "R_index_2_average_pos_y_locator" -p "R_index_2_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.12394246366829975 0.69770538871084575 0.020561623700061205 ;
+	setAttr ".t" -type "double3" -0.12394246366829975 0.69770538871084575 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -5782,7 +5829,8 @@ createNode transform -n "R_index_3_average_pos_y_locator" -p "R_index_3_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.038658416637787241 0.44512946568378453 -0.0090325653106404502 ;
+	setAttr ".t" -type "double3" 0.038658416637787241 0.44512946568378453 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -5898,7 +5946,8 @@ createNode transform -n "R_middle_1_average_pos_y_locator" -p "R_middle_1_averag
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.30736818617364747 1.1821102825108074 -0.012794821056598238 ;
+	setAttr ".t" -type "double3" -0.30736818617364747 1.1821102825108074 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6013,7 +6062,8 @@ createNode transform -n "R_middle_2_average_pos_y_locator" -p "R_middle_2_averag
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.05936371384328254 0.66761551579369893 0.010965767331033049 ;
+	setAttr ".t" -type "double3" -0.05936371384328254 0.66761551579369893 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6129,7 +6179,8 @@ createNode transform -n "R_middle_3_average_pos_y_locator" -p "R_middle_3_averag
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.11178224391687053 0.6162972360797454 -0.19072773034926982 ;
+	setAttr ".t" -type "double3" -0.11178224391687053 0.6162972360797454 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6242,7 +6293,8 @@ createNode transform -n "R_ring_1_average_pos_y_locator" -p "R_ring_1_average_gr
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.44262851688029059 1.1674617349126999 0.17441719489386109 ;
+	setAttr ".t" -type "double3" -0.44262851688029059 1.1674617349126999 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6354,7 +6406,8 @@ createNode transform -n "R_ring_2_average_pos_y_locator" -p "R_ring_2_average_gr
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" 0.002156555556098283 0.71485114192017818 -0.059962946419281238 ;
+	setAttr ".t" -type "double3" 0.002156555556098283 0.71485114192017818 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6466,7 +6519,8 @@ createNode transform -n "R_ring_3_average_pos_y_locator" -p "R_ring_3_average_gr
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.2393277591380425 0.59547923316716833 -0.054605464536113146 ;
+	setAttr ".t" -type "double3" -0.2393277591380425 0.59547923316716833 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6580,7 +6634,8 @@ createNode transform -n "R_pinky_1_average_pos_y_locator" -p "R_pinky_1_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.35997225062986615 1.0044903805282093 -0.030306462594379191 ;
+	setAttr ".t" -type "double3" -0.35997225062986615 1.0044903805282093 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6693,7 +6748,8 @@ createNode transform -n "R_pinky_2_average_pos_y_locator" -p "R_pinky_2_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.17060329208322855 0.67747346636244288 0.18318987036045109 ;
+	setAttr ".t" -type "double3" -0.17060329208322855 0.67747346636244288 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6806,7 +6862,8 @@ createNode transform -n "R_pinky_3_average_pos_y_locator" -p "R_pinky_3_average_
 	addAttr -ci true -k true -sn "speedOutterY" -ln "speedOutterY" -at "double" -p "speedOutter";
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
-	setAttr ".t" -type "double3" -0.086662166600490309 0.52696626109587896 0.057093190566434471 ;
+	setAttr ".t" -type "double3" -0.086662166600490309 0.52696626109587896 0 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6920,6 +6977,7 @@ createNode transform -n "M_neck_average_pos_y_locator" -p "M_neck_average_group"
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" 0.8367575508042987 4.4296256612509666 2.6817884081400723e-15 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -6962,6 +7020,7 @@ createNode transform -n "M_neck_average_neg_y_locator" -p "M_neck_average_group"
 	addAttr -ci true -k true -sn "speedOutterZ" -ln "speedOutterZ" -at "double" -p "speedOutter";
 	setAttr -l on -k off ".v";
 	setAttr ".t" -type "double3" -3.5348406378523407 -3.3733207400519074 -1.5605046931304462e-11 ;
+	setAttr -l on ".tz";
 	setAttr -l on -k off ".rx";
 	setAttr -l on -k off ".ry";
 	setAttr -l on -k off ".rz";
@@ -22383,11 +22442,11 @@ createNode multDL -n "R_leg_ik_polevector_control_helper_multDoubleLinear";
 	rename -uid "10699B37-4966-8A8F-C6AA-EFB5B06DFCD8";
 	setAttr ".i2" -1;
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "C2B0DCEE-40A4-482C-19EC-4D9ACE26742E";
+	rename -uid "A5819B97-46F8-37AA-6FC1-4AA21EADB09F";
 	setAttr -s 2 ".lnk";
 	setAttr -s 2 ".slnk";
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "A6E20853-4A20-E3A1-D540-B384AA1D68E1";
+	rename -uid "14DB7310-4FE1-BCD3-01FA-66A94C71A7C1";
 	setAttr -s 9 ".bsdt";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 0 ;
 	setAttr ".bsdt[1].bscd" -type "Int32Array" 0 ;
@@ -22406,18 +22465,18 @@ createNode shapeEditorManager -n "shapeEditorManager";
 	setAttr ".bsdt[8].bscd" -type "Int32Array" 0 ;
 	setAttr ".bsdt[8].bspi" 7;
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "EF64BE19-4A52-66E9-C52A-F8B0189455C3";
+	rename -uid "3BFEE6D2-4701-7A55-33EF-CEA9CBBF0503";
 	setAttr -s 2 ".tpdt";
 	setAttr ".tpdt[0].tpcd" -type "Int32Array" 2 -1 0 ;
 	setAttr ".tpdt[1].tpcd" -type "Int32Array" 0 ;
 	setAttr ".tpdt[1].tpdn" -type "string" "chr_abendis_MDL_Model_v010_fix";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "264455E6-4DBD-8509-B1E4-F48EE95BCF1C";
+	rename -uid "E430824C-4FC9-82FF-3BB3-FDADC46D03DA";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "9E8B42AB-4BF5-DAB9-7C6A-E5AA0822CA3A";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "F0A4CAF2-42EE-EE72-5513-FA9260B99958";
+	rename -uid "3C1BD621-46C6-B47F-9672-B4B215F4CFAF";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "4CFE04FF-4860-69A8-4D68-BD989CFA5CAF";
 	setAttr ".g" yes;
@@ -46580,15 +46639,15 @@ connectAttr "L_leg_2_bendRig_planeShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "R_leg_1_bendRig_planeShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "R_leg_2_bendRig_planeShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "ikSCsolver1.msg" ":ikSystem.sol" -na;
-dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
-dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
-dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
-dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
 dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
-dataStructure -fmt "raw" -as "name=DiffArea:float=value";
+dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
 dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
 dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
+dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
+dataStructure -fmt "raw" -as "name=DiffArea:float=value";
+dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
+dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 // End of biped_body_template.ma
