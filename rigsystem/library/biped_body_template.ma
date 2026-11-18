@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: biped_body_template.ma
-//Last modified: Tue, Nov 17, 2026 03:50:22 PM
+//Last modified: Wed, Nov 18, 2026 11:41:40 AM
 //Codeset: 1251
 requires maya "2026";
 requires -nodeType "skeleposer" "skeleposer" "Unknown";
@@ -8,21 +8,20 @@ requires "stereoCamera" "10.0";
 requires -nodeType "simpleSelector" -nodeType "renderSetupLayer" -nodeType "renderSetup"
 		 -nodeType "collection" -nodeType "renderSettingsCollection" -nodeType "absOverride"
 		 -nodeType "absUniqueOverride" "renderSetup.py" "1.0";
-requires "stereoCamera" "10.0";
 currentUnit -l centimeter -a degree -t ntsc;
 fileInfo "application" "maya";
 fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
 fileInfo "osv" "Windows 11 Home v2009 (Build: 26300)";
-fileInfo "UUID" "6AE8B2B5-4E67-94EC-FED8-C493B7CEBF72";
+fileInfo "UUID" "E171B0A9-4493-69CD-5586-23A19069B166";
 createNode transform -s -n "persp";
 	rename -uid "8DCF4356-4D3E-3DFF-4277-379CE6A38D01";
 	setAttr ".v" no;
 	setAttr -s 3 ".rlio";
 	setAttr -s 3 ".rlio";
-	setAttr ".t" -type "double3" 47.030971180502497 199.64964717462934 111.62802068860124 ;
-	setAttr ".r" -type "double3" -397.06058509098671 -2136.9119827350637 1.7287436009148007e-15 ;
+	setAttr ".t" -type "double3" 20.597554701013003 108.49029471524938 81.569064274842844 ;
+	setAttr ".r" -type "double3" -365.86058509094795 -2143.7119827346883 -1.0354835371950624e-16 ;
 	setAttr ".s" -type "double3" 0.00095447319492794331 0.00095447319492794331 0.00095447319492794331 ;
 	setAttr ".rp" -type "double3" 3.8239801283091031e-16 7.2340535421518455e-15 4.1921411130764298e-15 ;
 	setAttr ".rpt" -type "double3" 4.1037838398213399e-14 -8.074836772898577e-15 -2.0555281800315892e-14 ;
@@ -31,7 +30,7 @@ createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "A6BC27AA-453E-F4CE-2D57-C0A1FFD6CDEF";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
-	setAttr ".coi" 154.80784823185203;
+	setAttr ".coi" 85.917775229654552;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
@@ -14919,7 +14918,7 @@ createNode joint -n "R_thumb_index_joint" -p "R_arm_3_joint";
 	setAttr -k on ".s";
 	setAttr ".mnrl" -type "double3" -360 -360 -360 ;
 	setAttr ".mxrl" -type "double3" 360 360 360 ;
-	setAttr ".jo" -type "double3" 163.10145484785528 54.465737617720137 159.52841687911121 ;
+	setAttr ".jo" -type "double3" 16.898545152145079 -54.465737617720023 -20.471583120889399 ;
 	setAttr ".ssc" no;
 	setAttr ".bps" -type "matrix" -0.13390237923891377 0.79470199902643313 -0.59204635424732477 0
 		 0.97770308527417205 0.20345818476970765 0.051975418185723293 0 0.16176164526711312 -0.571885915015929 -0.80422613133799015 0
@@ -14960,6 +14959,7 @@ createNode aimConstraint -n "R_thumb_index_joint_aimConstraint1" -p "R_thumb_ind
 	setAttr -k off ".sy";
 	setAttr -k off ".sz";
 	setAttr ".erp" yes;
+	setAttr ".a" -type "double3" -1 0 0 ;
 	setAttr ".wut" 2;
 	setAttr ".rsrr" -type "double3" 6.361109362927032e-15 1.5902773407317584e-14 -9.5416640443905487e-15 ;
 	setAttr -k on ".w0";
@@ -22442,11 +22442,11 @@ createNode multDL -n "R_leg_ik_polevector_control_helper_multDoubleLinear";
 	rename -uid "10699B37-4966-8A8F-C6AA-EFB5B06DFCD8";
 	setAttr ".i2" -1;
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "A5819B97-46F8-37AA-6FC1-4AA21EADB09F";
+	rename -uid "D699807D-44A2-0E54-389A-1FA72F8D452D";
 	setAttr -s 2 ".lnk";
 	setAttr -s 2 ".slnk";
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "14DB7310-4FE1-BCD3-01FA-66A94C71A7C1";
+	rename -uid "6B265B6F-465F-2740-F26C-5FB2E32A5146";
 	setAttr -s 9 ".bsdt";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 0 ;
 	setAttr ".bsdt[1].bscd" -type "Int32Array" 0 ;
@@ -22465,18 +22465,18 @@ createNode shapeEditorManager -n "shapeEditorManager";
 	setAttr ".bsdt[8].bscd" -type "Int32Array" 0 ;
 	setAttr ".bsdt[8].bspi" 7;
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "3BFEE6D2-4701-7A55-33EF-CEA9CBBF0503";
+	rename -uid "DCE7CCCC-487B-772C-5805-11A78301ED3C";
 	setAttr -s 2 ".tpdt";
 	setAttr ".tpdt[0].tpcd" -type "Int32Array" 2 -1 0 ;
 	setAttr ".tpdt[1].tpcd" -type "Int32Array" 0 ;
 	setAttr ".tpdt[1].tpdn" -type "string" "chr_abendis_MDL_Model_v010_fix";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "E430824C-4FC9-82FF-3BB3-FDADC46D03DA";
+	rename -uid "ED1CD551-4E4F-B4BA-606D-18BDC4715B61";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "9E8B42AB-4BF5-DAB9-7C6A-E5AA0822CA3A";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "3C1BD621-46C6-B47F-9672-B4B215F4CFAF";
+	rename -uid "E3F06AD9-4D34-4959-FBC2-1B8563355A62";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "4CFE04FF-4860-69A8-4D68-BD989CFA5CAF";
 	setAttr ".g" yes;
@@ -46639,15 +46639,15 @@ connectAttr "L_leg_2_bendRig_planeShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "R_leg_1_bendRig_planeShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "R_leg_2_bendRig_planeShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "ikSCsolver1.msg" ":ikSystem.sol" -na;
-dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
-dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
-dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
-dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
-dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
-dataStructure -fmt "raw" -as "name=DiffArea:float=value";
-dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
-dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
-dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
 dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
+dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
+dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
+dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
+dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
+dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
+dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
+dataStructure -fmt "raw" -as "name=DiffArea:float=value";
 // End of biped_body_template.ma
