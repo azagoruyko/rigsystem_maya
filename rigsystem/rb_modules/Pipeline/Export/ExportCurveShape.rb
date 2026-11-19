@@ -1,4 +1,4 @@
-<module name="ExportHelper" muted="0" uid="3e1d4a234953465984ad40782cc951e2">
+<module name="ExportCurveShape" muted="0" uid="3e1d4a234953465984ad40782cc951e2">
 <run><![CDATA[from rigsystem import rig_utils
 
 rig_utils.curve.saveCurveData(@nurbsCurve, @curveType)]]></run>
