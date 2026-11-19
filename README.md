@@ -2,158 +2,104 @@
 
 ![GitHub Tag](https://img.shields.io/github/v/tag/azagoruyko/rigsystem_maya?label=Version)
 
-RigSystem is a **rigging environment for Maya**. It brings together Maya tools, plug-ins, and modules for [Rig Builder](https://github.com/azagoruyko/rigBuilder) in one workflow.
-
-In 2.0.0, the Maya tools live in the `rigsystem` Python package, and the viewport animation menu works without replacing Maya's `dagMenuProc.mel`.
+RigSystem is a Maya rigging toolkit with Python utilities, plug-ins, and [Rig Builder](https://github.com/azagoruyko/rigBuilder) modules.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/012cb13b-830c-4563-90f3-6304ac3aea4e" width="800" />
 </p>
 
-## ⚡ Quick start
+## Requirements
 
-After completing the installation steps below:
+- Maya 2026 on Windows (`win64`). The bundled plug-ins are built for this configuration.
+- [Rig Builder](https://github.com/azagoruyko/rigBuilder) to browse and run the `.rb` modules.
 
-1. Open `rigsystem/library/biped_body_template.ma` in Maya.
-2. Open Rig Builder and select the RigSystem workspace.
-3. Insert the `Assemblies/Biped/Biped` module by pressing Tab.
-4. Press **Run**.
-5. Save the resulting rig as a separate build/anim scene.
+Maya 2026 uses Python 3.11. Other Maya versions and platforms are not currently supported.
 
-The full featured bipedal rig is ready for animation.
+## Install
 
-### Build a custom rig with MyPipeline
+For a walkthrough, see the [installation video](https://www.youtube.com/watch?v=g7IWIPeaabQ).
 
-[`Pipeline/MyPipeline`](rigsystem/rb_modules/Pipeline/MyPipeline.rb) collects reusable Rig Builder modules for creating custom biped, quadruped, prop, and other rigs. Insert it with Tab and choose the tools your rig needs from its groups.
+1. Set `MAYA_MODULE_PATH` to the repository root — the folder containing `rigsystem.mod`.
+2. Restart Maya.
+3. In Rig Builder, open **Manage Workspaces** from the gear button beside the workspace selector.
+4. Create a workspace named **RigSystem**.
+5. Add this repository's `rigsystem/rb_modules` folder as a dependency module path, then select the RigSystem workspace.
 
-You can save `MyPipeline` in your own workspace and extend it with your own modules and settings.
+In interactive Maya, RigSystem loads its bundled plug-ins and adds the animation menu to the viewport at startup. No extra `MAYA_SCRIPT_PATH` or `PYTHONPATH` entry is needed. If you previously installed a custom `dagMenuProc.mel` for RigSystem, remove that override and restart Maya.
 
-| Group | Tools for |
-| --- | --- |
-| **Fitting** | Creating a basic rig hierarchy, importing an optional biped template, and adjusting or mirroring fitting guides. |
-| **Controls** | Making control shapes, FK controls, and corrective controls. |
-| **Deform** | Working with skin weights, bind matrices, and blend shapes. |
-| **Attachments** | Attaching controls or other rig elements to curves, meshes, and surfaces. |
-| **Face** | Building specific lips, eyelids, brows, and teeth components when your rig needs them. |
+### Connect Rig Builder to Maya
 
-For a new scene, use `Fitting/RigHierarchy` to create a basic rig structure, or `Fitting/ImportBipedBodyTemplate` to start from the biped template.
-
-## 📂 Source and build scenes
-
-Each rig should have two Maya scene files:
-
-| Scene | Purpose |
-| --- | --- |
-| `source` | The rigger's working scene. It can keep guides, helpers, intermediate geometry, and anything else needed to develop the rig. |
-| `build` (`anim`) | The generated scene for animators. The build scripts turn the source into a clean, optimized rig ready for animation. |
-
-Make all scene changes in the `source` file. If the build logic needs to change, update its Rig Builder `.rb` module. Never edit the `build` scene directly: run the module again to reproduce it from the `source` scene and the `.rb` module.
-
-### 🦴 Fit the skeleton
-
-In the `source` scene, fit the template skeleton to the character by moving and rotating its bones along the available axes. Preserve each joint's local axes and orientation while adjusting its position and pose; the build modules use those axes to construct the rig.
-
-### 📍 Place the helpers
-
-Helpers are rigging guides in the `source` scene, not animation controls.
-
-For `Biped`, the supplied template already contains helpers under the `helpers` group:
-
-1. Use the template's existing helpers, or set the `Biped` module's `mode` to **Helpers** and run it to create guides for a new source scene.
-2. Fit most helpers by editing their curve points (CVs).
-3. Select the adjusted curves on one side and run `Pipeline/Symmetry/MirrorCurves` to mirror their shapes to the opposite side.
-4. Switch `mode` to **Run** and execute the module again. The build uses the helpers to create an animation rig.
-
-To change a control's placement later, adjust its helper in the `source` scene and rebuild the `build` scene.
-
-## 📦 What's included
-
-| Path | Contents |
-| --- | --- |
-| `rigsystem/scripts/rigsystem` | Maya rigging and animation Python package (`rig_utils` and `anim_utils`) |
-| `rigsystem/scripts/userSetup.py` | Loads bundled plug-ins and installs the viewport menu in interactive Maya |
-| `rigsystem/rb_modules` | Modules to run in Rig Builder |
-| `rigsystem/platforms/2026/win64/plug-ins` | Bundled Maya 2026 plug-ins |
-| `rigsystem/library` | Maya scene assets and templates |
-
-## 🧩 Dependencies
-
-The following plug-ins are included as compiled `.mll` files. Their source code is maintained in separate repositories:
-
-| Bundled plug-in | Source repository |
-| --- | --- |
-| `animClip.mll` | [`animClip`](https://github.com/azagoruyko/animClip) |
-| `colliders.mll` | [`colliders`](https://github.com/azagoruyko/colliders) |
-| `skeleposer.mll` | [`skeleposer`](https://github.com/azagoruyko/skeleposer) |
-
-The Python scripts and Rig Builder modules use `maya.cmds`, the Maya API 2.0, and the bundled `rigsystem.proxy` layer instead of `PyMEL`. [Rig Builder](https://github.com/azagoruyko/rigBuilder) is a separate application required to use the modules in `rigsystem/rb_modules`.
-
-## 🧪 Compatibility
-
-> [!IMPORTANT]
-> **Pilot support:** Maya 2026 on Windows (`win64`). The bundled `.mll` plug-ins are built for this configuration. Other Maya versions may be added as needed, after their builds have been tested.
-
-The scripts use **Python 3.11** inside Maya. Autodesk lists Python 3.11.4 for [Maya 2026](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-DEVHELP/files/Maya_DEVHELP_Open_Source_Components_html.html).
-
-## 🚀 Installation
-
-Follow the guide: https://www.youtube.com/watch?v=g7IWIPeaabQ
-
-Set `MAYA_MODULE_PATH` to the **repository root**, the folder containing `rigsystem.mod`.
-
-The module definition points to `./rigsystem` and its Maya 2026 Windows plug-ins. Its `userSetup.py` loads the bundled plug-ins and installs the viewport menu in interactive Maya. The RigSystem release version is defined in `rigsystem/scripts/rigsystem/__init__.py`.
-
-If upgrading from a setup that used a custom `dagMenuProc.mel`, remove that script override and restart Maya. RigSystem 2.0.0 does not need an extra `MAYA_SCRIPT_PATH` or `PYTHONPATH` entry for it.
-
-### 🎬 Viewport animation menu
-
-RigSystem installs its viewport animation menu when Maya starts. Select a rig control, then right-click in the viewport to open its actions. With multiple transforms selected, the menu uses the **last selected** one; it does not inspect the object under the cursor. Maya's standard menu appears when the selected object has no RigSystem actions. No Maya MEL file needs to be copied or modified.
-
-Custom scripts and Rig Builder modules should use the package imports, for example `from rigsystem import rig_utils` or `from rigsystem.anim_utils import switcher`.
-
-### 🔌 Connect Maya to Rig Builder
-
-1. Start Rig Builder and open **Host Manager** using the gear button next to the host selector.
-2. Under **Host Startup Code Generator**, select **Maya** and copy the generated **Startup Script**.
-3. In Maya's Script Editor, switch to the Python tab, paste the script, and run it.
+1. In Rig Builder, open **Host Manager** using the gear button beside the host selector.
+2. Under **Host Startup Code Generator**, select **Maya** and copy the generated startup script.
+3. In Maya's Script Editor, select the Python tab, paste the script, and run it.
 4. Select the detected Maya host in Rig Builder.
 
-This starts Rig Builder's host connection inside Maya so modules can execute there.
+To connect automatically on startup, add the generated script to the `userSetup.py` that Maya runs.
 
-To start the connection automatically with Maya, append the generated **Startup Script** to your `userSetup.py` that Maya runs at startup.
+## Build your first rig
 
-### 🛠️ Rig Builder workspace (recommended workflow)
+1. Open `rigsystem/library/biped_body_template.ma` in Maya.
+2. In Rig Builder, select the **RigSystem** workspace.
+3. Insert `Assemblies/Biped/Biped` (press **Tab** and search for it).
+4. Press **Run**.
+5. Save the generated rig as a separate build/animation scene.
 
-Create a dedicated Rig Builder workspace and add RigSystem as a module dependency. This keeps the modules in this repository as the source of truth, so updates do not require copying them into the workspace again:
+## Build a custom rig
 
-1. In Rig Builder, open **Manage Workspaces** using the gear button next to the workspace selector.
-2. Create a workspace named **RigSystem**.
-3. In the workspace settings, add this repository's `rigsystem/rb_modules` directory as a dependency module path.
-4. Select the RigSystem workspace to browse and use the dependency modules.
+[`Pipeline/MyPipeline`](rigsystem/rb_modules/Pipeline/MyPipeline.rb) groups reusable modules for custom biped, quadruped, prop, and other rigs. Insert it in Rig Builder with **Tab**, then choose the tools you need:
 
-## 🤖 AI and MCP
+| Group | Purpose |
+| --- | --- |
+| **Fitting** | Create a rig hierarchy, import a biped template, and fit or mirror guides. |
+| **Controls** | Create control shapes, FK controls, and corrective controls. |
+| **Deform** | Work with skin weights, bind matrices, and blend shapes. |
+| **Attachments** | Attach rig elements to curves, meshes, and surfaces. |
+| **Face** | Build lips, eyelids, brows, and teeth. |
 
-RigSystem is very AI-friendly: its `.rb` modules contain readable code, structured inputs and outputs, and documentation that an AI assistant can use to understand and extend a rig.
+For a new scene, start with `Fitting/RigHierarchy` or import the biped template with `Fitting/ImportBipedBodyTemplate`. You can save `MyPipeline` in your own workspace and extend it with custom modules and settings.
 
-[Rig Builder](https://github.com/azagoruyko/rigBuilder) provides an MCP server that lets compatible AI clients search the workspace library, inspect and edit the active module tree, and run modules through a connected Maya host. Select the RigSystem workspace, keep Rig Builder running, and connect your client using Rig Builder's **Copy MCP Config** option. See the [Rig Builder MCP setup](https://github.com/azagoruyko/rigBuilder#6-connect-an-mcp-client) for details.
+## Rig development workflow
 
-## 🤝 Contributions
+Keep the working scene separate from the scene delivered for animation:
 
-Contributions to the Maya package belong in this repository:
+| Scene | Use |
+| --- | --- |
+| **Source** | Working scene; may contain guides, helpers, and intermediate geometry. |
+| **Build** (or **Anim**) | Generated scene for animators, built from the source scene. |
 
-- Add or improve Rig Builder modules in `rigsystem/rb_modules`.
-- Add or improve Maya rigging and animation scripts in `rigsystem/scripts/rigsystem`.
-- Report issues with the packaged Maya module, its installation, or bundled builds here.
+Make scene changes in the source file. To change how the rig is built, edit and rerun its Rig Builder `.rb` module. Do not edit the build scene directly; regenerate it from the source and module.
 
-For changes to Rig Builder itself, use the [Rig Builder repository](https://github.com/azagoruyko/rigBuilder). For plug-in source changes, contribute to [`animClip`](https://github.com/azagoruyko/animClip), [`colliders`](https://github.com/azagoruyko/colliders), or [`skeleposer`](https://github.com/azagoruyko/skeleposer) in their respective repositories.
+### Fit and place guides
 
-When opening a pull request here, describe the affected component, the Maya version used, and how you tested the change in Maya.
+- Fit the template skeleton by moving and rotating its joints. Preserve each joint's local axes and orientation; build modules use them to construct the rig.
+- For the biped, use the helpers in the template's `helpers` group, or set the `Biped` module's `mode` to **Helpers** and run it to create guides.
+- Fit helper curves by editing their CVs. Mirror one side with `Pipeline/Symmetry/MirrorCurves`.
+- Set the `Biped` module's `mode` to **Run** and run it again to build the animation rig.
+- To reposition a control later, adjust its helper in the source scene and rebuild.
 
-## 📄 License
+## Viewport animation menu
 
-See [`LICENSE`](LICENSE) for this repository. Refer to the linked plug-in repositories for their source licenses.
+Select a rig control and right-click in the viewport to see its actions. With multiple transforms selected, the menu uses the last selected transform; it does not inspect the object under the cursor. Maya's standard menu appears when the selection has no RigSystem actions.
 
-## 🏷️ Versions
+## Bundled plug-ins
+
+The following Maya plug-ins are included as compiled `.mll` files. Their source is maintained separately:
+
+| Plug-in | Source |
+| --- | --- |
+| `animClip.mll` | [animClip](https://github.com/azagoruyko/animClip) |
+| `colliders.mll` | [colliders](https://github.com/azagoruyko/colliders) |
+| `skeleposer.mll` | [skeleposer](https://github.com/azagoruyko/skeleposer) |
+
+## Contributing
+
+- Maya scripts: `rigsystem/scripts/rigsystem`
+- Rig Builder modules: `rigsystem/rb_modules`
+- For Rig Builder application changes or plug-in source changes, contribute to their respective repositories.
+
+When opening a pull request, include the affected component, Maya version, and how you tested the change.
+
+## Versions
 
 Version numbers use `major.minor.patch`: a major release can change existing workflows, a minor release adds features, and a patch release fixes problems without intentionally changing workflows.
 
@@ -163,4 +109,8 @@ Version numbers use `major.minor.patch`: a major release can change existing wor
 | `v2.0.0` | Moved Maya tools into the `rigsystem` Python package and installed the viewport menu without replacing Maya's `dagMenuProc.mel`. |
 | `v3.0.0` | Removed the PyMEL dependency from Python utilities and Rig Builder modules, replacing it with `maya.cmds`, Maya API 2.0, and `rigsystem.proxy`. Added face rig templates and fitting modules. |
 
-For the exact changes in a release, compare its Git tag with the previous tag.
+For exact release changes, compare a Git tag with the previous tag.
+
+## License
+
+See [`LICENSE`](LICENSE). Plug-in source licenses are listed in their respective repositories.
