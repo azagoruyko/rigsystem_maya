@@ -2,22 +2,40 @@ import maya.cmds as cmds
 import maya.api.OpenMaya as om
 
 from rigsystem import proxy
-   
+
 NAME = "selectionGizmo"
 
+
 def setWorldMatrixWithoutUndo(node, wm):
-    nodeNode = proxy.node(node)
-    nodePath = nodeNode.mdagpath
-    lm = om.MMatrix(wm) * nodePath.exclusiveMatrixInverse() # make local matrix
-    
-    if cmds.nodeType(node) == "joint":
-        joInv = nodeNode.mfn().orientation(asQuaternion=True).asMatrix().inverse()
-        m = lm * joInv # consider jointOrient if any
-        m[12], m[13], m[14] = lm[12], lm[13], lm[14]
-    else:
-        m = lm        
-    
-    nodeNode.mfn().setTransformation(om.MTransformationMatrix(m))
+    """Set the world matrix without undo, preserving joint orientation and scale compensation."""
+    transform = proxy.node(node)
+    nodePath = transform.mdagpath
+    parentInverse = om.MMatrix(transform.parentInverseMatrix.get())
+    localMatrix = om.MMatrix(wm) * parentInverse
+    nodeFn = transform.mfn()
+    if not nodePath.node().hasFn(om.MFn.kJoint):
+        nodeFn.setTransformation(om.MTransformationMatrix(localMatrix))
+        return
+
+    space = om.MSpace.kTransform
+    translation = om.MVector(localMatrix[12], localMatrix[13], localMatrix[14])
+
+    # A joint applies inverseScale after jointOrient. Remove both before extracting rotation and scale.
+    if transform.segmentScaleCompensate.get():
+        parentScale = om.MTransformationMatrix()
+        parentScale.setScale(transform.inverseScale.get()[0], space)
+        localMatrix *= parentScale.asMatrix()
+
+    jointOrientPlug = transform.jointOrient.mplug
+    orientAngles = [jointOrientPlug.child(i).asMAngle().asRadians() for i in range(3)]
+    jointOrient = om.MEulerRotation(*orientAngles)
+    rotationScale = om.MTransformationMatrix(localMatrix * jointOrient.asMatrix().inverse())
+    rotateAxis = nodeFn.rotateOrientation(space)
+    rotation = rotateAxis.inverse() * rotationScale.rotation(asQuaternion=True)
+
+    nodeFn.setTranslation(translation, space)
+    nodeFn.setRotation(rotation, space)
+    nodeFn.setScale(rotationScale.scale(space))
 
 
 def gizmoChange(msg, plug, otherPlug, data):
@@ -37,6 +55,9 @@ def makeGizmo():
     if not selected:
         cmds.warning("Select controls")
         return
+
+    # Apply parent matrices first so descendants are moved only once.
+    selected.sort(key=lambda path: path.count("|"))
 
     if cmds.objExists(NAME):
         cmds.delete(NAME)
