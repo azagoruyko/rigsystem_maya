@@ -18,7 +18,7 @@ Creates a rig curve by delegating to `rig_utils.curve.makeCurve` with a specifie
 - Execute the module to create the curve in the current rig scene.
 - Use the value returned by `rig_utils.curve.makeCurve` or locate the generated node by `name` when connecting it to downstream rig logic.]]></doc>
 <attributes>
-<attr name="curveType" template="comboBox" category="General" connect=""><![CDATA[{"items": ["arc", "arrow", "axis", "circle", "cross", "cube", "diamond", "flag", "guide", "key", "plus", "pyramid", "rect", "sphere", "triangle"], "current": "cube", "default": "current"}]]></attr>
+<attr name="curveType" template="comboBox" category="General" connect=""><![CDATA[{"items": ["arc", "arrow", "axis", "circle", "cross", "cube", "diamond", "flag", "key", "plus", "pyramid", "rect", "sphere", "triangle"], "current": "cube", "default": "current"}]]></attr>
 <attr name="" template="button" category="General" connect=""><![CDATA[{"command": "import os\nfrom rigsystem import rig_utils\n\ncurves = sorted(\n    os.path.splitext(filename)[0]\n    for filename in os.listdir(rig_utils.curve.CurvesPath)\n    if filename.endswith(\".json\")\n)\ncurrent = ch(\"/curveType\")\nif current not in curves:\n    chset(\"/curveType\", curves[0] if curves else \"\", \"current\")\n\nchset(\"/curveType\", curves, \"items\")", "label": "Get All Curves", "color": "", "default": "command"}]]></attr>
 <attr name="name" template="lineEditAndButton" category="General" connect=""><![CDATA[{"value": "M", "placeholder": "", "buttonCommand": "print(\"Hello, world!\")", "buttonLabel": "Button", "buttonEnabled": false, "min": 0, "max": 100, "validator": 0, "default": "value"}]]></attr>
 </attributes>
