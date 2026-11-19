@@ -1,6 +1,6 @@
 //Maya ASCII 2026 scene
 //Name: biped_body_template.ma
-//Last modified: Wed, Nov 18, 2026 11:41:40 AM
+//Last modified: Thu, Nov 19, 2026 11:46:23 AM
 //Codeset: 1251
 requires maya "2026";
 requires -nodeType "skeleposer" "skeleposer" "Unknown";
@@ -14,14 +14,14 @@ fileInfo "product" "Maya 2026";
 fileInfo "version" "2026";
 fileInfo "cutIdentifier" "202510291147-60ec9eda33";
 fileInfo "osv" "Windows 11 Home v2009 (Build: 26300)";
-fileInfo "UUID" "E171B0A9-4493-69CD-5586-23A19069B166";
+fileInfo "UUID" "63F57889-41EB-17E1-4E85-6791E798FFA4";
 createNode transform -s -n "persp";
 	rename -uid "8DCF4356-4D3E-3DFF-4277-379CE6A38D01";
 	setAttr ".v" no;
 	setAttr -s 3 ".rlio";
 	setAttr -s 3 ".rlio";
-	setAttr ".t" -type "double3" 20.597554701013003 108.49029471524938 81.569064274842844 ;
-	setAttr ".r" -type "double3" -365.86058509094795 -2143.7119827346883 -1.0354835371950624e-16 ;
+	setAttr ".t" -type "double3" 5.6689201126254787 150.96251718777984 55.343883794843592 ;
+	setAttr ".r" -type "double3" -361.0605850909451 -2152.5119827346753 1.2530903544378489e-17 ;
 	setAttr ".s" -type "double3" 0.00095447319492794331 0.00095447319492794331 0.00095447319492794331 ;
 	setAttr ".rp" -type "double3" 3.8239801283091031e-16 7.2340535421518455e-15 4.1921411130764298e-15 ;
 	setAttr ".rpt" -type "double3" 4.1037838398213399e-14 -8.074836772898577e-15 -2.0555281800315892e-14 ;
@@ -30,11 +30,11 @@ createNode camera -s -n "perspShape" -p "persp";
 	rename -uid "A6BC27AA-453E-F4CE-2D57-C0A1FFD6CDEF";
 	setAttr -k off ".v" no;
 	setAttr ".fl" 34.999999999999979;
-	setAttr ".coi" 85.917775229654552;
+	setAttr ".coi" 64.17802673543315;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
-	setAttr ".tp" -type "double3" 25.257390686705698 95.396616066812385 2.7334170639745721 ;
+	setAttr ".tp" -type "double3" -0.0024677930350200938 91.99613968135796 -2.8835292255016824 ;
 	setAttr ".hc" -type "string" "viewSet -p %camera";
 createNode transform -s -n "top";
 	rename -uid "E92F8C23-4F3A-E868-C85E-8B8043222547";
@@ -182,7 +182,6 @@ createNode pointConstraint -n "M_neck_twistExtractor_1_joint_pointConstraint1" -
 createNode ikHandle -n "M_neck_twistExtractor_ikHandle" -p "twistExtractor_joints_group";
 	rename -uid "07044B6E-4218-DAF0-8B74-DD90072F0DC7";
 	setAttr ".v" no;
-	setAttr ".r" -type "double3" -89.999952781771327 -14.785058021603513 89.999814970963442 ;
 	setAttr ".roc" yes;
 createNode pointConstraint -n "M_neck_twistExtractor_ikHandle_pointConstraint1" -p
 		 "M_neck_twistExtractor_ikHandle";
@@ -201,6 +200,26 @@ createNode pointConstraint -n "M_neck_twistExtractor_ikHandle_pointConstraint1" 
 	setAttr -k off ".sz";
 	setAttr ".erp" yes;
 	setAttr ".rst" -type "double3" 3.6480749355646609e-05 147.06231338007268 1.8492602551054589 ;
+	setAttr -k on ".w0";
+createNode orientConstraint -n "M_neck_twistExtractor_ikHandle_orientConstraint1" 
+		-p "M_neck_twistExtractor_ikHandle";
+	rename -uid "CED7AB9D-460B-D04E-3AAD-D49FC6CD3309";
+	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "M_spine_5_jointW0" -dv 1 -min 0 -at "double";
+	setAttr -k on ".nds";
+	setAttr -k off ".v";
+	setAttr -k off ".tx";
+	setAttr -k off ".ty";
+	setAttr -k off ".tz";
+	setAttr -k off ".rx";
+	setAttr -k off ".ry";
+	setAttr -k off ".rz";
+	setAttr -k off ".sx";
+	setAttr -k off ".sy";
+	setAttr -k off ".sz";
+	setAttr ".erp" yes;
+	setAttr ".lr" -type "double3" -89.999999999999986 13.90260870023671 90 ;
+	setAttr ".o" -type "double3" 0 0.00017890272009456575 -28.687666721913942 ;
+	setAttr ".rsrr" -type "double3" -89.999952781771341 -14.785058021603504 89.999814970963428 ;
 	setAttr -k on ".w0";
 createNode joint -n "L_arm_1_twistExtractor_1_joint" -p "twistExtractor_joints_group";
 	rename -uid "FB07BAE2-483E-9178-C558-169E42CE1938";
@@ -22442,11 +22461,11 @@ createNode multDL -n "R_leg_ik_polevector_control_helper_multDoubleLinear";
 	rename -uid "10699B37-4966-8A8F-C6AA-EFB5B06DFCD8";
 	setAttr ".i2" -1;
 createNode lightLinker -s -n "lightLinker1";
-	rename -uid "D699807D-44A2-0E54-389A-1FA72F8D452D";
+	rename -uid "5B7A0B65-4852-C372-FEFF-C7B4ABDE75CA";
 	setAttr -s 2 ".lnk";
 	setAttr -s 2 ".slnk";
 createNode shapeEditorManager -n "shapeEditorManager";
-	rename -uid "6B265B6F-465F-2740-F26C-5FB2E32A5146";
+	rename -uid "4A99B558-4F69-EB3B-AA55-9CB374365325";
 	setAttr -s 9 ".bsdt";
 	setAttr ".bsdt[0].bscd" -type "Int32Array" 0 ;
 	setAttr ".bsdt[1].bscd" -type "Int32Array" 0 ;
@@ -22465,18 +22484,18 @@ createNode shapeEditorManager -n "shapeEditorManager";
 	setAttr ".bsdt[8].bscd" -type "Int32Array" 0 ;
 	setAttr ".bsdt[8].bspi" 7;
 createNode poseInterpolatorManager -n "poseInterpolatorManager";
-	rename -uid "DCE7CCCC-487B-772C-5805-11A78301ED3C";
+	rename -uid "36F222A0-4724-C48C-E089-AEACF871A7A9";
 	setAttr -s 2 ".tpdt";
 	setAttr ".tpdt[0].tpcd" -type "Int32Array" 2 -1 0 ;
 	setAttr ".tpdt[1].tpcd" -type "Int32Array" 0 ;
 	setAttr ".tpdt[1].tpdn" -type "string" "chr_abendis_MDL_Model_v010_fix";
 createNode displayLayerManager -n "layerManager";
-	rename -uid "ED1CD551-4E4F-B4BA-606D-18BDC4715B61";
+	rename -uid "C996DD78-4ABC-BC09-FECE-ECAAB1C6A492";
 createNode displayLayer -n "defaultLayer";
 	rename -uid "9E8B42AB-4BF5-DAB9-7C6A-E5AA0822CA3A";
 	setAttr ".ufem" -type "stringArray" 0  ;
 createNode renderLayerManager -n "renderLayerManager";
-	rename -uid "E3F06AD9-4D34-4959-FBC2-1B8563355A62";
+	rename -uid "06D86A66-4334-B8A4-739D-258D1614AEF2";
 createNode renderLayer -n "defaultRenderLayer";
 	rename -uid "4CFE04FF-4860-69A8-4D68-BD989CFA5CAF";
 	setAttr ".g" yes;
@@ -26617,6 +26636,12 @@ connectAttr "M_neck_twistExtractor_ikHandle_pointConstraint1.cty" "M_neck_twistE
 		;
 connectAttr "M_neck_twistExtractor_ikHandle_pointConstraint1.ctz" "M_neck_twistExtractor_ikHandle.tz"
 		;
+connectAttr "M_neck_twistExtractor_ikHandle_orientConstraint1.crx" "M_neck_twistExtractor_ikHandle.rx"
+		;
+connectAttr "M_neck_twistExtractor_ikHandle_orientConstraint1.cry" "M_neck_twistExtractor_ikHandle.ry"
+		;
+connectAttr "M_neck_twistExtractor_ikHandle_orientConstraint1.crz" "M_neck_twistExtractor_ikHandle.rz"
+		;
 connectAttr "M_neck_twistExtractor_ikHandle.pim" "M_neck_twistExtractor_ikHandle_pointConstraint1.cpim"
 		;
 connectAttr "M_neck_twistExtractor_ikHandle.rp" "M_neck_twistExtractor_ikHandle_pointConstraint1.crp"
@@ -26632,6 +26657,20 @@ connectAttr "M_head_joint.rpt" "M_neck_twistExtractor_ikHandle_pointConstraint1.
 connectAttr "M_head_joint.pm" "M_neck_twistExtractor_ikHandle_pointConstraint1.tg[0].tpm"
 		;
 connectAttr "M_neck_twistExtractor_ikHandle_pointConstraint1.w0" "M_neck_twistExtractor_ikHandle_pointConstraint1.tg[0].tw"
+		;
+connectAttr "M_neck_twistExtractor_ikHandle.ro" "M_neck_twistExtractor_ikHandle_orientConstraint1.cro"
+		;
+connectAttr "M_neck_twistExtractor_ikHandle.pim" "M_neck_twistExtractor_ikHandle_orientConstraint1.cpim"
+		;
+connectAttr "M_spine_5_joint.r" "M_neck_twistExtractor_ikHandle_orientConstraint1.tg[0].tr"
+		;
+connectAttr "M_spine_5_joint.ro" "M_neck_twistExtractor_ikHandle_orientConstraint1.tg[0].tro"
+		;
+connectAttr "M_spine_5_joint.pm" "M_neck_twistExtractor_ikHandle_orientConstraint1.tg[0].tpm"
+		;
+connectAttr "M_spine_5_joint.jo" "M_neck_twistExtractor_ikHandle_orientConstraint1.tg[0].tjo"
+		;
+connectAttr "M_neck_twistExtractor_ikHandle_orientConstraint1.w0" "M_neck_twistExtractor_ikHandle_orientConstraint1.tg[0].tw"
 		;
 connectAttr "L_arm_1_twistExtractor_1_joint_pointConstraint1.ctx" "L_arm_1_twistExtractor_1_joint.tx"
 		;
@@ -46639,15 +46678,15 @@ connectAttr "L_leg_2_bendRig_planeShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "R_leg_1_bendRig_planeShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "R_leg_2_bendRig_planeShape.iog" ":initialShadingGroup.dsm" -na;
 connectAttr "ikSCsolver1.msg" ":ikSystem.sol" -na;
-dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
-dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
 dataStructure -fmt "raw" -as "name=faceConnectOutputStructure:bool=faceConnectOutput:string[200]=faceConnectOutputAttributes:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
-dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
-dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
-dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
-dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
-dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
 dataStructure -fmt "raw" -as "name=OffStruct:float=Offset";
+dataStructure -fmt "raw" -as "name=OrgStruct:float[3]=Origin Point";
 dataStructure -fmt "raw" -as "name=DiffArea:float=value";
+dataStructure -fmt "raw" -as "name=faceConnectMarkerStructure:bool=faceConnectMarker:string[200]=faceConnectOutputGroups";
+dataStructure -fmt "raw" -as "name=idStructure:int32=ID";
+dataStructure -fmt "raw" -as "name=keyValueStructure:string=value";
+dataStructure -fmt "raw" -as "name=Offset:float[3]=value";
+dataStructure -fmt "raw" -as "name=Curvature:float=mean:float=gaussian:float=ABS:float=RMS";
+dataStructure -fmt "raw" -as "name=DiffEdge:float=value";
+dataStructure -fmt "raw" -as "name=IdStruct:int32=ID";
 // End of biped_body_template.ma
