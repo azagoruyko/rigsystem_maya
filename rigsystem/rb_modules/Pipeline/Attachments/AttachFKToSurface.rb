@@ -132,16 +132,23 @@ attachToSurfaceMod.attr.transforms.set(attached)
 attachToSurfaceMod.run()
 
 for pv, a in zip(pivots, proxy.nodes(attached)):
-    cmds.parentConstraint(a, pv, mo=True)
-    
     decompose = a.t.inputs()[0].node
     multMatrix = decompose.inputMatrix.inputs()[0].node
-    m = multMatrix.matrixIn[1].get()
-    multMatrix.matrixIn[1].disconnect()
-    multMatrix.matrixIn[1].set(m)
+    parentMatrixInput = multMatrix.matrixIn[1]
+
+    parentBlend = proxy.create("blendMatrix", f"{a.name()}_parentInverseScale")
+    parentBlend.inputMatrix.set(parentMatrixInput.get())
+    target = parentBlend.target[0]
+    target.translateWeight.set(0)
+    target.rotateWeight.set(0)
+    target.shearWeight.set(0)
+    parentMatrixInput.inputs()[0] >> target.targetMatrix
+    parentBlend.outputMatrix.connect(parentMatrixInput, force=True)
+
+    cmds.parentConstraint(a, pv, mo=True)
 ]]></run>
 <doc><![CDATA[## Summary
-Creates a set of “attached” transform nodes that mirror the world matrices of the pivots produced by a **MakeEditablePivot** module, then runs an **AttachToSurface** module to bind those nodes to a surface. After the surface attachment, it establishes parent constraints from the attached nodes back to the original pivots and cleans up matrix connections to keep the constraints stable.
+Creates a set of “attached” transform nodes that mirror the world matrices of the pivots produced by a **MakeEditablePivot** module, then runs an **AttachToSurface** module to bind those nodes to a surface. After the surface attachment, it keeps the initial parent inverse matrix for each attachment and updates only its scale from the live parent inverse matrix. It then creates offset-preserving parent constraints to the original pivots.
 
 ## Inputs
 - **`MakeEditablePivot/out_transforms`** – The list of pivot transform nodes that will be duplicated and attached to the surface.  

@@ -219,8 +219,8 @@ def attachTransformToSurface(transform, surface, u=0.5, v=0.5, percentUV=False):
     for source, target in (
         ("positionX", "in30"), ("positionY", "in31"), ("positionZ", "in32"),
         ("normalX", "in00"), ("normalY", "in01"), ("normalZ", "in02"),
-        ("tangentUx", "in10"), ("tangentUy", "in11"), ("tangentUz", "in12"),
-        ("tangentVx", "in20"), ("tangentVy", "in21"), ("tangentVz", "in22"),
+        ("normalizedTangentUX", "in10"), ("normalizedTangentUY", "in11"), ("normalizedTangentUZ", "in12"),
+        ("normalizedTangentVX", "in20"), ("normalizedTangentVY", "in21"), ("normalizedTangentVZ", "in22"),
     ):
         posi.attr(source) >> fourByFour.attr(target)
 
