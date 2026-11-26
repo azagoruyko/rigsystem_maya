@@ -38,6 +38,7 @@ plane = cmds.polyPlane(
 cmds.xform(plane, worldSpace=True, matrix=control_matrix)
 cmds.delete(plane, constructionHistory=True)
 
+
 target_skin = cmds.skinCluster(
     influences, plane, tsb=True, name=control_name + "_skinCluster"
 )[0]
@@ -60,7 +61,8 @@ if not new_locators:
 
 rivet = proxy.node(new_locators[0]).getParent(fullPath=True)
 rivet.rename(control_name + "_rivet")
-plane | rivet
+proxy.node(plane) | rivet
+
 cmds.xform(str(rivet), matrix=list(om.MMatrix()))
 rivet.inheritsTransform.set(False)
 
