@@ -35,6 +35,7 @@ for tr in @transforms:
     rig_utils.setToOffsetParentMatrix(pivot)
     
     pivot | tr
+    rig_utils.setToOffsetParentMatrix(tr)
             
     pivotOffset = proxy.create("transform", f"{name}_pivot_offset", parent=tr)
     cmds.parent(children, pivotOffset)
