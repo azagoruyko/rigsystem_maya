@@ -475,10 +475,10 @@ def makeHelpLine(name, objects, visibleAttr=None, parent=None):
         pnt.translate >> shape.controlPoints[i]
         cmds.pointConstraint(obj, pnt)
 
-        lockTRS(pnt, t=1, r=1, s=1, v=1)
+        lockTRS(pnt, t=1, r=1, s=1, v=0.5)
 
-    lockTRS(crv, t=1, r=1, s=1, v=1)
-    lockTRS(grp, t=1, r=1, s=1, v=1)
+    lockTRS(crv, t=1, r=1, s=1, v=0.5)
+    lockTRS(grp, t=1, r=1, s=1, v=0.5)
 
 
 def getDeformers(shape, types=None):
