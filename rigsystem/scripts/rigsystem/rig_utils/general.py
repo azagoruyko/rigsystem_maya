@@ -456,7 +456,7 @@ def makeHelpLine(name, objects, visibleAttr=None, parent=None):
     crv = cmds.curve(n=f"{name}_helpLine_curve", d=1, p=poses)
     proxy.node(crv).template.set(True)
 
-    grp = proxy.create("transform", f"{name}_helpLine_group", parent=parent)
+    grp = proxy.create("transform", f"{name}_helpLine_group", parent=parent, suffix=False)
     crv = grp | proxy.node(crv)
 
     if visibleAttr:
